@@ -87,6 +87,8 @@ AC_EXEEXT
 
 AM_PROG_LIBTOOL
 
+AC_CHECK_LIB([popt], [poptGetArg], , AC_MSG_ERROR([Popt is required]))
+
 pkg_modules="glib-2.0 >= 2.2.2, dbus-1 >= 0.20, dbus-glib-1 >= 0.20"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
@@ -105,11 +107,12 @@ dnl ################################################################
 dnl # Output the Makefiles
 dnl ################################################################
 AC_CONFIG_FILES([
-libnotify.pc
 Makefile
+libnotify.pc
+libnotify.spec
 libnotify/Makefile
-tools/Makefile
 tests/Makefile
+tools/Makefile
 ])
 
 AC_OUTPUT

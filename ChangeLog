@@ -1,3 +1,9 @@
+Wed Nov 03 01:19:42 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* configure.ac:
+	A libnotify.spec.in:
+	  - Fix make distcheck.
+
 Wed Sep 29 22:34:03 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:
