@@ -59,12 +59,6 @@ main(int argc, const char **argv)
 		POPT_TABLEEND
 	};
 
-	if (!notify_init("notify-send"))
-	{
-		fprintf(stderr, "Unable to initialize libnotify\n");
-		exit(1);
-	}
-
 	opt_ctx = poptGetContext("notify-send", argc, argv, options, 0);
 	poptSetOtherOptionHelp(opt_ctx, "[OPTIONS]* <summary> [description]");
 
@@ -125,6 +119,12 @@ main(int argc, const char **argv)
 			poptPrintHelp(opt_ctx, stderr, 0);
 			exit(1);
 		}
+	}
+
+	if (!notify_init("notify-send"))
+	{
+		fprintf(stderr, "Unable to initialize libnotify\n");
+		exit(1);
 	}
 
 	notify_send_notification(urgency, summary, description, icon,
