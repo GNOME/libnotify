@@ -1,3 +1,8 @@
+Sun Jul 04 14:32:46 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Don't make IDs of 0 bad. They just want to be loved, too.
+
 Sun Jul 04 14:08:59 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

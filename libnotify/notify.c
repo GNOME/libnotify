@@ -97,8 +97,6 @@ _notify_handle_new(guint32 id)
 {
 	NotifyHandle *handle;
 
-	g_return_val_if_fail(id > 0, NULL);
-
 	handle = g_new0(NotifyHandle, 1);
 
 	handle->id = id;
