@@ -103,16 +103,67 @@ server: the message content is the most important thing.
 
 MARKUP
 
-Write me!
+Description text may contain markup. The markup is XML-based, and consists
+of a small subset of HTML along with a few additional tags.
 
+The following tags should be supported by all implementations:
+
+- <b>...</b> - Bold
+- <i>...</i> - Italic
+- <u>...</u> - Underline
+- <a href="...">...</a> - Hyperlink
+
+TODO: Add the rest of the tags! This is mostly a filler.
 
 
 ICON ENCODING
 
-Write me!
+Icons are sent through D-BUS either as an icon URI string, or as the raw
+data. The determination should be automatically computed when sending or
+receiving the icon.
 
+
+ICON URIS:
+
+Icon URIs must consist of one of the following forms:
+
+- stock:<stockname>
+- file://<hostname>/<path> [1]
+- <path>
+
+The supplied list of stock icon names should be represented by all
+notification daemons. If an unknown stock icon name is specified, the
+notification daemon is encouraged to provide a best-guess based on the
+toolkit's own stock system, or simply ignore the icon.
+
+The file URI must match the format provided by the freedesktop.org
+File URI Specification <http://freedesktop.org/Standards/file-uri-spec>.
+
+
+STOCK ICON NAMES:
+
+- question
+- info
+- warning
+- error
+- critical
+
+[Do we want any of the following?]
+- camera
+- printer
+- email
+- fax
+- disk
+- cfcard
+- memstick
+- sdcard
 
 
 DBUS PROTOCOL
 
 Write me!
+
+
+REFERENCE
+
+[1] http://freedesktop.org/Standards/file-uri-spec
