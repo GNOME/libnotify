@@ -1,4 +1,5 @@
-/**
+/** -*- mode: c-mode; tab-width: 4; indent-tabs-mode: t; -*-
+ *
  * @file libnotify/notify.c Notifications library
  *
  * @Copyright (C) 2004 Christian Hammond <chipx86@chipx86.com>
@@ -608,7 +609,7 @@ notify_send_request_varg(NotifyUrgency urgency, const char *summary,
 													  -1, &error);
 
 	dbus_message_unref(message);
-
+	
 	if (dbus_error_is_set(&error))
 	{
 		print_error("Error sending SendNotification: %s\n", error.message);

@@ -1,3 +1,7 @@
+2004-06-30  Mike Hearn  <mike@navi.cx>
+	* libnotify/notify.[ch]: Add file variables for emacs to match
+	  the settings Christian is using.
+
 Wed Jun 30 02:53:36 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:
