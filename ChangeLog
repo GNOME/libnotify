@@ -1,0 +1,6 @@
+Sun Jun 27 16:37:30 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Added the initial header file and connection code.
+
