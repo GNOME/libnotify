@@ -202,7 +202,16 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 	if (dbus_message_is_signal(message, NOTIFY_DBUS_CORE_INTERFACE,
 							   "NotificationClosed"))
 	{
-		/* We can ignore this, pretty much. */
+		guint32 id;
+		NotifyHandle *handle;
+
+		dbus_message_iter_init(message, &iter);
+		id = dbus_message_iter_get_uint32(&iter);
+
+		handle = g_hash_table_lookup(_handles, GINT_TO_POINTER(id));
+
+		if (handle != NULL && handle->type == NOTIFY_TYPE_NOTIFICATION)
+			g_hash_table_remove(_handles, GINT_TO_POINTER(id));
 	}
 	else if (dbus_message_is_signal(message, NOTIFY_DBUS_CORE_INTERFACE,
 									"RequestClosed"))
