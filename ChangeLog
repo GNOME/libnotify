@@ -1,3 +1,8 @@
+Fri Apr 01 09:21:26 PST 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Updated to work with 0.6 of the notification spec.
+
 Sat Nov 06 15:40:48 PST 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.h:

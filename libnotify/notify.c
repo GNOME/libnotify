@@ -158,15 +158,12 @@ _notify_dbus_message_new(const char *name, DBusMessageIter *iter)
 }
 
 static void
-_notify_dbus_message_iter_append_string_or_nil(DBusMessageIter *iter,
-											   const char *str)
+_notify_dbus_message_iter_append_string_or_empty(DBusMessageIter *iter,
+												 const char *str)
 {
 	g_return_if_fail(iter != NULL);
 
-	if (str == NULL)
-		dbus_message_iter_append_nil(iter);
-	else
-		dbus_message_iter_append_string(iter, str);
+	dbus_message_iter_append_string(iter, (str != NULL ? str : ""));
 }
 
 static DBusHandlerResult
@@ -653,22 +650,18 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 
 	g_return_val_if_fail(message != NULL, NULL);
 
-	_notify_dbus_message_iter_append_string_or_nil(&iter, _app_name);
-	dbus_message_iter_append_nil(&iter);
+	_notify_dbus_message_iter_append_string_or_empty(&iter, _app_name);
+	dbus_message_iter_append_string(&iter, "");
 	dbus_message_iter_append_uint32(&iter,
 									(replaces != NULL ? replaces->id : 0));
-	_notify_dbus_message_iter_append_string_or_nil(&iter, type);
+	_notify_dbus_message_iter_append_string_or_empty(&iter, type);
 	dbus_message_iter_append_byte(&iter, urgency);
 	dbus_message_iter_append_string(&iter, summary);
-	_notify_dbus_message_iter_append_string_or_nil(&iter, body);
+	_notify_dbus_message_iter_append_string_or_empty(&iter, body);
 
-	/*
-	 * NOTE: D-BUS 0.22cvs is the first to allow empty arrays, *I think*.
-	 *       For now, allow a NIL.
-	 */
 	if (icon == NULL)
 	{
-		dbus_message_iter_append_nil(&iter);
+		dbus_message_iter_append_string(&iter, "");
 	}
 	else if (icon->raw_data)
 	{
@@ -719,7 +712,7 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	}
 
 	/* Hints */
-	dbus_message_iter_append_nil(&iter);
+	dbus_message_iter_append_dict(&iter, &dict_iter);
 
 	/* Expires */
 	dbus_message_iter_append_boolean(&iter, expires);
