@@ -38,7 +38,7 @@ main(int argc, const char **argv)
 	gchar *icon_str = NULL;
 	NotifyIcon *icon = NULL;
 	NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
-	time_t expire_time;
+	time_t expire_time = 0;
 	char ch;
 	poptContext opt_ctx;
 	const char **args;
@@ -128,8 +128,8 @@ main(int argc, const char **argv)
 	}
 
     /* if the given time is < current time, treat it as a timeout in seconds (ie 5 seconds) */
-    if (expire_time < time(NULL)) expire_time += time(NULL);
-        
+	if (expire_time && expire_time < time(NULL)) expire_time += time(NULL);
+	
 	notify_send_notification(0, urgency, summary, description, icon,
 							 TRUE, expire_time, NULL, 0);
 

@@ -246,7 +246,9 @@ The following messages must be supported by all implementations.
   code. This code will be reported back to the client if the action
   is invoked by the user.
 
-  UINT32/NIL expire time: if nil the notification never times out  
+  UINT32/NIL expire time: if nil the notification never times out.
+  If non-nil, a UNIX time_t (since the epoch) at which point the notification
+  will be automatically closed. If zero, use the default server timeout.
   
   It returns a UINT32 that will never be reused within a
   session unless more than MAXINT notifications have been generated
