@@ -1,3 +1,12 @@
+Sat Nov 06 15:11:53 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.h:
+	A Doxyfile.in:
+	* Makefile.am:
+	* configure.ac:
+	  - Add a Doxyfile.in and update things so we can get doxygen
+	    docs.
+
 Wed Nov 03 23:39:23 PST 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

@@ -107,6 +107,7 @@ dnl ################################################################
 dnl # Output the Makefiles
 dnl ################################################################
 AC_CONFIG_FILES([
+Doxyfile
 Makefile
 libnotify.pc
 libnotify.spec
