@@ -30,9 +30,10 @@
 #include <glib.h>
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 
-GMainLoop *loop;
-NotifyHandle *n;
+static GMainLoop *loop;
+static NotifyHandle *n;
 
 static void callback(NotifyHandle *handle, guint32 uid, void *user_data)
 {
@@ -50,7 +51,7 @@ int main() {
     loop = g_main_loop_new(NULL, FALSE);
 
     dbus_connection_setup_with_g_main(conn, NULL);
-    
+
     n = notify_send_notification(NULL, // replaces nothing
                                  NOTIFY_URGENCY_NORMAL,
                                  "Matt is online", NULL,

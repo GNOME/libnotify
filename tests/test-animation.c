@@ -35,17 +35,17 @@ int frames = 10;
 GdkPixbuf **generate_animation()
 {
     int i;
-    GdkPixbuf *file = gdk_pixbuf_new_from_file("applet-critical.png");
+    GdkPixbuf *file = gdk_pixbuf_new_from_file("applet-critical.png", NULL);
     double alpha = 1.0;
 
-    GdkPixbuf **array = malloc(sizeof(GdkPixbuf *) * frames);
-    
+    GdkPixbuf **array = g_malloc(sizeof(GdkPixbuf *) * frames);
+
     for (i = 0; i < frames; i++)
     {
         GdkPixbuf *buf = gdk_pixbuf_copy(file);
 
         alpha = sin(M_PI + ((M_PI / frames) * i)) + 1.0;
-        
+
         gdk_pixbuf_composite(file, buf, 0, 0,
                              gdk_pixbuf_get_width(buf),
                              gdk_pixbuf_get_height(buf),
@@ -54,17 +54,21 @@ GdkPixbuf **generate_animation()
 
         array[i] = buf;
     }
+
+	return array;
 }
 
 
-int main() {
+int main()
+{
+	int i;
     notify_init("Animations");
 
-    for (int i = 0; i < frames; i++)
+    for (i = 0; i < frames; i++)
     {
-        
+
     }
-    
+
     NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
                                                NOTIFY_URGENCY_NORMAL,
                                                "Summary", "Content",
