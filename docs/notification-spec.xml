@@ -407,7 +407,7 @@
   </para>
 
   <sect2 id="commands">
-  <title>Message commands</title>
+   <title>Message commands</title>
 
    <sect3 id="command-get-capabilities">
     <title><literal>org.freedesktop.Notifications.GetCapabilities</literal></title>
@@ -756,7 +756,9 @@
          <para>The reason the notification was closed.</para>
          <para>1 - The notification expired.</para>
          <para>2 - The notification was dismissed by the user.</para>
-         <para>3 - "Other" reasons.</para>
+         <para>3 - The notification was closed by a call to
+               <literal>CloseNotification</literal>.</para>
+         <para>4 - Undefined/reserved reasons.</para>
         </entry>
        </row>
       </tbody>
