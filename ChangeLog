@@ -1,3 +1,11 @@
+Sat Jul 03 12:14:48 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Removed the last of the request implementation.
+	  - More work toward migrating the code to the specification.
+	  - Simplified the action implementation a little bit.
+
 Sat Jul 03 11:26:03 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

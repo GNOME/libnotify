@@ -25,7 +25,7 @@
 #include <time.h>
 
 /**
- * Notification and request urgency levels.
+ * Notification urgency levels.
  */
 typedef enum
 {
@@ -71,9 +71,9 @@ void notify_uninit(void);
 gboolean notify_is_initted(void);
 
 /**
- * Manually closes a notification or request.
+ * Manually closes a notification.
  *
- * @param handle The notification or request handle.
+ * @param handle The notification handle.
  */
 void notify_close(NotifyHandle *handle);
 
@@ -119,86 +119,68 @@ void notify_icon_destroy(NotifyIcon *icon);
 /*@{*/
 
 /**
- * Sends a standard notification.
+ * Sends a notification.
  *
- * @param urgency  The urgency level.
- * @param summary  The summary of the notification.
- * @param detailed The optional detailed information.
- * @param icon     The optional icon.
- * @param timeout  The optional time to automatically close the notification,
- *                 or 0.
+ * A callback has the following prototype:
+ *
+ * @code
+ * void callback(NotifyHandle *handle, guint32 action_id, void *user_data);
+ * @endcode
+ *
+ * @param urgency        The urgency level.
+ * @param summary        The summary of the notification.
+ * @param detailed       The optional detailed information.
+ * @param icon           The optional icon.
+ * @param timeout        TRUE if the notification should automatically timeout,
+ *                       or FALSE to keep it open until manually closed.
+ * @param timeout_time   The optional time to automatically close the
+ *                       notification, or 0 for the daemon's default.
+ * @param user_data      User-specified data to send to a callback.
+ * @param action_count   The number of actions.
+ * @param ...            The actions in uint32/string/callback sets.
  *
  * @return A unique ID for the notification.
  */
 NotifyHandle *notify_send_notification(NotifyUrgency urgency,
 									   const char *summary,
 									   const char *detailed,
-									   const NotifyIcon *icon, time_t timeout);
-
-/*@}*/
-
-/**************************************************************************/
-/** @name Requests API                                                    */
-/**************************************************************************/
-/*@{*/
-
-/**
- * Sends a standard request.
- *
- * A callback has the following prototype:
- *
- * @code
- * void callback(NotifyHandle *handle, guint32 button, void *user_data);
- * @endcode
- *
- * @param urgency        The urgency level.
- * @param summary        The summary of the request.
- * @param detailed       The optional detailed information.
- * @param icon           The optional icon.
- * @param timeout        The optional time to automatically close the request,
- *                       or 0.
- * @param user_data      User-specified data to send to a callback.
- * @param default_button The default button, or -1.
- * @param button_count   The number of buttons.
- * @param ...            The buttons in string/callback pairs.
- *
- * @return A unique ID for the request.
- */
-NotifyHandle *notify_send_request(NotifyUrgency urgency, const char *summary,
-								  const char *detailed, const NotifyIcon *icon,
-								  time_t timeout, gpointer user_data,
-								  size_t default_button,
-								  size_t button_count, ...);
-
-/**
- * Sends a standard request, taking a va_list for the buttons.
- *
- * A callback has the following prototype:
- *
- * @code
- * void callback(NotifyHandle *handle, guint32 button, void *user_data);
- * @endcode
- *
- * @param urgency        The urgency level.
- * @param summary        The summary of the request.
- * @param detailed       The optional detailed information.
- * @param icon           The optional icon.
- * @param timeout        The optional time to automatically close the request,
- *                       or 0.
- * @param user_data      User-specified data to send to a callback.
- * @param default_button The default button, or -1.
- * @param button_count   The number of buttons.
- * @param buttons        The buttons in string/callback pairs.
- *
- * @return A unique ID for the request.
- */
-NotifyHandle *notify_send_request_varg(NotifyUrgency urgency,
-									   const char *summary,
-									   const char *detailed,
-									   const NotifyIcon *icon, time_t timeout,
+									   const NotifyIcon *icon,
+									   gboolean timeout, time_t timeout_time,
 									   gpointer user_data,
-									   size_t default_button,
-									   size_t button_count, va_list buttons);
+									   size_t action_count, ...);
+
+/**
+ * Sends a notification, taking a va_list for the actions.
+ *
+ * A callback has the following prototype:
+ *
+ * @code
+ * void callback(NotifyHandle *handle, guint32 action, void *user_data);
+ * @endcode
+ *
+ * @param urgency        The urgency level.
+ * @param summary        The summary of the notification.
+ * @param detailed       The optional detailed information.
+ * @param icon           The optional icon.
+ * @param timeout        TRUE if the notification should automatically timeout,
+ *                       or FALSE to keep it open until manually closed.
+ * @param timeout_time   The optional time to automatically close the
+ *                       notification, or 0 for the daemon's default.
+ * @param user_data      User-specified data to send to a callback.
+ * @param action_count   The number of actions.
+ * @param actions        The actions in string/callback pairs.
+ *
+ * @return A unique ID for the notification.
+ */
+NotifyHandle *notify_send_notification_varg(NotifyUrgency urgency,
+											const char *summary,
+											const char *detailed,
+											const NotifyIcon *icon,
+											gboolean timeout,
+											time_t timeout_time,
+											gpointer user_data,
+											size_t action_count,
+											va_list actions);
 
 /*@}*/
 

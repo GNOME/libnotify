@@ -46,9 +46,8 @@ struct _NotifyHandle
 
 	gpointer user_data;
 
-	size_t num_actions;
-	char **texts;
-	NotifyCallback *cbs;
+	guint32 action_count;
+	GHashTable *actions_table;
 };
 
 struct _NotifyIcon
@@ -58,6 +57,14 @@ struct _NotifyIcon
 	size_t raw_len;
 	guchar *raw_data;
 };
+
+typedef struct
+{
+	guint32 id;
+	char *text;
+	NotifyCallback cb;
+
+} NotifyAction;
 
 static DBusConnection *_dbus_conn = NULL;
 static gboolean _initted = FALSE;
@@ -90,9 +97,13 @@ _notify_handle_new(guint32 id)
 {
 	NotifyHandle *handle;
 
+	g_return_val_if_fail(id > 0, NULL);
+
 	handle = g_new0(NotifyHandle, 1);
 
 	handle->id = id;
+
+	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
 
 	return handle;
 }
@@ -100,22 +111,23 @@ _notify_handle_new(guint32 id)
 static void
 _notify_handle_destroy(NotifyHandle *handle)
 {
-	size_t i;
-
 	g_return_if_fail(handle != NULL);
 
-	if (handle->texts != NULL)
-	{
-		for (i = 0; i < handle->num_actions; i++)
-			g_free(handle->texts[i]);
-
-		g_free(handle->texts);
-	}
-
-	if (handle->cbs != NULL)
-		g_free(handle->cbs);
+	if (handle->actions_table != NULL)
+		g_hash_table_destroy(handle->actions_table);
 
 	g_free(handle);
+}
+
+static void
+_notify_action_destroy(NotifyAction *action)
+{
+	g_return_if_fail(action != NULL);
+
+	if (action->text != NULL)
+		g_free(action->text);
+
+	g_free(action);
 }
 
 static DBusMessage *
@@ -213,15 +225,28 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 
 		handle = g_hash_table_lookup(_handles, GINT_TO_POINTER(id));
 
-		if (action_id >= handle->num_actions)
+		if (handle->actions_table == NULL)
 		{
-			print_error("Returned action ID %d is greater"
-						"than the maximum number of buttons (%d) for %d!\n",
-						action_id, handle->num_actions, id);
+			print_error("An action (%d) was invoked for a notification (%d) "
+						"with no actions listed!\n",
+						action_id, id);
 		}
-		else if (handle->cbs[action_id] != NULL)
+		else
 		{
-			(handle->cbs[action_id])(handle, action_id, handle->user_data);
+			NotifyAction *action;
+
+			action = g_hash_table_lookup(handle->actions_table,
+										 GINT_TO_POINTER(action_id));
+
+			if (action == NULL)
+			{
+				print_error("An invalid action (%d) was invoked for "
+							"notification %d\n", action_id, id);
+			}
+			else if (action->cb != NULL)
+			{
+				action->cb(handle, action_id, handle->user_data);
+			}
 		}
 	}
 	else
@@ -443,15 +468,39 @@ notify_icon_destroy(NotifyIcon *icon)
 NotifyHandle *
 notify_send_notification(NotifyUrgency urgency, const char *summary,
 						 const char *detailed, const NotifyIcon *icon,
-						 time_t timeout)
+						 gboolean timeout, time_t timeout_time,
+						 gpointer user_data, size_t action_count, ...)
 {
+	va_list actions;
 	NotifyHandle *handle;
-	DBusMessage *message, *reply;
-	DBusMessageIter iter;
-	DBusError error;
-	guint32 id;
 
-	message = _notify_dbus_message_new("SendNotification", &iter);
+	g_return_val_if_fail(summary != NULL, 0);
+
+	va_start(actions, action_count);
+	handle = notify_send_notification_varg(urgency, summary, detailed, icon,
+										   timeout, timeout_time, user_data,
+										   action_count, actions);
+	va_end(actions);
+
+	return handle;
+}
+
+NotifyHandle *
+notify_send_notification_varg(NotifyUrgency urgency, const char *summary,
+							  const char *detailed, const NotifyIcon *icon,
+							  gboolean timeout, time_t timeout_time,
+							  gpointer user_data, size_t action_count,
+							  va_list actions)
+{
+	DBusMessage *message, *reply;
+	DBusMessageIter iter, array_iter, dict_iter;
+	DBusError error;
+	GHashTable *table;
+	guint32 id;
+	guint32 i;
+	NotifyHandle *handle;
+
+	message = _notify_dbus_message_new("Notify", &iter);
 
 	g_return_val_if_fail(message != NULL, 0);
 
@@ -460,17 +509,52 @@ notify_send_notification(NotifyUrgency urgency, const char *summary,
 	dbus_message_iter_append_string(&iter, summary);
 	_notify_dbus_message_iter_append_string_or_nil(&iter, detailed);
 
+	/*
+	 * NOTE: D-BUS 0.22cvs is the first to allow empty arrays, *I think*.
+	 *       For now, allow a NIL.
+	 */
 	if (icon == NULL)
 		dbus_message_iter_append_nil(&iter);
 	else if (icon->raw_len > 0 && icon->raw_data != NULL)
 	{
-		dbus_message_iter_append_byte_array(&iter, icon->raw_data,
+		dbus_message_iter_append_array(&iter, &array_iter, DBUS_TYPE_ARRAY);
+		dbus_message_iter_append_byte_array(&array_iter, icon->raw_data,
 											icon->raw_len);
 	}
 	else
-		dbus_message_iter_append_string(&iter, icon->uri);
+	{
+		dbus_message_iter_append_array(&iter, &array_iter, DBUS_TYPE_STRING);
+		dbus_message_iter_append_string(&array_iter, icon->uri);
+	}
 
-	dbus_message_iter_append_uint32(&iter, timeout);
+	dbus_message_iter_append_nil(&iter); /* Sound */
+
+	/* Actions */
+	dbus_message_iter_append_dict(&iter, &dict_iter);
+
+	table = g_hash_table_new_full(g_int_hash, g_int_equal, NULL,
+								  (GFreeFunc)_notify_action_destroy);
+
+	for (i = 0; i < action_count; i++)
+	{
+		NotifyAction *action;
+
+		action = g_new0(NotifyAction, 1);
+
+		action->id   = va_arg(actions, guint32);
+		action->text = g_strdup((va_arg(actions, char *)));
+		action->cb   = va_arg(actions, NotifyCallback);
+
+		dbus_message_iter_append_dict_key(&dict_iter, action->text);
+		dbus_message_iter_append_uint32(&dict_iter, action->id);
+
+		g_hash_table_insert(table, GINT_TO_POINTER(action->id), action);
+	}
+
+	if (timeout)
+		dbus_message_iter_append_uint32(&iter, timeout_time);
+	else
+		dbus_message_iter_append_nil(&iter);
 
 	dbus_error_init(&error);
 
@@ -484,6 +568,8 @@ notify_send_notification(NotifyUrgency urgency, const char *summary,
 		print_error("Error sending SendNotification: %s\n", error.message);
 
 		dbus_error_free(&error);
+
+		g_hash_table_destroy(table);
 
 		return 0;
 	}
@@ -495,117 +581,8 @@ notify_send_notification(NotifyUrgency urgency, const char *summary,
 	dbus_error_free(&error);
 
 	handle = _notify_handle_new(id);
-
-	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
-
-	return handle;
-}
-
-NotifyHandle *
-notify_send_request(NotifyUrgency urgency, const char *summary,
-					const char *detailed, const NotifyIcon *icon,
-					time_t timeout, gpointer user_data,
-					size_t default_button, size_t button_count, ...)
-{
-	va_list buttons;
-	NotifyHandle *handle;
-
-	g_return_val_if_fail(summary != NULL,  0);
-	g_return_val_if_fail(button_count > 1, 0);
-
-	va_start(buttons, button_count);
-	handle = notify_send_request_varg(urgency, summary, detailed, icon,
-									  timeout, user_data, default_button,
-									  button_count, buttons);
-	va_end(buttons);
-
-	return handle;
-}
-
-NotifyHandle *
-notify_send_request_varg(NotifyUrgency urgency, const char *summary,
-						 const char *detailed, const NotifyIcon *icon,
-						 time_t timeout, gpointer user_data,
-						 size_t default_button, size_t button_count,
-						 va_list buttons)
-{
-	DBusMessage *message, *reply;
-	DBusMessageIter iter;
-	DBusError error;
-	guint32 id;
-	guint32 i;
-	char *text;
-	NotifyCallback cb;
-	NotifyHandle *handle;
-
-	message = _notify_dbus_message_new("SendRequest", &iter);
-
-	g_return_val_if_fail(message != NULL, 0);
-
-	_notify_dbus_message_iter_append_app_info(&iter);
-	dbus_message_iter_append_uint32(&iter, urgency);
-	dbus_message_iter_append_string(&iter, summary);
-	_notify_dbus_message_iter_append_string_or_nil(&iter, detailed);
-
-	if (icon == NULL)
-		dbus_message_iter_append_nil(&iter);
-	else if (icon->raw_len > 0 && icon->raw_data != NULL)
-	{
-		dbus_message_iter_append_byte_array(&iter, icon->raw_data,
-											icon->raw_len);
-	}
-	else
-		dbus_message_iter_append_string(&iter, icon->uri);
-
-	dbus_message_iter_append_uint32(&iter, timeout);
-	dbus_message_iter_append_uint32(&iter, default_button);
-
-	handle = _notify_handle_new(0);
-
-	handle->texts = g_new0(char *, button_count);
-	handle->cbs   = g_new0(NotifyCallback, button_count);
-
-	handle->num_actions = button_count;
-
-	for (i = 0; i < button_count; i++)
-	{
-		text = va_arg(buttons, char *);
-		cb   = va_arg(buttons, NotifyCallback);
-
-		handle->texts[i] = text;
-		handle->cbs[i]   = cb;
-	}
-
-	dbus_message_iter_append_string_array(&iter,
-		(const char **)handle->texts, button_count);
-
-	dbus_error_init(&error);
-
-	reply = dbus_connection_send_with_reply_and_block(_dbus_conn, message,
-													  -1, &error);
-
-	dbus_message_unref(message);
-
-	if (dbus_error_is_set(&error))
-	{
-		print_error("Error sending SendNotification: %s\n", error.message);
-
-		dbus_error_free(&error);
-
-		_notify_handle_destroy(handle);
-
-		return 0;
-	}
-
-	dbus_message_iter_init(reply, &iter);
-	id = dbus_message_iter_get_uint32(&iter);
-
-	dbus_message_unref(reply);
-	dbus_error_free(&error);
-
-	handle->id = id;
-
-	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
+	handle->actions_table = table;
+	handle->action_count  = action_count;
 
 	return handle;
 }
