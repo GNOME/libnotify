@@ -1,3 +1,9 @@
+Sat Nov 06 15:35:52 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.h:
+	  - Move the emacs mode string out of the Doxygen comment and into its
+	    own.
+
 Sat Nov 06 15:11:53 PST 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.h:
