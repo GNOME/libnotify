@@ -8,7 +8,7 @@ ChangeLog:
 
 v0.1:
   * Initial version
-
+  
 ---------------------------------------------------------------------
 
 OVERVIEW
@@ -158,11 +158,48 @@ types can be one of the following:
   assumed to be of type image/png.
 
 A sound can be specified, this will be played by the notification
-server when the notification is displayed.
+server when the notification is displayed. FIXME: elaborate here.
 
 PROTOCOL
 
-Write me!
+The following messages must be supported by all implementations.
 
+* CapsQuery
 
+  This message takes no parameters.
+  
+  It returns an array of strings. Each string describes an optional
+  capability implemented by the server. The following values are
+  defined by this spec:
+
+  "body": Supports body text. Some implementations may only show the
+          summary (for instance, onscreen displays, marquee/scrollers)
+          
+  "markup": Supports markup in the body text.
+  
+  "static-image" : Supports display of exactly 1 frame of any given
+                   image array.  This value is mutually exclusive with
+                   "multi-image", it is a protocol error for the
+                   server to specify both. The client may still
+                   specify multiple frames even if this cap is
+                   missing, however the server is free to ignore them
+                   and use only the primary frame.
+
+  "multi-image": The server will render an animation of all the frames
+                 in a given image array.
+
+  "sound": The server will play the specified sound. Even if this cap
+           is missing, a sound may still be specified however the
+           server is free to ignore it.
+
+  "actions": The server will provide the specified actions to the
+             user. Even if this cap is missing, actions may still be
+             specified by the client, however the server is free to
+             ignore them.
+
+  New vendor-specific caps may be specified as long as they start with
+  "x-vendorname", so for instance "x-gnome-foo-cap". Caps may not
+  contain spaces in their names (FIXME: this feels right but is it
+  really necessary?)
+             
 REFERENCE
