@@ -134,7 +134,7 @@ void notify_icon_destroy(NotifyIcon *icon);
  * @param urgency  The urgency level.
  * @param summary  The summary of the notification.
  * @param detailed The optional detailed information.
- * @param icon_uri The optional icon URI.
+ * @param icon     The optional icon.
  * @param timeout  The optional time to automatically close the notification,
  *                 or 0.
  *
@@ -143,27 +143,7 @@ void notify_icon_destroy(NotifyIcon *icon);
 NotifyHandle *notify_send_notification(NotifyUrgency urgency,
 									   const char *summary,
 									   const char *detailed,
-									   const char *icon_uri, time_t timeout);
-
-/**
- * Sends a standard notification with raw icon data.
- *
- * @param urgency   The urgency level.
- * @param summary   The summary of the notification.
- * @param detailed  The optional detailed information.
- * @param icon_len  The icon data length.
- * @param icon_data The icon data.
- * @param timeout   The optional time to automatically close the notification,
- *                  or 0.
- *
- * @return A unique ID for the notification.
- */
-NotifyHandle *notify_send_notification_with_icon_data(NotifyUrgency urgency,
-													  const char *summary,
-													  const char *detailed,
-													  size_t icon_len,
-													  guchar *icon_data,
-													  time_t timeout);
+									   const NotifyIcon *icon, time_t timeout);
 
 /*@}*/
 
@@ -184,7 +164,7 @@ NotifyHandle *notify_send_notification_with_icon_data(NotifyUrgency urgency,
  * @param urgency        The urgency level.
  * @param summary        The summary of the request.
  * @param detailed       The optional detailed information.
- * @param icon_uri       The optional icon URI.
+ * @param icon           The optional icon.
  * @param timeout        The optional time to automatically close the request,
  *                       or 0.
  * @param user_data      User-specified data to send to a callback.
@@ -195,7 +175,7 @@ NotifyHandle *notify_send_notification_with_icon_data(NotifyUrgency urgency,
  * @return A unique ID for the request.
  */
 NotifyHandle *notify_send_request(NotifyUrgency urgency, const char *summary,
-								  const char *detailed, const char *icon_uri,
+								  const char *detailed, const NotifyIcon *icon,
 								  time_t timeout, gpointer user_data,
 								  size_t default_button,
 								  size_t button_count, ...);
@@ -212,7 +192,7 @@ NotifyHandle *notify_send_request(NotifyUrgency urgency, const char *summary,
  * @param urgency        The urgency level.
  * @param summary        The summary of the request.
  * @param detailed       The optional detailed information.
- * @param icon_uri       The optional icon URI.
+ * @param icon           The optional icon.
  * @param timeout        The optional time to automatically close the request,
  *                       or 0.
  * @param user_data      User-specified data to send to a callback.
@@ -225,78 +205,10 @@ NotifyHandle *notify_send_request(NotifyUrgency urgency, const char *summary,
 NotifyHandle *notify_send_request_varg(NotifyUrgency urgency,
 									   const char *summary,
 									   const char *detailed,
-									   const char *icon_uri, time_t timeout,
+									   const NotifyIcon *icon, time_t timeout,
 									   gpointer user_data,
 									   size_t default_button,
 									   size_t button_count, va_list buttons);
-
-/**
- * Sends a standard request with raw icon data.
- *
- * A callback has the following prototype:
- *
- * @code
- * void callback(NotifyHandle *handle, guint32 button, void *user_data);
- * @endcode
- *
- * @param urgency        The urgency level.
- * @param summary        The summary of the request.
- * @param detailed       The optional detailed information.
- * @param icon_len       The icon data length.
- * @param icon_data      The icon data.
- * @param timeout        The optional time to automatically close the request,
- *                       or 0.
- * @param user_data      User-specified data to send to a callback.
- * @param default_button The default button, or -1.
- * @param button_count   The number of buttons.
- * @param ...            The buttons in string/callback pairs.
- *
- * @return A unique ID for the request.
- */
-NotifyHandle *notify_send_request_with_icon_data(NotifyUrgency urgency,
-												 const char *summary,
-												 const char *detailed,
-												 size_t icon_len,
-												 guchar *icon_data,
-												 time_t timeout,
-												 gpointer user_data,
-												 gint32 default_button,
-												 size_t button_count, ...);
-
-/**
- * Sends a standard request with raw icon data, taking a va_list for the
- * buttons.
- *
- * A callback has the following prototype:
- *
- * @code
- * void callback(NotifyHandle *handle, guint32 button, void *user_data);
- * @endcode
- *
- * @param urgency        The urgency level.
- * @param summary        The summary of the request.
- * @param detailed       The optional detailed information.
- * @param icon_len       The icon data length.
- * @param icon_data      The icon data.
- * @param timeout        The optional time to automatically close the request,
- *                       or 0.
- * @param user_data      User-specified data to send to a callback.
- * @param default_button The default button, or -1.
- * @param button_count   The number of buttons.
- * @param buttons        The buttons in string/callback pairs.
- *
- * @return A unique ID for the request.
- */
-NotifyHandle *notify_send_request_with_icon_data_varg(NotifyUrgency urgency,
-													  const char *summary,
-													  const char *detailed,
-													  size_t icon_len,
-													  guchar *icon_data,
-													  time_t timeout,
-													  gpointer user_data,
-													  gint32 default_button,
-													  size_t button_count,
-													  va_list buttons);
 
 /*@}*/
 

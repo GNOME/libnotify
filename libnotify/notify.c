@@ -454,10 +454,10 @@ notify_icon_destroy(NotifyIcon *icon)
 /**************************************************************************
  * Notifications API
  **************************************************************************/
-static NotifyHandle *
-_notify_send_notification(NotifyUrgency urgency, const char *summary,
-						  const char *detailed, const char *icon_uri,
-						  size_t icon_len, guchar *icon_data, time_t timeout)
+NotifyHandle *
+notify_send_notification(NotifyUrgency urgency, const char *summary,
+						 const char *detailed, const NotifyIcon *icon,
+						 time_t timeout)
 {
 	NotifyHandle *handle;
 	DBusMessage *message, *reply;
@@ -474,10 +474,15 @@ _notify_send_notification(NotifyUrgency urgency, const char *summary,
 	dbus_message_iter_append_string(&iter, summary);
 	_notify_dbus_message_iter_append_string_or_nil(&iter, detailed);
 
-	if (icon_len > 0 && icon_data != NULL)
-		dbus_message_iter_append_byte_array(&iter, icon_data, icon_len);
+	if (icon == NULL)
+		dbus_message_iter_append_nil(&iter);
+	else if (icon->raw_len > 0 && icon->raw_data != NULL)
+	{
+		dbus_message_iter_append_byte_array(&iter, icon->raw_data,
+											icon->raw_len);
+	}
 	else
-		_notify_dbus_message_iter_append_string_or_nil(&iter, icon_uri);
+		dbus_message_iter_append_string(&iter, icon->uri);
 
 	dbus_message_iter_append_uint32(&iter, timeout);
 
@@ -511,35 +516,32 @@ _notify_send_notification(NotifyUrgency urgency, const char *summary,
 }
 
 NotifyHandle *
-notify_send_notification(NotifyUrgency urgency, const char *summary,
-						 const char *detailed, const char *icon_uri,
-						 time_t timeout)
+notify_send_request(NotifyUrgency urgency, const char *summary,
+					const char *detailed, const NotifyIcon *icon,
+					time_t timeout, gpointer user_data,
+					size_t default_button, size_t button_count, ...)
 {
-	g_return_val_if_fail(summary != NULL, 0);
+	va_list buttons;
+	NotifyHandle *handle;
 
-	return _notify_send_notification(urgency, summary, detailed, icon_uri,
-									 0, NULL, timeout);
+	g_return_val_if_fail(summary != NULL,  0);
+	g_return_val_if_fail(button_count > 1, 0);
+
+	va_start(buttons, button_count);
+	handle = notify_send_request_varg(urgency, summary, detailed, icon,
+									  timeout, user_data, default_button,
+									  button_count, buttons);
+	va_end(buttons);
+
+	return handle;
 }
 
 NotifyHandle *
-notify_send_notification_with_icon_data(NotifyUrgency urgency,
-										const char *summary,
-										const char *detailed,
-										size_t icon_len, guchar *icon_data,
-										time_t timeout)
-{
-	g_return_val_if_fail(summary != NULL, 0);
-
-	return _notify_send_notification(urgency, summary, detailed, NULL,
-									 icon_len, icon_data, timeout);
-}
-
-static NotifyHandle *
-_notify_send_request(NotifyUrgency urgency, const char *summary,
-					 const char *detailed, const char *icon_uri,
-					 size_t icon_len, guchar *icon_data, time_t timeout,
-					 gpointer user_data, guint32 default_button,
-					 size_t button_count, va_list buttons)
+notify_send_request_varg(NotifyUrgency urgency, const char *summary,
+						 const char *detailed, const NotifyIcon *icon,
+						 time_t timeout, gpointer user_data,
+						 size_t default_button, size_t button_count,
+						 va_list buttons)
 {
 	DBusMessage *message, *reply;
 	DBusMessageIter iter;
@@ -559,10 +561,15 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 	dbus_message_iter_append_string(&iter, summary);
 	_notify_dbus_message_iter_append_string_or_nil(&iter, detailed);
 
-	if (icon_len > 0 && icon_data != NULL)
-		dbus_message_iter_append_byte_array(&iter, icon_data, icon_len);
+	if (icon == NULL)
+		dbus_message_iter_append_nil(&iter);
+	else if (icon->raw_len > 0 && icon->raw_data != NULL)
+	{
+		dbus_message_iter_append_byte_array(&iter, icon->raw_data,
+											icon->raw_len);
+	}
 	else
-		_notify_dbus_message_iter_append_string_or_nil(&iter, icon_uri);
+		dbus_message_iter_append_string(&iter, icon->uri);
 
 	dbus_message_iter_append_uint32(&iter, timeout);
 	dbus_message_iter_append_uint32(&iter, default_button);
@@ -615,82 +622,4 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
 
 	return handle;
-}
-
-NotifyHandle *
-notify_send_request(NotifyUrgency urgency, const char *summary,
-					const char *detailed, const char *icon_uri,
-					time_t timeout, gpointer user_data,
-					size_t default_button, size_t button_count, ...)
-{
-	va_list buttons;
-	NotifyHandle *handle;
-
-	g_return_val_if_fail(summary != NULL,  0);
-	g_return_val_if_fail(button_count > 1, 0);
-
-	va_start(buttons, button_count);
-	handle = notify_send_request_varg(urgency, summary, detailed, icon_uri,
-									  timeout, user_data, default_button,
-									  button_count, buttons);
-	va_end(buttons);
-
-	return handle;
-}
-
-NotifyHandle *
-notify_send_request_varg(NotifyUrgency urgency, const char *summary,
-						 const char *detailed, const char *icon_uri,
-						 time_t timeout, gpointer user_data,
-						 size_t default_button, size_t button_count,
-						 va_list buttons)
-{
-	g_return_val_if_fail(summary != NULL,  0);
-	g_return_val_if_fail(button_count > 1, 0);
-
-	return _notify_send_request(urgency, summary, detailed, icon_uri,
-								0, NULL, timeout, user_data, default_button,
-								button_count, buttons);
-}
-
-NotifyHandle *
-notify_send_request_with_icon_data(NotifyUrgency urgency,
-								   const char *summary, const char *detailed,
-								   size_t icon_len, guchar *icon_data,
-								   time_t timeout, gpointer user_data,
-								   gint32 default_button, size_t button_count,
-								   ...)
-{
-	va_list buttons;
-	NotifyHandle *handle;
-
-	g_return_val_if_fail(summary != NULL,  0);
-	g_return_val_if_fail(button_count > 1, 0);
-
-	va_start(buttons, button_count);
-	handle = notify_send_request_with_icon_data_varg(urgency, summary,
-													 detailed, icon_len,
-													 icon_data, timeout,
-													 user_data, default_button,
-													 button_count, buttons);
-	va_end(buttons);
-
-	return handle;
-}
-
-NotifyHandle *
-notify_send_request_with_icon_data_varg(NotifyUrgency urgency,
-										const char *summary,
-										const char *detailed,
-										size_t icon_len, guchar *icon_data,
-										time_t timeout, gpointer user_data,
-										gint32 default_button,
-										size_t button_count, va_list buttons)
-{
-	g_return_val_if_fail(summary != NULL,  0);
-	g_return_val_if_fail(button_count > 1, 0);
-
-	return _notify_send_request(urgency, summary, detailed, NULL, icon_len,
-								icon_data, timeout, user_data, default_button,
-								button_count, buttons);
 }

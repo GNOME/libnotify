@@ -1,3 +1,10 @@
+Tue Jun 29 19:33:43 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Due to the new icon struct, a lot of redundant functions have now
+	    been removed.
+
 Tue Jun 29 19:26:58 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:
