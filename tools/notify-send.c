@@ -130,7 +130,7 @@ main(int argc, const char **argv)
     /* if the given time is < current time, treat it as a timeout in seconds (ie 5 seconds) */
 	if (expire_time && expire_time < time(NULL)) expire_time += time(NULL);
 	
-	notify_send_notification(0, urgency, summary, description, icon,
+	notify_send_notification(NULL, urgency, summary, description, icon,
 							 TRUE, expire_time, NULL, 0);
 
 	if (icon != NULL)

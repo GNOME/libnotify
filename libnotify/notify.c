@@ -106,9 +106,9 @@ _notify_handle_new(guint32 id)
 
 	handle->id = id;
 
-	handle->replaces = -1;
+	handle->replaces = 0;
 
-	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
+	g_hash_table_insert(_handles, &handle->id, handle);
 
 	return handle;
 }
@@ -215,7 +215,7 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 
 		reason = dbus_message_iter_get_uint32(&iter);
 
-		g_hash_table_remove(_handles, GINT_TO_POINTER(id));
+		g_hash_table_remove(_handles, &id);
 	}
 	else if (dbus_message_is_signal(message, NOTIFY_DBUS_CORE_INTERFACE,
 									"ActionInvoked"))
@@ -230,7 +230,7 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 
 		action_id = dbus_message_iter_get_uint32(&iter);
 
-		handle = g_hash_table_lookup(_handles, GINT_TO_POINTER(id));
+		handle = g_hash_table_lookup(_handles, &id);
 
 		if (handle->actions_table == NULL)
 		{
@@ -243,7 +243,7 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 			NotifyAction *action;
 
 			action = g_hash_table_lookup(handle->actions_table,
-										 GINT_TO_POINTER(action_id));
+										 &action_id);
 
 			if (action == NULL)
 			{
@@ -578,7 +578,7 @@ notify_icon_destroy(NotifyIcon *icon)
  * Notifications API
  **************************************************************************/
 NotifyHandle *
-notify_send_notification(guint32 replaces, NotifyUrgency urgency, const char *summary,
+notify_send_notification(NotifyHandle *replaces, NotifyUrgency urgency, const char *summary,
 						 const char *detailed, const NotifyIcon *icon,
 						 gboolean expires, time_t expire_time,
 						 gpointer user_data, size_t action_count, ...)
@@ -598,7 +598,7 @@ notify_send_notification(guint32 replaces, NotifyUrgency urgency, const char *su
 }
 
 NotifyHandle *
-notify_send_notification_varg(guint32 replaces, NotifyUrgency urgency, const char *summary,
+notify_send_notification_varg(NotifyHandle *replaces, NotifyUrgency urgency, const char *summary,
 							  const char *detailed, const NotifyIcon *icon,
 							  gboolean expires, time_t expire_time,
 							  gpointer user_data, size_t action_count,
@@ -619,7 +619,8 @@ notify_send_notification_varg(guint32 replaces, NotifyUrgency urgency, const cha
 #if 0
 	_notify_dbus_message_iter_append_app_info(&iter);
 #endif
-	dbus_message_iter_append_uint32(&iter, replaces);
+
+	dbus_message_iter_append_uint32(&iter, replaces ? replaces->id : 0);
 	dbus_message_iter_append_byte(&iter, urgency);
 	dbus_message_iter_append_string(&iter, summary);
 	_notify_dbus_message_iter_append_string_or_nil(&iter, detailed);

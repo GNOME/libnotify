@@ -1,7 +1,11 @@
-Tue Jul 13 23:58:54 2004  Mike Hearn  <mike@navi.cx>
+Wed Jul 14 02:11:48 GMT 2004  Mike Hearn  <mike@navi.cx>
+	* libnotify/notify.c: Use pointers instead of GINT_TO_POINTER
+	* tools/test-replace.c: Test replacing notifications
+
+Tue Jul 13 23:58:54 GMT 2004  Mike Hearn  <mike@navi.cx>
 	* SPECIFICATION: CloseNotification sends NotificationClosed signal.
 
-Mon Jul  5 00:12:03 2004  Mike Hearn  <mike@navi.cx>
+Mon Jul  5 00:12:03 GMT 2004  Mike Hearn  <mike@navi.cx>
 	* tools/notify-send.c (main): Treat expiry times < current time
 	  as timeouts from current instant
 
