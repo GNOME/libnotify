@@ -8,7 +8,7 @@ ChangeLog:
 
 v0.1:
   * Initial version
-  
+
 ---------------------------------------------------------------------
 
 OVERVIEW
@@ -71,12 +71,13 @@ A notification has the following components:
 
 - An optional sound: See the ICONS/SOUNDS section below.
 
-- An array of buttons. The buttons send a request message back to the
-  notification client when clicked. This functionality may not be
+- An array of actions. The actions send a request message back to the
+  notification client when invoked. This functionality may not be
   implemented by the notification server, conforming clients should
   check if it is available before using it (see the CapsQuery message
   in the PROTOCOL section). An implementation is free to ignore any
-  requested by the client.
+  requested by the client. As an example one possible rendering of
+  actions would be as buttons in the notification popup.
 
 - A timeout: the time in milliseconds after which the notification
   should be hidden (FIXME: should this be a function of text length
@@ -167,16 +168,16 @@ The following messages must be supported by all implementations.
 * CapsQuery
 
   This message takes no parameters.
-  
+
   It returns an array of strings. Each string describes an optional
   capability implemented by the server. The following values are
   defined by this spec:
 
   "body": Supports body text. Some implementations may only show the
           summary (for instance, onscreen displays, marquee/scrollers)
-          
+
   "markup": Supports markup in the body text.
-  
+
   "static-image" : Supports display of exactly 1 frame of any given
                    image array.  This value is mutually exclusive with
                    "multi-image", it is a protocol error for the
@@ -201,5 +202,30 @@ The following messages must be supported by all implementations.
   "x-vendorname", so for instance "x-gnome-foo-cap". Caps may not
   contain spaces in their names (FIXME: this feels right but is it
   really necessary?)
-             
+
+* Notify
+
+  This message requires the following parameters in the exact order
+  shown. For some parameters multiple types may be acceptable
+
+  STRING summary
+  STRING/NIL body: if nil the body is considered omitted.
+  ARRAY images: the array may be empty.
+  STRING/NIL sound: if nil the sound is considered omitted.
+  ARRAY actions
+  UINT32/NIL timeout: if nil the notification never times out
+
+  It returns a UINT32 that will never be reused within a
+  session unless more than MAXINT notifications have been generated
+  (ie an acceptable implementation for this is just an incrementing
+  counter).
+
+* EndNotify
+
+  This message indicates that the notification should be removed from
+  the users view. It can be used, for instance, if the event the
+  notification pertains to is no longer relevant or to cancel a
+  notification with no timeout. It takes one UINT32 parameter, the ID
+  of the notificaton to cancel.
+
 REFERENCE

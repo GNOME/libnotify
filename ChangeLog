@@ -1,6 +1,6 @@
-Thu Jul  1 23:46:28 2004  Mike Hearn  <mike@navi.cx>
-	* SPECIFICATION: Add info on icons/sounds, add CapsQuery
-	  protocol request.
+Thu Jul  1 23:46:28 GMT 2004  Mike Hearn  <mike@navi.cx>
+	* SPECIFICATION: Add info on icons/sounds, add some
+	  protocol requests. Change "buttons" in the overview to "actions".
 
 Wed Jun 30 14:03:51 GMT 2004  Mike Hearn  <mike@navi.cx>
 	* SPECIFICATION: Initial version
