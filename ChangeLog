@@ -1,3 +1,8 @@
+Wed Nov 03 23:39:23 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Use glib's memory allocation stuff instead of libc's.
+
 Wed Nov 03 23:34:10 PST 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

@@ -531,7 +531,7 @@ notify_icon_new_from_uri(const char *icon_uri)
 	icon = g_new0(NotifyIcon, 1);
 
 	icon->frames = 1;
-	icon->uri    = malloc(sizeof(char *));
+	icon->uri    = g_malloc(sizeof(char *));
 	icon->uri[0] = g_strdup(icon_uri);
 
 	return icon;
@@ -548,9 +548,9 @@ notify_icon_new_from_data(size_t icon_len, const guchar *icon_data)
 	icon = g_new0(NotifyIcon, 1);
 
 	icon->frames      = 1;
-	icon->raw_len     = malloc(sizeof(icon->raw_len));
+	icon->raw_len     = g_malloc(sizeof(icon->raw_len));
 	icon->raw_len[0]  = icon_len;
-	icon->raw_data    = malloc(sizeof(guchar *));
+	icon->raw_data    = g_malloc(sizeof(guchar *));
 	icon->raw_data[0] = g_memdup(icon_data, icon_len);
 
 	return icon;
@@ -566,9 +566,9 @@ notify_icon_add_frame_from_data(NotifyIcon *icon, size_t icon_len, const guchar 
 	if (icon->frames) g_return_val_if_fail(icon->raw_len != NULL, FALSE);
 
 	icon->frames++;
-	icon->raw_len = realloc(icon->raw_len, sizeof(size_t) * icon->frames);
+	icon->raw_len = g_realloc(icon->raw_len, sizeof(size_t) * icon->frames);
 	icon->raw_len[icon->frames - 1] = icon_len;
-	icon->raw_data = realloc(icon->raw_data, sizeof(guchar *) * icon->frames);
+	icon->raw_data = g_realloc(icon->raw_data, sizeof(guchar *) * icon->frames);
 	icon->raw_data[icon->frames - 1] = g_memdup(icon_data, icon_len);
 
 	return TRUE;
@@ -578,12 +578,15 @@ gboolean
 notify_icon_add_frame_from_uri(NotifyIcon *icon, const char *uri)
 {
 	g_return_val_if_fail(icon != NULL, FALSE);
-	g_return_val_if_fail(uri != NULL, FALSE);
+	g_return_val_if_fail(uri  != NULL, FALSE);
 
-	if (icon->frames) g_return_val_if_fail(icon->uri != NULL, FALSE);
+	if (icon->frames)
+	{
+		g_return_val_if_fail(icon->uri != NULL, FALSE);
+	}
 
 	icon->frames++;
-	icon->uri = realloc(icon->uri, sizeof(char *) * icon->frames);
+	icon->uri = g_realloc(icon->uri, sizeof(char *) * icon->frames);
 	icon->uri[icon->frames - 1] = g_strdup(uri);
 
 	return TRUE;
