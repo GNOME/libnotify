@@ -1,3 +1,11 @@
+Sun Jul 04 13:28:51 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	A tools/:
+	R tests/:
+	* Makefile.am:
+	* configure.ac:
+	  - Renamed tests to tools.
+
 Sun Jul 04 13:28:00 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* tests/Makefile.am:
