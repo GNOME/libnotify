@@ -35,11 +35,23 @@
 #define NOTIFY_DBUS_CORE_INTERFACE "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_OBJECT    "/org/freedesktop/Notifications"
 
+typedef struct
+{
+	guint32 id;
+	gpointer user_data;
+
+	size_t num_buttons;
+	char **texts;
+	NotifyCallback *cbs;
+
+} NotifyRequestData;
+
 static DBusConnection *_dbus_conn = NULL;
 static gboolean _initted = FALSE;
 static gboolean _filters_added = FALSE;
 static guint32 _init_ref_count = 0;
 static char *_app_name = NULL;
+static GHashTable *_request_ids = NULL;
 
 static DBusMessage *
 _notify_dbus_message_new(const char *name, DBusMessageIter *iter)
@@ -186,6 +198,21 @@ _notify_disconnect(void)
 	dbus_connection_unref(_dbus_conn);
 }
 
+static void
+_destroy_request_data(gpointer data)
+{
+	NotifyRequestData *request_data = (NotifyRequestData *)data;
+	size_t i;
+
+	for (i = 0; i < request_data->num_buttons; i++)
+		g_free(request_data->texts[i]);
+
+	g_free(request_data->texts);
+	g_free(request_data->cbs);
+
+	g_free(request_data);
+}
+
 gboolean
 notify_init(const char *app_name)
 {
@@ -205,6 +232,9 @@ notify_init(const char *app_name)
 	}
 
 	_app_name = g_strdup(app_name);
+
+	_request_ids = g_hash_table_new_full(g_int_hash, g_int_equal,
+										 NULL, _destroy_request_data);
 
 #ifdef HAVE_ATEXIT
 	atexit(notify_uninit);
@@ -229,6 +259,12 @@ notify_uninit(void)
 	{
 		g_free(_app_name);
 		_app_name = NULL;
+	}
+
+	if (_request_ids != NULL)
+	{
+		g_hash_table_destroy(_request_ids);
+		_request_ids = NULL;
 	}
 
 	_notify_disconnect();
@@ -365,7 +401,7 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 	guint32 i;
 	char *text;
 	NotifyCallback cb;
-	char **array;
+	NotifyRequestData *request_data;
 
 	message = _notify_dbus_message_new("SendRequest", &iter);
 
@@ -384,20 +420,24 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 	dbus_message_iter_append_uint32(&iter, timeout);
 	dbus_message_iter_append_uint32(&iter, default_button);
 
-	array = g_new0(char *, button_count);
+	request_data = g_new0(NotifyRequestData, 1);
+	request_data->texts = g_new0(char *, button_count);
+	request_data->cbs   = g_new0(NotifyCallback, button_count);
+
+	request_data->num_buttons = button_count;
 
 	for (i = 0; i < button_count; i++)
 	{
 		text = va_arg(buttons, char *);
 		cb   = va_arg(buttons, NotifyCallback);
 
-		array[i] = text;
+		request_data->texts[i] = text;
+		request_data->cbs[i]   = cb;
 	}
 
-	dbus_message_iter_append_string_array(&iter, (const char **)array,
+	dbus_message_iter_append_string_array(&iter,
+										  (const char **)request_data->texts,
 										  button_count);
-
-	g_free(array);
 
 	dbus_error_init(&error);
 
@@ -412,6 +452,8 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 				error.message);
 		dbus_error_free(&error);
 
+		_destroy_request_data(request_data);
+
 		return 0;
 	}
 
@@ -420,6 +462,10 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 
 	dbus_message_unref(reply);
 	dbus_error_free(&error);
+
+	request_data->id = id;
+
+	g_hash_table_insert(_request_ids, GINT_TO_POINTER(id), request_data);
 
 	return id;
 }
