@@ -40,28 +40,15 @@
 #define NOTIFY_DBUS_CORE_INTERFACE "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_OBJECT    "/org/freedesktop/Notifications"
 
-typedef struct
-{
-	gpointer user_data;
-
-	size_t num_buttons;
-	char **texts;
-	NotifyCallback *cbs;
-
-} NotifyRequestData;
-
 struct _NotifyHandle
 {
-	NotifyType type;
-
 	guint32 id;
 
-	union
-	{
-		NotifyRequestData *request;
-		void *notify;
+	gpointer user_data;
 
-	} data;
+	size_t num_actions;
+	char **texts;
+	NotifyCallback *cbs;
 };
 
 struct _NotifyIcon
@@ -99,17 +86,13 @@ print_error(char *message, ...)
 }
 
 static NotifyHandle *
-_notify_handle_new(NotifyType type, guint32 id)
+_notify_handle_new(guint32 id)
 {
 	NotifyHandle *handle;
 
 	handle = g_new0(NotifyHandle, 1);
 
-	handle->type = type;
-	handle->id   = id;
-
-	if (type == NOTIFY_TYPE_REQUEST)
-		handle->data.request = g_new0(NotifyRequestData, 1);
+	handle->id = id;
 
 	return handle;
 }
@@ -121,15 +104,16 @@ _notify_handle_destroy(NotifyHandle *handle)
 
 	g_return_if_fail(handle != NULL);
 
-	if (handle->type == NOTIFY_TYPE_REQUEST && handle->data.request != NULL)
+	if (handle->texts != NULL)
 	{
-		for (i = 0; i < handle->data.request->num_buttons; i++)
-			g_free(handle->data.request->texts[i]);
+		for (i = 0; i < handle->num_actions; i++)
+			g_free(handle->texts[i]);
 
-		g_free(handle->data.request->texts);
-		g_free(handle->data.request->cbs);
-		g_free(handle->data.request);
+		g_free(handle->texts);
 	}
+
+	if (handle->cbs != NULL)
+		g_free(handle->cbs);
 
 	g_free(handle);
 }
@@ -203,21 +187,21 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 	if (dbus_message_is_signal(message, NOTIFY_DBUS_CORE_INTERFACE,
 							   "NotificationClosed"))
 	{
-		guint32 id;
-		NotifyHandle *handle;
+		guint32 id, reason;
 
 		dbus_message_iter_init(message, &iter);
+
 		id = dbus_message_iter_get_uint32(&iter);
+		dbus_message_iter_next(&iter);
 
-		handle = g_hash_table_lookup(_handles, GINT_TO_POINTER(id));
+		reason = dbus_message_iter_get_uint32(&iter);
 
-		if (handle != NULL && handle->type == NOTIFY_TYPE_NOTIFICATION)
-			g_hash_table_remove(_handles, GINT_TO_POINTER(id));
+		g_hash_table_remove(_handles, GINT_TO_POINTER(id));
 	}
 	else if (dbus_message_is_signal(message, NOTIFY_DBUS_CORE_INTERFACE,
-									"RequestClosed"))
+									"ActionInvoked"))
 	{
-		guint32 id, button;
+		guint32 id, action_id;
 		NotifyHandle *handle;
 
 		dbus_message_iter_init(message, &iter);
@@ -225,24 +209,19 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 		id = dbus_message_iter_get_uint32(&iter);
 		dbus_message_iter_next(&iter);
 
-		button = dbus_message_iter_get_uint32(&iter);
+		action_id = dbus_message_iter_get_uint32(&iter);
 
 		handle = g_hash_table_lookup(_handles, GINT_TO_POINTER(id));
 
-		if (handle != NULL && handle->type == NOTIFY_TYPE_REQUEST)
+		if (action_id >= handle->num_actions)
 		{
-			if (button >= handle->data.request->num_buttons)
-			{
-				print_error("Returned request button ID is greater"
-							"than the maximum number of buttons!\n");
-			}
-			else if (handle->data.request->cbs[button] != NULL)
-			{
-				(handle->data.request->cbs[button])(handle, button,
-					handle->data.request->user_data);
-			}
-
-			g_hash_table_remove(_handles, GINT_TO_POINTER(id));
+			print_error("Returned action ID %d is greater"
+						"than the maximum number of buttons (%d) for %d!\n",
+						action_id, handle->num_actions, id);
+		}
+		else if (handle->cbs[action_id] != NULL)
+		{
+			(handle->cbs[action_id])(handle, action_id, handle->user_data);
 		}
 	}
 	else
@@ -400,10 +379,7 @@ notify_close(NotifyHandle *handle)
 
 	g_return_if_fail(handle != NULL);
 
-	message = _notify_dbus_message_new(
-		(handle->type == NOTIFY_TYPE_NOTIFICATION
-		 ? "CloseNotification" : "CloseRequest"),
-		&iter);
+	message = _notify_dbus_message_new("CloseNotification", &iter);
 
 	g_return_if_fail(message != NULL);
 
@@ -518,7 +494,7 @@ notify_send_notification(NotifyUrgency urgency, const char *summary,
 	dbus_message_unref(reply);
 	dbus_error_free(&error);
 
-	handle = _notify_handle_new(NOTIFY_TYPE_NOTIFICATION, id);
+	handle = _notify_handle_new(id);
 
 	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
 
@@ -584,24 +560,24 @@ notify_send_request_varg(NotifyUrgency urgency, const char *summary,
 	dbus_message_iter_append_uint32(&iter, timeout);
 	dbus_message_iter_append_uint32(&iter, default_button);
 
-	handle = _notify_handle_new(NOTIFY_TYPE_REQUEST, 0);
+	handle = _notify_handle_new(0);
 
-	handle->data.request->texts = g_new0(char *, button_count);
-	handle->data.request->cbs   = g_new0(NotifyCallback, button_count);
+	handle->texts = g_new0(char *, button_count);
+	handle->cbs   = g_new0(NotifyCallback, button_count);
 
-	handle->data.request->num_buttons = button_count;
+	handle->num_actions = button_count;
 
 	for (i = 0; i < button_count; i++)
 	{
 		text = va_arg(buttons, char *);
 		cb   = va_arg(buttons, NotifyCallback);
 
-		handle->data.request->texts[i] = text;
-		handle->data.request->cbs[i]   = cb;
+		handle->texts[i] = text;
+		handle->cbs[i]   = cb;
 	}
 
 	dbus_message_iter_append_string_array(&iter,
-		(const char **)handle->data.request->texts, button_count);
+		(const char **)handle->texts, button_count);
 
 	dbus_error_init(&error);
 

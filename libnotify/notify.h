@@ -25,16 +25,6 @@
 #include <time.h>
 
 /**
- * Basic notification types.
- */
-typedef enum
-{
-	NOTIFY_TYPE_NOTIFICATION,  /**< Notification */
-	NOTIFY_TYPE_REQUEST        /**< Request      */
-
-} NotifyType;
-
-/**
  * Notification and request urgency levels.
  */
 typedef enum

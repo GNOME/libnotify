@@ -1,3 +1,10 @@
+Sat Jul 03 11:26:03 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Cleaned up some things and updated some stuff to be compliant with
+	    the spec. More will come soon.
+
 Thu Jul  1 23:46:28 GMT 2004  Mike Hearn  <mike@navi.cx>
 	* SPECIFICATION: Add info on icons/sounds, add some
 	  protocol requests. Change "buttons" in the overview to "actions".
