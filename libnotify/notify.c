@@ -609,7 +609,7 @@ notify_send_request_varg(NotifyUrgency urgency, const char *summary,
 													  -1, &error);
 
 	dbus_message_unref(message);
-	
+
 	if (dbus_error_is_set(&error))
 	{
 		print_error("Error sending SendNotification: %s\n", error.message);
