@@ -292,7 +292,7 @@
   </para>
   <informaltable>
    <tgroup cols="2">
-    <tbody>
+    <tbody valign="top">
      <row>
       <entry>
        <sgmltag class="starttag">b</sgmltag> ...
@@ -362,7 +362,7 @@
       <entry>Description</entry>
      </row>
     </thead>
-    <tbody>
+    <tbody valign="top">
      <row>
       <entry>Icon Theme Name</entry>
       <entry>String</entry>
@@ -444,9 +444,10 @@
      capability implemented by the server. The following values are
      defined by this spec:
     </para>
-    <informaltable>
+    <table>
+     <title>Server Capabilities</title>
      <tgroup cols="2">
-      <tbody>
+      <tbody valign="top">
        <row>
         <entry><literal>"body"</literal></entry>
         <entry>
@@ -498,7 +499,7 @@
        </row>
       </tbody>
      </tgroup>
-    </informaltable>
+    </table>
     <para>
      New vendor-specific caps may be specified as long as they start with
      <literal>"x-vendorname"</literal>. For instance,
@@ -542,7 +543,7 @@
         <entry>Description</entry>
        </row>
       </thead>
-      <tbody>
+      <tbody valign="top">
        <row>
         <entry>app_name</entry>
         <entry>STRING or NIL</entry>
@@ -706,7 +707,7 @@
         <entry>Description</entry>
        </row>
       </thead>
-      <tbody>
+      <tbody valign="top">
        <row>
         <entry>name</entry>
         <entry>STRING</entry>
@@ -759,7 +760,7 @@
         <entry>Description</entry>
        </row>
       </thead>
-      <tbody>
+      <tbody valign="top">
        <row>
         <entry><parameter>id</parameter></entry>
         <entry>UINT32</entry>
@@ -824,7 +825,7 @@
         <entry>Description</entry>
        </row>
       </thead>
-      <tbody>
+      <tbody valign="top">
        <row>
         <entry><parameter>id</parameter></entry>
         <entry>UINT32</entry>
