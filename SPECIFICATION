@@ -74,7 +74,7 @@ A notification has the following components:
 - An array of actions. The actions send a request message back to the
   notification client when invoked. This functionality may not be
   implemented by the notification server, conforming clients should
-  check if it is available before using it (see the CapsQuery message
+  check if it is available before using it (see the GetCapabilities message
   in the PROTOCOL section). An implementation is free to ignore any
   requested by the client. As an example one possible rendering of
   actions would be as buttons in the notification popup.
@@ -107,7 +107,7 @@ assumptions about the presentation and abilities of the notification
 server: the message content is the most important thing.
 
 Clients can check with the server what capabilities are supported
-using the CapsQuery message. See the PROTOCOL section.
+using the GetCapabilities message. See the PROTOCOL section.
 
 If a client requires a response from a passive popup, it should be
 coded such that a non-focus-stealing message box can be used instead
@@ -165,7 +165,7 @@ PROTOCOL
 
 The following messages must be supported by all implementations.
 
-* CapsQuery
+* GetCapabilities
 
   This message takes no parameters.
 
