@@ -118,20 +118,14 @@
      <row>
       <entry>Application Name</entry>
       <entry>
-       Application name: This is the optional name of the application sending
-       the notification. This should be the application's formal name, rather
-       than some sort of ID.
+       This is the optional name of the application sending the notification.
+       This should be the application's formal name, rather than some sort
+       of ID. An example would be "FredApp E-Mail Client," rather than
+       "fredapp-email-client."
       </entry>
      </row>
      <row>
       <entry>Application Icon</entry>
-      <entry>
-       An optional byte array containing the application's icon.
-       This should be in PNG or GIF formats.
-      </entry>
-     </row>
-     <row>
-      <entry>Application ID</entry>
       <entry>
        An optional byte array containing the application's icon.
        This should be in PNG or GIF formats.
@@ -185,11 +179,7 @@
      </row>
      <row>
       <entry>Images</entry>
-      <entry>See <xref linkend="icons-sounds"/>.</entry>
-     </row>
-     <row>
-      <entry>Sounds</entry>
-      <entry>See <xref linkend="icons-sounds"/>.</entry>
+      <entry>See <xref linkend="icons"/>.</entry>
      </row>
      <row>
       <entry>Actions</entry>
@@ -219,10 +209,6 @@
         If zero, the notification's expiration time is dependent on the
         notification server's settings, and may vary for the type of
         notification.
-       </para>
-       <para>
-        The expiration time should be respected by implementations, but this is
-        not required (this is for compatibility with KNotify).
        </para>
       </entry>
      </row>
@@ -315,25 +301,23 @@
   </para>
  </sect1>
 
- <sect1 id="icons-sounds" xreflabel="Icons and Sounds">
+ <sect1 id="icons" xreflabel="Icons and Sounds">
   <title>Icons and Sounds</title>
   <para>
-   A notification can optionally include an array of images and/or a
-   single sound. The array of images specifies frames in an animation,
-   animations always loop. Implementations are free to ignore the
-   images and sound data, and implementations that support images need not
-   support animation.
+   A notification can optionally include an array of images. The array of
+   images specifies frames in an animation, which always loop.
+   Implementations are free to ignore the images data, and implementations
+   that support images need not support animation.
   </para>
   <para>
    If the image array has more than one element, a "primary frame" can
-   be specified - if not specified it defaults to the first frame. For
-   implementations that support images but not animation (for instance a
-   <application>KNotify</application> bridge), only the primary frame will
-   be used.
+   be specified. If not specified, it defaults to the first frame. For
+   implementations that support images but not animation, only the primary
+   frame will be used.
   </para>
   <para>
    Each element of the array must have the same type as the first
-   element, mixtures of strings and blobs are not allowed. The element
+   element. Mixtures of strings and blobs are not allowed. The element
    types can be one of the following:
   </para>
   <informaltable>
@@ -377,11 +361,6 @@
     </tbody>
    </tgroup>
   </informaltable>
-  <para>
-   A sound can be specified, this will be played by the notification
-   server when the notification is displayed.
-   <remark>Elaborate here!</remark>
-  </para>
  </sect1>
 
  <sect1 id="notification-types" xreflabel="Notification Types">
@@ -434,10 +413,10 @@
    them.
   </para>
   <para>
-   Server implementations may use urgency information how they see fit.
-   Possible implementations may keep critical notifications on the screen
-   until the user manually closes them, which is our recommendation. However,
-   there are no user interface guidelines in this area.
+   For the most part, server implementations may use urgency information
+   how they see fit. The one exception is the Critical notification.
+   As Critical notifications are things that the user will most likely want
+   to know about, they should not be closed until the user dismisses them.
   </para>
  </sect1>
 
@@ -445,8 +424,8 @@
   <title>Hints</title>
   <para>
    Hints are a way to provide extra data to a notification server that
-   the server may be able to make use of. Such examples may be the
-   application's PID or the window ID.
+   the server may be able to make use of. One such example would be the
+   window ID.
   </para>
   <para>
    Neither clients nor notification servers are required to support any
@@ -470,13 +449,6 @@
     </thead>
     <tbody valign="top">
      <row>
-      <entry><literal>"pid"</literal></entry>
-      <entry>UINT32</entry>
-      <entry>
-       The Process ID of the application that sent the notification.
-      </entry>
-     </row>
-     <row>
       <entry><literal>"winid"</literal></entry>
       <entry>UINT32</entry>
       <entry>
@@ -489,7 +461,7 @@
   </table>
   <para>
    Third parties, when defining their own hints, should discuss the
-   possibilty of standardizing on the hint with other parties, preferably
+   possibility of standardizing on the hint with other parties, preferably
    in a place such as the
    <ulink url="http://freedesktop.org/mailman/listinfo/xdg">xdg</ulink>
    mailing list at
@@ -566,14 +538,6 @@
         </entry>
        </row>
        <row>
-        <entry><literal>"sound"</literal></entry>
-        <entry>
-         The server will play the specified sound. Even if this cap is
-         missing, a sound may still be specified however the server is free
-         to ignore it.
-        </entry>
-       </row>
-       <row>
         <entry><literal>"actions"</literal></entry>
         <entry>
          The server will provide the specified actions to the user. Even if
@@ -608,7 +572,6 @@
       <paramdef>STRING <parameter>summary</parameter></paramdef>
       <paramdef>STRING_OR_NIL <parameter>body</parameter></paramdef>
       <paramdef>ARRAY <parameter>images</parameter></paramdef>
-      <paramdef>STRING_OR_NIL <parameter>sound</parameter></paramdef>
       <paramdef>DICT_OR_NIL <parameter>actions</parameter></paramdef>
       <paramdef>DICT_OR_NIL <parameter>hints</parameter></paramdef>
       <paramdef>UINT32_OR_NIL <parameter>expire_time</parameter></paramdef>
@@ -678,13 +641,8 @@
         <entry><parameter>images</parameter></entry>
         <entry>ARRAY or NIL</entry>
         <entry>
-         The optional array of images. See <xref linkend="icons-sounds"/>.
+         The optional array of images. See <xref linkend="icons"/>.
         </entry>
-       </row>
-       <row>
-        <entry><parameter>sound</parameter></entry>
-        <entry>STRING</entry>
-        <entry>The optional sound file to play.</entry>
        </row>
        <row>
         <entry><parameter>actions</parameter></entry>
@@ -740,7 +698,7 @@
     <title><literal>org.freedesktop.Notifications.CloseNotification</literal></title>
     <funcsynopsis>
      <funcprototype>
-      <funcdef>BOOLEAN
+      <funcdef>void
        <function>org.freedesktop.Notifications.CloseNotification</function>
       </funcdef>
       <paramdef>UINT32 id</paramdef>
@@ -749,7 +707,7 @@
     <para>
      Causes a notification to be forcefully closed and removed from the user's
      view. It can be used, for example, in the event that what the
-     notification pertains to is no onger relevant, or to cancel a
+     notification pertains to is no longer relevant, or to cancel a
      notification with no expiration time.
     </para>
     <para>
@@ -757,10 +715,8 @@
      method.
     </para>
     <para>
-     This returns <constant>TRUE</constant> if the notification was closed.
-     If the notification didn't exist, this will return
-     <constant>FALSE</constant>. This can happen if the notification already
-     expired or was closed, or if the ID was simply invalid.
+     If the notification no longer exists, an empty D-BUS Error message is
+     sent back.
     </para>
    </sect3>
 
