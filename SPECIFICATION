@@ -26,7 +26,7 @@ Example use cases include:
 * Presence changes in IM programs: for instance, MSN Messenger on
   Windows pioneered the use of passive popups to indicate presence
   changes.
-  
+
 * New mail notification
 
 * Low disk space/battery warnings
@@ -48,7 +48,7 @@ by the bus process, however this is not required and notification
 server clients must not assume that it is available.
 
 The server should implement the "org.freedesktop.Notifications" interface on
-an object with the path "/org/freedesktop/Notifications". This is the 
+an object with the path "/org/freedesktop/Notifications". This is the
 only interface required by this version of the specification.
 
 A notification has the following components:
@@ -75,12 +75,13 @@ A notification has the following components:
 
 - A timeout: the time in milliseconds after which the notification
   should be hidden (FIXME: should this be a function of text length
-  to accommodate different reading speeds?). If zero the notification
-  stays on-screen indefinitely (persistent notifications).
+  to accommodate different reading speeds?). If zero, the notification's
+  timeout is dependent on the notification server's settings, and may vary
+  for the type of notification.
 
   The timeout should be respected by implementations, but this is not
   required (this is for compatibility with KNotify).
-  
+
 
 Each notification displayed is allocated a unique ID by the server
 (FIXME: should this be unique within a session, or just unique while
