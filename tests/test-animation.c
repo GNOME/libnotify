@@ -20,6 +20,7 @@
  */
 
 #include <libnotify/notify.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
@@ -29,7 +30,7 @@
 
 /// WRITE ME! ///
 
-int frames = 10;
+const int frames = 10;
 
 // returns array of pixbufs for a pulsing animation
 GdkPixbuf **generate_animation()
@@ -62,18 +63,35 @@ GdkPixbuf **generate_animation()
 int main()
 {
 	int i;
+	GdkPixbuf **buffers;
+	NotifyIcon *icon;
+
 	notify_init("Animations");
+
+	g_type_init();
+
+	buffers = generate_animation();
+	icon = notify_icon_new();
 
 	for (i = 0; i < frames; i++)
 	{
+		gchar *pngdata;
+		gsize size;
+		GError *error = NULL;
 
+		gdk_pixbuf_save_to_buffer(buffers[i], &pngdata, &size, "png",
+								  &error, NULL);
+
+		g_assert(error == NULL);
+
+		notify_icon_add_frame_from_data(icon, size, pngdata);
 	}
 
 	NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
 											   NULL,
 											   NOTIFY_URGENCY_NORMAL,
 											   "Summary", "Content",
-											   NULL, // no icon
+											   icon,
 											   TRUE, time(NULL) + 5,
 											   NULL, // no user data
 											   0); // no actions

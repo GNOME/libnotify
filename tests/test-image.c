@@ -46,9 +46,9 @@ static void send(char *i, size_t rawlen, char *s, char *b)
 	NotifyIcon *icon;
 
 	if (rawlen > 0)
-		icon = notify_icon_new_with_data(rawlen, i);
+		icon = notify_icon_new_from_data(rawlen, i);
 	else
-		icon = notify_icon_new(i);
+		icon = notify_icon_new_from_uri(i);
 
 	n = notify_send_notification(NULL, // replaces nothing
 								 NULL,
@@ -95,7 +95,6 @@ int main() {
 		 "Warning!");
 
 
-	// FIXME: test raw image transfer
 	struct stat buf;
 	if (stat(file, &buf) == -1)
 	{

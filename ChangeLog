@@ -1,3 +1,12 @@
+Wed Nov 03 23:34:10 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	* tests/test-animation.c:
+	* tests/test-image.c:
+	  - Patch from Mike Hearn to do a bunch of stuff, like handling icons
+	    and animations better.
+
 Wed Nov 03 01:19:42 PST 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* configure.ac:

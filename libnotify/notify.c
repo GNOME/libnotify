@@ -55,10 +55,12 @@ struct _NotifyHandle
 
 struct _NotifyIcon
 {
-	char *uri;
+	int frames;
 
-	size_t raw_len;
-	guchar *raw_data;
+	char **uri;
+
+	size_t *raw_len;
+	guchar **raw_data;
 };
 
 typedef struct
@@ -507,8 +509,19 @@ notify_get_server_caps(void)
 /**************************************************************************
  * Icon API
  **************************************************************************/
+
 NotifyIcon *
-notify_icon_new(const char *icon_uri)
+notify_icon_new()
+{
+	NotifyIcon *icon;
+
+	icon = g_new0(NotifyIcon, 1);
+
+	return icon;
+}
+
+NotifyIcon *
+notify_icon_new_from_uri(const char *icon_uri)
 {
 	NotifyIcon *icon;
 
@@ -517,13 +530,15 @@ notify_icon_new(const char *icon_uri)
 
 	icon = g_new0(NotifyIcon, 1);
 
-	icon->uri = g_strdup(icon_uri);
+	icon->frames = 1;
+	icon->uri    = malloc(sizeof(char *));
+	icon->uri[0] = g_strdup(icon_uri);
 
 	return icon;
 }
 
 NotifyIcon *
-notify_icon_new_with_data(size_t icon_len, const guchar *icon_data)
+notify_icon_new_from_data(size_t icon_len, const guchar *icon_data)
 {
 	NotifyIcon *icon;
 
@@ -532,10 +547,46 @@ notify_icon_new_with_data(size_t icon_len, const guchar *icon_data)
 
 	icon = g_new0(NotifyIcon, 1);
 
-	icon->raw_len  = icon_len;
-	icon->raw_data = g_memdup(icon_data, icon_len);
+	icon->frames      = 1;
+	icon->raw_len     = malloc(sizeof(icon->raw_len));
+	icon->raw_len[0]  = icon_len;
+	icon->raw_data    = malloc(sizeof(guchar *));
+	icon->raw_data[0] = g_memdup(icon_data, icon_len);
 
 	return icon;
+}
+
+gboolean
+notify_icon_add_frame_from_data(NotifyIcon *icon, size_t icon_len, const guchar *icon_data)
+{
+	g_return_val_if_fail(icon != NULL, FALSE);
+	g_return_val_if_fail(icon_data != NULL, FALSE);
+	g_return_val_if_fail(icon_len != 0, FALSE);
+
+	if (icon->frames) g_return_val_if_fail(icon->raw_len != NULL, FALSE);
+
+	icon->frames++;
+	icon->raw_len = realloc(icon->raw_len, sizeof(size_t) * icon->frames);
+	icon->raw_len[icon->frames - 1] = icon_len;
+	icon->raw_data = realloc(icon->raw_data, sizeof(guchar *) * icon->frames);
+	icon->raw_data[icon->frames - 1] = g_memdup(icon_data, icon_len);
+
+	return TRUE;
+}
+
+gboolean
+notify_icon_add_frame_from_uri(NotifyIcon *icon, const char *uri)
+{
+	g_return_val_if_fail(icon != NULL, FALSE);
+	g_return_val_if_fail(uri != NULL, FALSE);
+
+	if (icon->frames) g_return_val_if_fail(icon->uri != NULL, FALSE);
+
+	icon->frames++;
+	icon->uri = realloc(icon->uri, sizeof(char *) * icon->frames);
+	icon->uri[icon->frames - 1] = g_strdup(uri);
+
+	return TRUE;
 }
 
 void
@@ -593,9 +644,11 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	guint32 i;
 	NotifyHandle *handle;
 
+	g_return_val_if_fail(notify_is_initted(), NULL);
+
 	message = _notify_dbus_message_new("Notify", &iter);
 
-	g_return_val_if_fail(message != NULL, 0);
+	g_return_val_if_fail(message != NULL, NULL);
 
 	_notify_dbus_message_iter_append_string_or_nil(&iter, _app_name);
 	dbus_message_iter_append_nil(&iter);
@@ -611,17 +664,33 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	 *       For now, allow a NIL.
 	 */
 	if (icon == NULL)
-		dbus_message_iter_append_nil(&iter);
-	else if (icon->raw_len > 0 && icon->raw_data != NULL)
 	{
+		dbus_message_iter_append_nil(&iter);
+	}
+	else if (icon->raw_data)
+	{
+		int i;
+
 		dbus_message_iter_append_array(&iter, &array_iter, DBUS_TYPE_ARRAY);
-		dbus_message_iter_append_byte_array(&array_iter, icon->raw_data,
-											icon->raw_len);
+
+		for (i = 0; i < icon->frames; i++)
+		{
+			dbus_message_iter_append_byte_array(&array_iter, icon->raw_data[i],
+												icon->raw_len[i]);
+		}
 	}
 	else
 	{
+		int i;
+
 		dbus_message_iter_append_array(&iter, &array_iter, DBUS_TYPE_STRING);
-		dbus_message_iter_append_string(&array_iter, icon->uri);
+
+		g_assert( icon->uri != NULL); /* can be either raw data OR uri */
+
+		for (i = 0; i < icon->frames; i++)
+		{
+			dbus_message_iter_append_string(&array_iter, icon->uri[i]);
+		}
 	}
 
 	/* Actions */

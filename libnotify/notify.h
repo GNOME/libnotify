@@ -17,7 +17,12 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
+ *
+ * TODO:
+ *  - We talk about URIs, but they are actually file paths not URIs
+ *  - Un-glibify?
  */
+
 #ifndef _LIBNOTIFY_NOTIFY_H_
 #define _LIBNOTIFY_NOTIFY_H_
 
@@ -108,24 +113,65 @@ GList *notify_get_server_caps(void);
 /*@{*/
 
 /**
- * Creates an icon with the specified icon URI.
+ * Creates an empty (invalid) icon. You must add at least one frame,
+ * otherwise the icon will be rejected. The first add_frame function
+ * you call determines if this is a raw data or URI based icon.
+ *
+ * This function is useful when adding data from a loop.
+ *
+ * @return A new invalid icon.
+ */
+NotifyIcon *notify_icon_new();
+
+/**
+ * Creates an icon with the specified icon URI as the first frame.
+ * You can then add more frames by calling notify_icon_add_frame_from_uri.
+ * Note that you can't mix raw data and file URIs in the same icon.
  *
  * @param icon_uri The icon URI.
  *
  * @return The icon.
  */
-NotifyIcon *notify_icon_new(const char *icon_uri);
+NotifyIcon *notify_icon_new_from_uri(const char *icon_uri);
 
 /**
- * Creates an icon with the specified icon data.
+ * Creates an icon with the specified icon data as the first frame.
+ * You can then add more frames by calling notify_icon_add_frame_from_data.
+ * Note that you can't mix raw data and file URIs in the same icon.
  *
  * @param icon_len  The icon data length.
  * @param icon_data The icon data.
  *
  * @return The icon.
  */
-NotifyIcon *notify_icon_new_with_data(size_t icon_len,
+NotifyIcon *notify_icon_new_from_data(size_t icon_len,
 									  const guchar *icon_data);
+
+/**
+ * Adds a frame from raw data (a png file) to the icons animation.
+ *
+ * @param icon      The icon to add the frame to
+ * @param icon_len  The frame data length
+ * @param icon_data The frame data
+ *
+ * @return TRUE if was successful, FALSE if this icon isn't a raw data
+ * icon or there was a bad parameter.
+ */
+gboolean notify_icon_add_frame_from_data(NotifyIcon *icon,
+										 size_t icon_len,
+										 const guchar *icon_data);
+
+/**
+ * Adds a frame from a URI to the icons animation.
+ *
+ * @param icon      The icon to add the frame to
+ * @param icon_uri  The URI of the icon file for the frame
+ *
+ * @return TRUE if was successful, FALSE if this icon isn't a file URI
+ * icon or there was a bad parameter.
+ */
+gboolean notify_icon_add_frame_from_uri(NotifyIcon *icon,
+										 const char *icon_uri);
 
 /**
  * Destroys an icon.
