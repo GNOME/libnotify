@@ -228,4 +228,12 @@ The following messages must be supported by all implementations.
   notification with no timeout. It takes one UINT32 parameter, the ID
   of the notificaton to cancel.
 
+* GetServerInformation
+
+  This message takes no parameters, and returns the following values:
+
+  STRING name: the product name of the server
+  STRING vendor: "kde"/"freedesktop.org"/"Microsoft" etc etc
+  STRING version: a version spec of arbitrary format
+
 REFERENCE
