@@ -1,3 +1,10 @@
+Sun Aug 29 22:27:42 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	A docs/notification-spec.ps:
+	A docs/notification-spec.xml:
+	  - Added the notification spec in docbook format. It's not finished.
+	    I'm just tired of working on it.
+
 Wed Jul 14 02:11:48 GMT 2004  Mike Hearn  <mike@navi.cx>
 	* libnotify/notify.c: Use pointers instead of GINT_TO_POINTER
 	* tools/test-replace.c: Test replacing notifications
