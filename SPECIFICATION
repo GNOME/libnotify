@@ -249,12 +249,15 @@ The following messages must be supported by all implementations.
   UINT32/NIL expire time: if nil the notification never times out.
   If non-nil, a UNIX time_t (since the epoch) at which point the notification
   will be automatically closed. If zero, use the default server timeout.
+
   
-  It returns a UINT32 that will never be reused within a
-  session unless more than MAXINT notifications have been generated
-  (ie an acceptable implementation for this is just an incrementing
-  counter). The returned UINT32 will never be zero, as this is an invalid
-  ID.
+  If replaces is NIL, return is a UINT32 that will never be reused
+  within a session unless more than MAXINT notifications have been
+  generated (ie an acceptable implementation for this is just an
+  incrementing counter). The returned UINT32 will never be zero, as
+  this is an invalid ID.
+
+  If replaces is not NIL, return is the same as replaces.
 
 * CloseNotification
 
