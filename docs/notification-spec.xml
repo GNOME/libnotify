@@ -391,7 +391,54 @@
 
  <sect1 id="urgency-levels" xreflabel="Urgency Levels">
   <title>Urgency Levels</title>
-  <para><remark>Write me!</remark></para>
+  <para>
+   Notifications have an urgency level associated with them. This defines
+   the importance of the notification. For example, "Your computer is on
+   fire" would be a critical urgency. "Joe Bob signed on" would be a low
+   urgency.
+  </para>
+  <para>Urgency levels are defined as follows:</para>
+  <table>
+   <title>Urgency Levels</title>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>Level</entry>
+      <entry>Name</entry>
+     </row>
+    </thead>
+    <tbody valign="top">
+     <row>
+      <entry>0</entry>
+      <entry>Low</entry>
+     </row>
+     <row>
+      <entry>1</entry>
+      <entry>Medium (Normal)</entry>
+     </row>
+     <row>
+      <entry>2</entry>
+      <entry>High</entry>
+     </row>
+     <row>
+      <entry>3</entry>
+      <entry>Critical</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+  <para>
+   Developers must use their own judgement when deciding the urgency of a
+   notification. Typically, if the majority of programs are using the same
+   level for a specific type of urgency, other applications should follow
+   them.
+  </para>
+  <para>
+   Server implementations may use urgency information how they see fit.
+   Possible implementations may keep critical notifications on the screen
+   until the user manually closes them, which is our recommendation. However,
+   there are no user interface guidelines in this area.
+  </para>
  </sect1>
 
  <sect1 id="hints" xreflabel="Hints">
