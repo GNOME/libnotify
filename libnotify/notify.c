@@ -117,7 +117,49 @@ _notify_dbus_message_iter_append_app_info(DBusMessageIter *iter)
 static DBusHandlerResult
 _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 {
-	return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+	DBusMessageIter iter;
+
+	if (dbus_message_is_signal(message, NOTIFY_DBUS_CORE_INTERFACE,
+							   "NotificationClosed"))
+	{
+		/* We can ignore this, pretty much. */
+	}
+	else if (dbus_message_is_signal(message, NOTIFY_DBUS_CORE_INTERFACE,
+									"RequestClosed"))
+	{
+		guint32 id, button;
+		NotifyRequestData *request_data;
+
+		dbus_message_iter_init(message, &iter);
+
+		id = dbus_message_iter_get_uint32(&iter);
+		dbus_message_iter_next(&iter);
+
+		button = dbus_message_iter_get_uint32(&iter);
+
+		request_data = g_hash_table_lookup(_request_ids, GINT_TO_POINTER(id));
+
+		if (request_data != NULL)
+		{
+			if (button >= request_data->num_buttons)
+			{
+				fprintf(stderr,
+						"Returned request button ID is greater than "
+						"the maximum number of buttons!\n");
+			}
+			else if (request_data->cbs[button] != NULL)
+			{
+				(request_data->cbs[button])(id, button,
+											request_data->user_data);
+			}
+
+			g_hash_table_remove(_request_ids, GINT_TO_POINTER(id));
+		}
+	}
+	else
+		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+
+	return DBUS_HANDLER_RESULT_HANDLED;
 }
 
 static gboolean
