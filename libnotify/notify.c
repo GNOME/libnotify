@@ -89,7 +89,7 @@ print_error(char *message, ...)
 	vsnprintf(buf, sizeof(buf), message, args);
 	va_end(args);
 
-	fprintf(stderr, "%s (%d): libnotify: %s", getenv("_"), getpid(), buf);
+	fprintf(stderr, "%s(%d): libnotify: %s", getenv("_") ? getenv("_") : "", getpid(), buf);
 }
 
 static NotifyHandle *
@@ -101,7 +101,7 @@ _notify_handle_new(guint32 id)
 
 	handle->id = id;
 
-	g_hash_table_insert(_handles, id, handle);
+	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
 
 	return handle;
 }
@@ -275,8 +275,7 @@ _notify_connect(void)
 
 	dbus_connection_set_exit_on_disconnect(_dbus_conn, FALSE);
 
-	if (!dbus_bus_activate_service(_dbus_conn, NOTIFY_DBUS_SERVICE, 0,
-								   NULL, &error))
+	if (!dbus_bus_activate_service(_dbus_conn, NOTIFY_DBUS_SERVICE, 0, NULL, &error))
 	{
 		print_error("Error activating %s service: %s\n",
 					NOTIFY_DBUS_SERVICE, error.message);
