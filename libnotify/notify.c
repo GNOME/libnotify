@@ -613,7 +613,7 @@ notify_send_notification_varg(NotifyUrgency urgency, const char *summary,
 	g_return_val_if_fail(message != NULL, 0);
 
 	_notify_dbus_message_iter_append_app_info(&iter);
-	dbus_message_iter_append_uint32(&iter, urgency);
+	dbus_message_iter_append_byte(&iter, urgency);
 	dbus_message_iter_append_string(&iter, summary);
 	_notify_dbus_message_iter_append_string_or_nil(&iter, detailed);
 

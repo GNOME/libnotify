@@ -208,6 +208,12 @@ The following messages must be supported by all implementations.
   This message requires the following parameters in the exact order
   shown. For some parameters multiple types may be acceptable
 
+  BYTE urgency: The urgency level:
+    0 - low urgency
+	1 - medium (default)
+	2 - high
+	3 - critical
+
   STRING summary
 
   STRING/NIL body: if nil the body is considered omitted.
