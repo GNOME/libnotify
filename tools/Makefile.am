@@ -1,4 +1,4 @@
-bin_PROGRAMS = notify-send test-replace
+bin_PROGRAMS = notify-send
 
 common_ldflags = \
 	$(top_builddir)/libnotify/libnotify.la \
@@ -7,8 +7,5 @@ common_ldflags = \
 
 notify_send_SOURCES = notify-send.c
 notify_send_LDADD   = $(common_ldflags)
-
-test_replace_SOURCES = test-replace.c
-test_replace_LDADD  = $(common_ldflags)
 
 INCLUDES = $(PACKAGE_CFLAGS)

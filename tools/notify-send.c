@@ -121,13 +121,9 @@ main(int argc, const char **argv)
 		}
 	}
 
-	if (!notify_init("notify-send"))
-	{
-		fprintf(stderr, "Unable to initialize libnotify\n");
-		exit(1);
-	}
+	if (!notify_init("notify-send")) exit(1);
 
-    /* if the given time is < current time, treat it as a timeout in seconds (ie 5 seconds) */
+        /* if the given time is < current time, treat it as a timeout in seconds (ie 5 seconds) */
 	if (expire_time && expire_time < time(NULL)) expire_time += time(NULL);
 	
 	notify_send_notification(NULL, urgency, summary, description, icon,

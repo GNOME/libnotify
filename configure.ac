@@ -109,6 +109,7 @@ libnotify.pc
 Makefile
 libnotify/Makefile
 tools/Makefile
+tests/Makefile
 ])
 
 AC_OUTPUT

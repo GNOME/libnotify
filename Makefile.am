@@ -1,4 +1,4 @@
-SUBDIRS = libnotify tools
+SUBDIRS = libnotify tools tests
 
 pcdata_DATA = libnotify.pc
 pcdatadir = $(libdir)/pkgconfig

@@ -302,9 +302,15 @@ _notify_connect(void)
 	}
 
 	dbus_bus_add_match(_dbus_conn,
-					   "type='signal',"
-					   "interface='" DBUS_INTERFACE_ORG_FREEDESKTOP_DBUS "',"
-					   "sender='" DBUS_SERVICE_ORG_FREEDESKTOP_DBUS "'",
+					   "type=signal,"
+					   "interface=" DBUS_INTERFACE_ORG_FREEDESKTOP_DBUS ","
+					   "sender=" DBUS_SERVICE_ORG_FREEDESKTOP_DBUS ,
+					   &error);
+
+	dbus_bus_add_match(_dbus_conn,
+					   "type=signal,"
+					   "interface=" NOTIFY_DBUS_CORE_INTERFACE ","
+					   "path=" NOTIFY_DBUS_CORE_OBJECT ,
 					   &error);
 
 	if (dbus_error_is_set(&error))
@@ -336,6 +342,7 @@ _notify_disconnect(void)
 		_filters_added = FALSE;
 	}
 
+	dbus_connection_flush(_dbus_conn);
 	dbus_connection_unref(_dbus_conn);
 }
 
@@ -359,7 +366,7 @@ notify_init(const char *app_name)
 
 	_app_name = g_strdup(app_name);
 
-	_handles = g_hash_table_new_full(g_direct_hash, g_int_equal,
+	_handles = g_hash_table_new_full(g_int_hash, g_int_equal,
 									 NULL, (GFreeFunc)_notify_handle_destroy);
 
 #ifdef HAVE_ATEXIT
@@ -374,11 +381,10 @@ notify_init(const char *app_name)
 void
 notify_uninit(void)
 {
-	g_return_if_fail(notify_is_initted());
 
 	_init_ref_count--;
 
-	if (_init_ref_count > 0)
+	if (_init_ref_count != 0)
 		return;
 
 	if (_app_name != NULL)
@@ -416,7 +422,7 @@ notify_close(NotifyHandle *handle)
 
 	dbus_message_iter_append_uint32(&iter, handle->id);
 
-	dbus_connection_send(_dbus_conn, message, NULL);
+	dbus_connection_send_with_reply_and_block(_dbus_conn, message, -1, NULL);
 	dbus_message_unref(message);
 }
 
@@ -643,8 +649,6 @@ notify_send_notification_varg(NotifyHandle *replaces, NotifyUrgency urgency, con
 		dbus_message_iter_append_string(&array_iter, icon->uri);
 	}
 
-	dbus_message_iter_append_nil(&iter); /* Sound */
-
 	/* Actions */
 	dbus_message_iter_append_dict(&iter, &dict_iter);
 
@@ -664,7 +668,7 @@ notify_send_notification_varg(NotifyHandle *replaces, NotifyUrgency urgency, con
 		dbus_message_iter_append_dict_key(&dict_iter, action->text);
 		dbus_message_iter_append_uint32(&dict_iter, action->id);
 
-		g_hash_table_insert(table, GINT_TO_POINTER(action->id), action);
+		g_hash_table_insert(table, &action->id, action);
 	}
 
 	if (expires)
@@ -681,7 +685,7 @@ notify_send_notification_varg(NotifyHandle *replaces, NotifyUrgency urgency, con
 
 	if (dbus_error_is_set(&error))
 	{
-		print_error("Error sending Notify: %s\n", error.message);
+		print_error("error sending notification: %s\n", error.message);
 
 		dbus_error_free(&error);
 
@@ -689,7 +693,7 @@ notify_send_notification_varg(NotifyHandle *replaces, NotifyUrgency urgency, con
 
 		return 0;
 	}
-
+	
 	dbus_message_iter_init(reply, &iter);
 	id = dbus_message_iter_get_uint32(&iter);
 
