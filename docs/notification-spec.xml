@@ -6,8 +6,8 @@
 <article id="index">
  <articleinfo>
   <title>Desktop Notifications Specification</title>
-  <releaseinfo>Version 0.3</releaseinfo>
-  <date>15 September 2004</date>
+  <releaseinfo>Version 0.4</releaseinfo>
+  <date>29 September 2004</date>
   <authorgroup>
    <author>
     <firstname>Mike</firstname>
@@ -29,17 +29,15 @@
    </author>
   </authorgroup>
   <revhistory>
-<!--
    <revision>
     <revnumber>0.4</revnumber>
-    <date>25 September 2004</date>
+    <date>29 September 2004</date>
     <authorinitials>cdh</authorinitials>
     <revremark>
      Added image support in markup, and made the restrictions on markup more
      clear. Removed the High urgency. Added new notification types. Fixed
      notification expiration.</revremark>
    </revision>
--->
    <revision>
     <revnumber>0.3</revnumber>
     <date>15 September 2004</date>
