@@ -187,8 +187,10 @@ _notify_dbus_message_iter_append_app_info(DBusMessageIter *iter)
 {
 	g_return_if_fail(iter != NULL);
 
+#if 0
 	dbus_message_iter_append_string(iter, _app_name);
 	dbus_message_iter_append_nil(iter); /* App Icon */
+#endif
 }
 
 static DBusHandlerResult

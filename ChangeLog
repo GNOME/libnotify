@@ -1,3 +1,9 @@
+Sat Jul 03 12:21:05 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Remove the application info sent on calls to Notify for now,
+	    until/if something gets added to the spec about it.
+
 Sat Jul 03 12:14:48 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:
