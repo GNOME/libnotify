@@ -10,7 +10,7 @@
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
@@ -43,9 +43,9 @@ static void callback(NotifyHandle *handle, guint32 uid, void *user_data)
 
 	switch (uid)
 	{
-	    case 0: s = "the notification"; break;
-	    case 1: s = "Empty Trash"; break;
-	    case 2: s = "Help Me"; break;
+		case 0: s = "the notification"; break;
+		case 1: s = "Empty Trash"; break;
+		case 2: s = "Help Me"; break;
 	}
 
 	printf("You clicked %s\n", s);
@@ -64,22 +64,22 @@ int main() {
 	dbus_connection_setup_with_g_main(conn, NULL);
 
 	n = notify_send_notification(NULL, // replaces nothing
-	                             "device",
-	                             NOTIFY_URGENCY_NORMAL,
-	                             "Low disk space",
-	                             "You can free up some disk space by "
-	                             "emptying the trash can.",
-	                             NULL, // no icon
-	                             FALSE, 0, // does not expire
-	                             NULL, // no user data
-	                             3,    // 3 actions
-	                             0, "default", callback,
-	                             1, "Empty Trash", callback,
-	                             2, "Help Me", callback );
+								 "device",
+								 NOTIFY_URGENCY_NORMAL,
+								 "Low disk space",
+								 "You can free up some disk space by "
+								 "emptying the trash can.",
+								 NULL, // no icon
+								 FALSE, 0, // does not expire
+								 NULL, // no user data
+								 3,	   // 3 actions
+								 0, "default", callback,
+								 1, "Empty Trash", callback,
+								 2, "Help Me", callback );
 
 	if (!n) {
-	    fprintf(stderr, "failed to send notification\n");
-	    return 1;
+		fprintf(stderr, "failed to send notification\n");
+		return 1;
 	}
 
 	g_main_loop_run(loop);

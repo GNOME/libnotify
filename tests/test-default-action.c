@@ -10,7 +10,7 @@
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
@@ -55,14 +55,14 @@ main()
 	dbus_connection_setup_with_g_main(conn, NULL);
 
 	n = notify_send_notification(NULL, // replaces nothing
-	                             "presence.online",
-	                             NOTIFY_URGENCY_NORMAL,
-	                             "Matt is online", NULL,
-	                             NULL, // no icon
-	                             FALSE, 0, // does not expire
-	                             NULL, // no user data
-	                             1,
-	                             0, "default", callback); // 1 action
+								 "presence.online",
+								 NOTIFY_URGENCY_NORMAL,
+								 "Matt is online", NULL,
+								 NULL, // no icon
+								 FALSE, 0, // does not expire
+								 NULL, // no user data
+								 1,
+								 0, "default", callback); // 1 action
 
 	if (!n) {
 		fprintf(stderr, "failed to send notification\n");
