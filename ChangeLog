@@ -1,3 +1,10 @@
+Wed Sep 01 00:39:23 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* docs/ChangeLog:
+	* SPECIFICATION:
+	  - Moved specification documentation.
+	  - Moved specification ChangeLog.
+
 Wed Sep 01 00:30:53 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* docs/notification-spec.xml:
