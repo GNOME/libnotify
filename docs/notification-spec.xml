@@ -6,8 +6,8 @@
 <article id="index">
  <articleinfo>
   <title>Desktop Notifications Specification</title>
-  <releaseinfo>Version 0.4</releaseinfo>
-  <date>29 September 2004</date>
+  <releaseinfo>Version 0.5</releaseinfo>
+  <date>2 October 2004</date>
   <authorgroup>
    <author>
     <firstname>Mike</firstname>
@@ -30,13 +30,23 @@
   </authorgroup>
   <revhistory>
    <revision>
+    <revnumber>0.5</revnumber>
+    <date>2 October 2004</date>
+    <authorinitials>cdh</authorinitials>
+    <revremark>
+     Added a "suppress-sound" hint. Added a "sound" capability. Renamed the
+     "soundfile" hint to sound-file".
+    </revremark>
+   </revision>
+   <revision>
     <revnumber>0.4</revnumber>
     <date>29 September 2004</date>
     <authorinitials>cdh</authorinitials>
     <revremark>
      Added image support in markup, and made the restrictions on markup more
      clear. Removed the High urgency. Added new notification types. Fixed
-     notification expiration.</revremark>
+     notification expiration.
+    </revremark>
    </revision>
    <revision>
     <revnumber>0.3</revnumber>
@@ -693,10 +703,19 @@
     </thead>
     <tbody valign="top">
      <row>
-      <entry><literal>"soundfile"</literal></entry>
+      <entry><literal>"sound-file"</literal></entry>
       <entry>string</entry>
       <entry>
        The path to a sound file to play when the notification pops up.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"suppress-sound"</literal></entry>
+      <entry>boolean</entry>
+      <entry>
+       Causes the server to suppress playing any sounds, if it has that
+       ability. This is usually set when the client itself is going to
+       play its own sound.
       </entry>
      </row>
     </tbody>
@@ -787,6 +806,14 @@
          This value is mutually exclusive with
          <literal>"icon-multi"</literal>, it is a protocol error for the
          server to specify both.
+        </entry>
+       </row>
+       <row>
+        <entry><literal>"sound"</literal></entry>
+        <entry>
+         The server supports sounds on notifications. If returned, the
+         server must support the <literal>"sound-file"</literal> and
+         <literal>"suppress-sound"</literal> hints.
         </entry>
        </row>
       </tbody>
