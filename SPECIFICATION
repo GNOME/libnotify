@@ -1,0 +1,117 @@
+FreeDesktop proposed notifications spec
+=======================================
+
+(c) 2004 Mike Hearn <mike@navi.cx>
+    2004 Christian Hammond <chipx86@chipx86.com>
+
+ChangeLog:
+
+v0.1:
+  * Initial version
+
+---------------------------------------------------------------------
+
+OVERVIEW
+
+This is a draft standard for a desktop notifications service, through
+which applications can generate passive popups (sometimes known as
+"poptarts") to notify the user in an asynchronous manner of events.
+
+This specification explicitly does not include other types of
+notification presentation such as modal message boxes, window manager
+decorations or window list annotations.
+
+Example use cases include:
+
+* Presence changes in IM programs: for instance, MSN Messenger on
+  Windows pioneered the use of passive popups to indicate presence
+  changes.
+  
+* New mail notification
+
+* Low disk space/battery warnings
+
+
+
+BASIC DESIGN
+
+In order to ensure that multiple notifications can easily be
+displayed at once, and to provide a convenient implementation, all
+notifications are controlled by a single session-scoped service which
+exposes a DBUS interface.
+
+On startup, a conforming implementation should take the
+"org.freedesktop.Notifications" service on the session bus. This
+service will be referred to as the "notification server" or just "the
+server" in this document. It can optionally be activated automatically
+by the bus process, however this is not required and notification
+server clients must not assume that it is available.
+
+The server should implement the "org.freedesktop.Notifications" interface on
+an object with the path "/org/freedesktop/Notifications". This is the 
+only interface required by this version of the specification.
+
+A notification has the following components:
+
+- A summary: This is a single line overview of the notification. For
+  instance "You have mail" or "A friend has come online". It should
+  generally not be longer than 40 characters (FIXME: is 40 sane?)
+
+- An optional body: This is a multi-line body of text. Each line is a
+  paragraph, server implementations are free to word wrap them as they
+  see fit.
+
+  The text may contain simple markup as specified in the MARKUP
+  section below.
+
+  If the body is omitted just the summary is displayed.
+
+- An optional icon: See the ICONS/SOUNDS section below.
+
+- An optional sound: See the ICONS/SOUNDS section below.
+
+- An array of buttons. The buttons send a request message back to the
+  notification client when clicked.
+
+- A timeout: the time in milliseconds after which the notification
+  should be hidden (FIXME: should this be a function of text length
+  to accommodate different reading speeds?). If zero the notification
+  stays on-screen indefinitely (persistent notifications).
+
+  The timeout should be respected by implementations, but this is not
+  required (this is for compatibility with KNotify).
+  
+
+Each notification displayed is allocated a unique ID by the server
+(FIXME: should this be unique within a session, or just unique while
+the notification is active?). This can be used to hide the
+notification before the timeout is over. It can also be used to
+atomically replace the notification with another: this allows you to
+(for instance) modify the contents of a notification while it's
+on-screen.
+
+
+BACKWARDS COMPATIBILITY
+
+Prior art in this area is basically just the KNotify system. This
+specification strives to be compatible with KNotify, however there is
+still some semantic mismatch. Clients should try and avoid making
+assumptions about the presentation and abilities of the notification
+server: the message content is the most important thing.
+
+
+MARKUP
+
+Write me!
+
+
+
+ICON ENCODING
+
+Write me!
+
+
+
+DBUS PROTOCOL
+
+Write me!
