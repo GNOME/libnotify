@@ -48,7 +48,7 @@ main(int argc, const char **argv)
 		  0, N_("Specifies the urgency level (low, normal, high, critical)"),
 		  NULL },
 		{ "expire-time", 't', POPT_ARG_INT | POPT_ARGFLAG_STRIP, &expire_time,
-		  0, N_("Specifies the timestamp at which to expire the notification"),
+		  0, N_("Specifies the timestamp at which to expire the notification, or if < current time, specifies timeout in seconds from current time"),
 		  NULL },
 		{ "sound", 's', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &sound, 0,
 		  N_("Specifies a sound file to play on notification."), NULL },
@@ -127,6 +127,9 @@ main(int argc, const char **argv)
 		exit(1);
 	}
 
+        /* if the given time is < current time, treat it as a timeout in seconds (ie 5 seconds) */
+        if (expire_time < time(NULL)) expire_time += time(NULL);
+        
 	notify_send_notification(urgency, summary, description, icon,
 							 TRUE, expire_time, NULL, 0);
 

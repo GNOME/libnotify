@@ -1,3 +1,7 @@
+Mon Jul  5 00:12:03 2004  Mike Hearn  <mike@navi.cx>
+	* tools/notify-send.c (main): Treat expiry times < current time
+	  as timeouts from current instant
+
 Sun Jul  4 22:54:44 GMT 2004  Mike Hearn  <mike@navi.cx>
 	* libnotify/notify.c: Use a direct hash rather than an int hash
 
