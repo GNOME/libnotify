@@ -1,11 +1,11 @@
-noinst_PROGRAMS =
-	send-notification
+noinst_PROGRAMS = notify-send
 
 common_ldflags = \
 	$(top_builddir)/libnotify/libnotify.la \
-	$(PACKAGE_LIBS)
+	$(PACKAGE_LIBS) \
+	-lpopt
 
-send_notification_SOURCES = send-notification.c
-send_notification_LDADD   = $(common_ldflags)
+notify_send_SOURCES = notify-send.c
+notify_send_LDADD   = $(common_ldflags)
 
 INCLUDES = $(PACKAGE_CFLAGS)
