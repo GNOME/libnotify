@@ -365,6 +365,7 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 	guint32 i;
 	char *text;
 	NotifyCallback cb;
+	char **array;
 
 	message = _notify_dbus_message_new("SendRequest", &iter);
 
@@ -382,15 +383,21 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 
 	dbus_message_iter_append_uint32(&iter, timeout);
 	dbus_message_iter_append_uint32(&iter, default_button);
-	dbus_message_iter_append_uint32(&iter, button_count);
+
+	array = g_new0(char *, button_count);
 
 	for (i = 0; i < button_count; i++)
 	{
 		text = va_arg(buttons, char *);
 		cb   = va_arg(buttons, NotifyCallback);
 
-		dbus_message_iter_append_string(&iter, text);
+		array[i] = text;
 	}
+
+	dbus_message_iter_append_string_array(&iter, (const char **)array,
+										  button_count);
+
+	g_free(array);
 
 	dbus_error_init(&error);
 
