@@ -119,6 +119,9 @@ If a client requires a response from a passive popup, it should be
 coded such that a non-focus-stealing message box can be used instead
 and the notification server is only used when available.
 
+FIXME: is this enough? is it even worth trying to be compatible with
+KNotify given how different these systems are? Might just be easier to
+implement this protocol in KNotify itself as a separate thing.
 
 
 MARKUP
