@@ -3,7 +3,7 @@ dnl Process this file with autoconf to create configure.
 dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
-AC_INIT(libnotify, 0.0.99, chipx86@gnupdate.org)
+AC_INIT(libnotify, 0.0.1, chipx86@gnupdate.org)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
 AC_COPYRIGHT([Copyright 2004 Christian Hammond])

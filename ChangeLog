@@ -1,3 +1,8 @@
+Sun Jun 27 21:50:33 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* configure.ac:
+	  - Pass 0.0.1 as the version number to AC_INIT().
+
 Sun Jun 27 21:39:13 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:
