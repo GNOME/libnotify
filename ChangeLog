@@ -1,3 +1,9 @@
+Tue Jun 29 14:49:51 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Patch by Mike Hearn to add a print_error() function for dumping
+	    extra info when we have an error.
+
 Sun Jun 27 21:50:33 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* configure.ac:

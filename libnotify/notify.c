@@ -1,7 +1,8 @@
 /**
  * @file libnotify/notify.c Notifications library
  *
- * @Copyright (C) 2004 Christian Hammond
+ * @Copyright (C) 2004 Christian Hammond <chipx86@chipx86.com>
+ * @Copyright (C) 2004 Mike Hearn <mike@navi.cx>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +31,9 @@
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <unistd.h>
 
 #define NOTIFY_DBUS_SERVICE        "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_INTERFACE "org.freedesktop.Notifications"
@@ -52,6 +56,25 @@ static gboolean _filters_added = FALSE;
 static guint32 _init_ref_count = 0;
 static char *_app_name = NULL;
 static GHashTable *_request_ids = NULL;
+
+#ifdef __GNUC__
+#  define format_func __attribute__((format(printf, 1, 2)))
+#else /* no format string checking with this compiler */
+#  define format_func
+#endif
+
+static void format_func
+print_error(char *message, ...)
+{
+        char buf[1024];
+        va_list args;
+
+        va_start(args, message);
+        vsnprintf(buf, sizeof(buf), message, args);
+        va_end(args);
+
+        fprintf(stderr, "%s (%d): libnotify: %s", getenv("_"), getpid(), buf);
+}
 
 static DBusMessage *
 _notify_dbus_message_new(const char *name, DBusMessageIter *iter)
@@ -143,9 +166,8 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 		{
 			if (button >= request_data->num_buttons)
 			{
-				fprintf(stderr,
-						"Returned request button ID is greater than "
-						"the maximum number of buttons!\n");
+				print_error("Returned request button ID is greater"
+                                            "than the maximum number of buttons!\n");
 			}
 			else if (request_data->cbs[button] != NULL)
 			{
@@ -173,8 +195,8 @@ _notify_connect(void)
 
 	if (_dbus_conn == NULL)
 	{
-		fprintf(stderr, "Error connecting to session bus: %s\n",
-				error.message);
+		print_error("Error connecting to session bus: %s\n", error.message);
+
 		dbus_error_free(&error);
 
 		return FALSE;
@@ -185,8 +207,7 @@ _notify_connect(void)
 	if (!dbus_bus_activate_service(_dbus_conn, NOTIFY_DBUS_SERVICE, 0,
 								   NULL, &error))
 	{
-		fprintf(stderr, "Error activating %s service: %s\n",
-				NOTIFY_DBUS_SERVICE, error.message);
+		print_error("Error activating %s service: %s\n", NOTIFY_DBUS_SERVICE, error.message);
 
 		dbus_error_free(&error);
 
@@ -195,7 +216,7 @@ _notify_connect(void)
 
 	if (!dbus_connection_add_filter(_dbus_conn, _filter_func, NULL, NULL))
 	{
-		fprintf(stderr, "Error creating D-BUS message filter.\n");
+		print_error("Error creating D-BUS message filter.\n");
 
 		dbus_error_free(&error);
 
@@ -210,7 +231,7 @@ _notify_connect(void)
 
 	if (dbus_error_is_set(&error))
 	{
-		fprintf(stderr, "Error subscribing to signals: %s\n", error.message);
+		print_error("Error subscribing to signals: %s\n", error.message);
 
 		dbus_error_free(&error);
 
@@ -389,8 +410,8 @@ _notify_send_notification(NotifyUrgency urgency, const char *summary,
 
 	if (dbus_error_is_set(&error))
 	{
-		fprintf(stderr, "Error sending SendNotification: %s\n",
-				error.message);
+		print_error("Error sending SendNotification: %s\n", error.message);
+
 		dbus_error_free(&error);
 
 		return 0;
@@ -490,8 +511,8 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 
 	if (dbus_error_is_set(&error))
 	{
-		fprintf(stderr, "Error sending SendNotification: %s\n",
-				error.message);
+		print_error("Error sending SendNotification: %s\n", error.message);
+
 		dbus_error_free(&error);
 
 		_destroy_request_data(request_data);
