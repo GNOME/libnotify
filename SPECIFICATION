@@ -8,7 +8,9 @@ ChangeLog:
 
 v0.1:
   * Initial version
-
+v0.2:
+  * Add replaces field to protocol
+  
 ---------------------------------------------------------------------
 
 OVERVIEW
@@ -54,9 +56,10 @@ only interface required by this version of the specification.
 A notification has the following components:
 
 - A summary: This is a single line overview of the notification. For
-  instance "You have mail" or "A friend has come online". It should
-  generally not be longer than 40 characters (FIXME: is 40
-  sane?). The summary must be encoded using UTF-8.
+  instance "You have mail" or "A friend has come online". Tip: It
+  should generally not be longer than 40 characters though this is not
+  a requirement and server implementations should word wrap if
+  necessary. The summary must be encoded using UTF-8.
 
 - An optional body: This is a multi-line body of text. Each line is a
   paragraph, server implementations are free to word wrap them as they
@@ -83,12 +86,12 @@ A notification has the following components:
   notification should close. If one wishes to have an expiration of 5 seconds
   from now, they must grab the current timestamp and add 5 seconds to it.
 
-  If zero, the notification's expiration time is dependent on the notification
-  server's settings, and may vary for the type of notification.
+  If zero, the notification's expiration time is dependent on the
+  notification server's settings, and may vary for the type of
+  notification. 
 
   The expiration time should be respected by implementations, but this is
   not required (this is for compatibility with KNotify).
-
 
 Each notification displayed is allocated a unique ID by the server.
 This is unique within the session - while the notification server is
@@ -212,10 +215,12 @@ The following messages must be supported by all implementations.
   shown. For some parameters multiple types may be acceptable
 
   BYTE urgency: The urgency level:
-    0 - low urgency
+        0 - low urgency
 	1 - medium (default)
 	2 - high
 	3 - critical
+
+  Other values should be treated as "medium" in this version of the spec.
 
   STRING summary
 
@@ -232,6 +237,13 @@ The following messages must be supported by all implementations.
 
   UINT32/NIL expire time: if nil the notification never times out
 
+  UINT32/NIL replaces: if non-nil this is the notification ID that
+  this notification replaces. The server must atomically (ie with
+  no flicker or other visual cues) replace the given notification
+  with this one. This allows clients to effectively modify the
+  notification while it's active.
+  
+  
   It returns a UINT32 that will never be reused within a
   session unless more than MAXINT notifications have been generated
   (ie an acceptable implementation for this is just an incrementing
@@ -288,4 +300,4 @@ The following signals MAY be emitted by the server.
                       specified in the original dictionary.
 
 
-REFERENCE
+
