@@ -416,6 +416,63 @@ notify_close(NotifyHandle *handle)
 	dbus_message_unref(message);
 }
 
+gboolean
+notify_get_server_info(char **ret_name, char **ret_vendor, char **ret_version)
+{
+	DBusMessage *message, *reply;
+	DBusMessageIter iter;
+	DBusError error;
+	char *name, *vendor, *version;
+
+	message = _notify_dbus_message_new("GetServerInformation", NULL);
+
+	g_return_val_if_fail(message != NULL, FALSE);
+
+	dbus_error_init(&error);
+
+	reply = dbus_connection_send_with_reply_and_block(_dbus_conn, message,
+													  -1, &error);
+
+	dbus_message_unref(message);
+
+	if (dbus_error_is_set(&error))
+	{
+		print_error("Error sending GetServerInformation: %s\n", error.message);
+
+		dbus_error_free(&error);
+
+		return FALSE;
+	}
+
+	dbus_error_free(&error);
+
+	dbus_message_iter_init(reply, &iter);
+
+	name = dbus_message_iter_get_string(&iter);
+	dbus_message_iter_next(&iter);
+
+	vendor = dbus_message_iter_get_string(&iter);
+	dbus_message_iter_next(&iter);
+
+	version = dbus_message_iter_get_string(&iter);
+	dbus_message_iter_next(&iter);
+
+	if (ret_name != NULL)
+		*ret_name = g_strdup(name);
+
+	if (ret_vendor != NULL)
+		*ret_vendor = g_strdup(vendor);
+
+	if (ret_version != NULL)
+		*ret_version = g_strdup(version);
+
+	dbus_free(name);
+	dbus_free(vendor);
+	dbus_free(version);
+
+	return TRUE;
+}
+
 /**************************************************************************
  * Icon API
  **************************************************************************/
