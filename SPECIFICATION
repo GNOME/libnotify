@@ -55,23 +55,28 @@ A notification has the following components:
 
 - A summary: This is a single line overview of the notification. For
   instance "You have mail" or "A friend has come online". It should
-  generally not be longer than 40 characters (FIXME: is 40 sane?)
+  generally not be longer than 40 characters (FIXME: is 40
+  sane?). The summary must be encoded using UTF-8.
 
 - An optional body: This is a multi-line body of text. Each line is a
   paragraph, server implementations are free to word wrap them as they
   see fit.
 
   The text may contain simple markup as specified in the MARKUP
-  section below.
+  section below. It must be encoded using UTF-8.
 
   If the body is omitted just the summary is displayed.
 
-- An optional icon: See the ICONS/SOUNDS section below.
+- An optional array of images: See the ICONS/SOUNDS section below.
 
 - An optional sound: See the ICONS/SOUNDS section below.
 
 - An array of buttons. The buttons send a request message back to the
-  notification client when clicked.
+  notification client when clicked. This functionality may not be
+  implemented by the notification server, conforming clients should
+  check if it is available before using it (see the CapsQuery message
+  in the PROTOCOL section). An implementation is free to ignore any
+  requested by the client.
 
 - A timeout: the time in milliseconds after which the notification
   should be hidden (FIXME: should this be a function of text length
@@ -100,70 +105,64 @@ still some semantic mismatch. Clients should try and avoid making
 assumptions about the presentation and abilities of the notification
 server: the message content is the most important thing.
 
+Clients can check with the server what capabilities are supported
+using the CapsQuery message. See the PROTOCOL section.
+
+If a client requires a response from a passive popup, it should be
+coded such that a non-focus-stealing message box can be used instead
+and the notification server is only used when available.
+
+
 
 MARKUP
 
 Description text may contain markup. The markup is XML-based, and consists
 of a small subset of HTML along with a few additional tags.
 
-The following tags should be supported by all implementations:
+The following tags can optionally be supported:
 
 - <b>...</b> - Bold
 - <i>...</i> - Italic
 - <u>...</u> - Underline
 - <a href="...">...</a> - Hyperlink
 
-TODO: Add the rest of the tags! This is mostly a filler.
 
+ICONS/SOUNDS
 
-ICON ENCODING
+A notification can optionally include an array of images and/or a
+single sound. The array of images specifies frames in an animation,
+animations always loop. Implementations are free to ignore the
+image/sound data, and implementations that support images may not
+support animation.
 
-Icons are sent through D-BUS either as an icon URI string, or as the raw
-data. The determination should be automatically computed when sending or
-receiving the icon.
+If the image array has more than one element, a "primary frame" can
+be specified - if not specified it defaults to the first frame. For
+implementations that support images but not animation (for instance a
+KNotify bridge), only the primary frame will be used.
 
+Each element of the array must have the same type as the first
+element, mixtures of strings and blobs are not allowed. The element
+types can be one of the following:
 
-ICON URIS:
+* [string] Icon theme name. Any string that does not begin with the /
+  character is assumed to be an icon theme name and is looked up
+  according to the spec. The best size to fit the servers chosen
+  presentation will be used. This is the recommended way of
+  specifying images.
 
-Icon URIs must consist of one of the following forms:
+* [string] Absolute path. Any string that begins with a / will be
+  used as an absolute file path. Implementations should support at
+  minimum files of type image/png and image/svg.
 
-- stock:<stockname>
-- file://<hostname>/<path> [1]
-- <path>
+* [binary] A data stream may be embedded in the message. This is
+  assumed to be of type image/png.
 
-The supplied list of stock icon names should be represented by all
-notification daemons. If an unknown stock icon name is specified, the
-notification daemon is encouraged to provide a best-guess based on the
-toolkit's own stock system, or simply ignore the icon.
+A sound can be specified, this will be played by the notification
+server when the notification is displayed.
 
-The file URI must match the format provided by the freedesktop.org
-File URI Specification <http://freedesktop.org/Standards/file-uri-spec>.
-
-
-STOCK ICON NAMES:
-
-- question
-- info
-- warning
-- error
-- critical
-
-[Do we want any of the following?]
-- camera
-- printer
-- email
-- fax
-- disk
-- cfcard
-- memstick
-- sdcard
-
-
-DBUS PROTOCOL
+PROTOCOL
 
 Write me!
 
 
 REFERENCE
-
-[1] http://freedesktop.org/Standards/file-uri-spec
