@@ -30,6 +30,14 @@
   </authorgroup>
   <revhistory>
    <revision>
+    <revnumber>0.6</revnumber>
+    <date>1 April 2005</date>
+    <authorinitials>cdh</authorinitials>
+    <revremark>
+     Updated to work with D-BUS 0.31+.
+    </revremark>
+   </revision>
+   <revision>
     <revnumber>0.5</revnumber>
     <date>2 October 2004</date>
     <authorinitials>cdh</authorinitials>
@@ -835,16 +843,16 @@
       <funcdef>UINT32
        <function>org.freedesktop.Notifications.Notify</function>
       </funcdef>
-      <paramdef>STRING_OR_NIL <parameter>app_name</parameter></paramdef>
-      <paramdef>BYTE_ARRAY_OR_STRING_OR_NIL <parameter>app_icon</parameter></paramdef>
-      <paramdef>UINT32_OR_NIL <parameter>replaces_id</parameter></paramdef>
-      <paramdef>STRING_OR_NIL <parameter>notification_type</parameter></paramdef>
+      <paramdef>STRING <parameter>app_name</parameter></paramdef>
+      <paramdef>BYTE_ARRAY_OR_STRING <parameter>app_icon</parameter></paramdef>
+      <paramdef>UINT32 <parameter>replaces_id</parameter></paramdef>
+      <paramdef>STRING <parameter>notification_type</parameter></paramdef>
       <paramdef>BYTE <parameter>urgency_level</parameter></paramdef>
       <paramdef>STRING <parameter>summary</parameter></paramdef>
-      <paramdef>STRING_OR_NIL <parameter>body</parameter></paramdef>
+      <paramdef>STRING <parameter>body</parameter></paramdef>
       <paramdef>ARRAY <parameter>images</parameter></paramdef>
-      <paramdef>DICT_OR_NIL <parameter>actions</parameter></paramdef>
-      <paramdef>DICT_OR_NIL <parameter>hints</parameter></paramdef>
+      <paramdef>DICT <parameter>actions</parameter></paramdef>
+      <paramdef>DICT <parameter>hints</parameter></paramdef>
       <paramdef>BOOL <parameter>expires</parameter></paramdef>
       <paramdef>UINT32 <parameter>expire_timeout</parameter></paramdef>
      </funcprototype>
@@ -865,36 +873,40 @@
       <tbody valign="top">
        <row>
         <entry><parameter>app_name</parameter></entry>
-        <entry>STRING or NIL</entry>
+        <entry>STRING</entry>
         <entry>
          The optional name of the application sending the notification.
+         Can be blank.
         </entry>
        </row>
        <row>
         <entry><parameter>app_icon</parameter></entry>
-        <entry>BYTE_ARRAY or STRING or NIL</entry>
+        <entry>BYTE_ARRAY or STRING</entry>
         <entry>
          The optional program icon of the calling application. This is in
          the same format as an image frame. See <xref linkend="icons"/>.
+         Can be an empty string, indicating no icon.
         </entry>
        </row>
        <row>
         <entry><parameter>replaces_id</parameter></entry>
-        <entry>UINT32 or NIL</entry>
+        <entry>UINT32</entry>
         <entry>
          The optional notification ID that this notification replaces. The
          server must atomically (ie with no flicker or other visual cues)
          replace the given notification with this one. This allows clients to
-         effectively modify the notification while it's active.
+         effectively modify the notification while it's active. A value of
+         value of 0 means that this notification won't replace any
+         existing notifications.
         </entry>
        </row>
        <row>
         <entry><parameter>notification_type</parameter></entry>
-        <entry>STRING or NIL</entry>
+        <entry>STRING</entry>
         <entry>
          The optional notification type ID, for potential server
          categorization and logging purposes. See
-         <xref linkend="notification-types"/>.
+         <xref linkend="notification-types"/>. Can be empty.
         </entry>
        </row>
        <row>
@@ -909,35 +921,38 @@
        </row>
        <row>
         <entry><parameter>body</parameter></entry>
-        <entry>STRING or NIL</entry>
-        <entry>The optional detailed body text.</entry>
+        <entry>STRING</entry>
+        <entry>The optional detailed body text. Can be empty.</entry>
        </row>
        <row>
         <entry><parameter>images</parameter></entry>
-        <entry>ARRAY or NIL</entry>
+        <entry>ARRAY</entry>
         <entry>
-         The optional array of images. See <xref linkend="icons"/>.
+         The optional array of images. See <xref linkend="icons"/>. Can
+         be empty.
         </entry>
        </row>
        <row>
         <entry><parameter>actions</parameter></entry>
-        <entry>DICT or NIL</entry>
+        <entry>DICT</entry>
         <entry>
          A dictionary key of actions. Each key is the localized name of the
          action, as it should appear to the user, and maps to a UINT32 value
          containing a program-specific action code. This code will be reported
-         back to the program if the action is invoked by the user.
+         back to the program if the action is invoked by the user. Can be
+         empty.
         </entry>
        </row>
        <row>
         <entry><parameter>hints</parameter></entry>
-        <entry>DICT or NIL</entry>
+        <entry>DICT</entry>
         <entry>
          Optional hints that can be passed to the server from the client
          program. Although clients and servers should never assume each other
          supports any specific hints, they can be used to pass along
          information, such as the process PID or window ID, that the server
-         may be able to make use of. See <xref linkend="hints"/>.
+         may be able to make use of. See <xref linkend="hints"/>. Can be
+         empty.
         </entry>
        </row>
        <row>
@@ -968,7 +983,7 @@
      </tgroup>
     </table>
     <para>
-     If <parameter>replaces_id</parameter> is NIL, the return value is a
+     If <parameter>replaces_id</parameter> is 0, the return value is a
      UINT32 that represent the notification. It is unique, and will not be
      reused unless a <constant>MAXINT</constant> number of notifications
      have been generated. An acceptable implementation may just use an
@@ -976,7 +991,7 @@
      zero. Servers must make sure not to return zero as an ID.
     </para>
     <para>
-     If <parameter>replaces_id</parameter> is not NIL, the returned value
+     If <parameter>replaces_id</parameter> is not 0, the returned value
      is the same value as <parameter>replaces_id</parameter>.
     </para>
    </sect3>

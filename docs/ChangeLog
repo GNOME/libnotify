@@ -1,3 +1,10 @@
+Fri Apr 01 09:11:38 PST 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* notification-spec.xml:
+	  - Removed all references to NIL, and explained briefly how each
+	    parameter can be made empty.
+	  - Bumped to version 0.6.
+
 Fri Oct 01 23:44:40 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* notification-spec.xml:
