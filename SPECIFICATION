@@ -90,13 +90,15 @@ A notification has the following components:
   not required (this is for compatibility with KNotify).
 
 
-Each notification displayed is allocated a unique ID by the server
-(FIXME: should this be unique within a session, or just unique while
-the notification is active?). This can be used to hide the
-notification before the expiration time is reached. It can also be used to
-atomically replace the notification with another: this allows you to
-(for instance) modify the contents of a notification while it's
-on-screen.
+Each notification displayed is allocated a unique ID by the server.
+This is unique within the session - while the notification server is
+running the ID will not be recycled unless the capacity of a uint32 is
+exceeded.
+
+This can be used to hide the notification before the expiration time
+is reached. It can also be used to atomically replace the notification
+with another: this allows you to (for instance) modify the contents of
+a notification while it's on-screen.
 
 
 BACKWARDS COMPATIBILITY
