@@ -105,147 +105,130 @@
   <para>
    A notification has the following components:
   </para>
-  <variablelist>
-   <varlistentry>
-    <term>Application Name</term>
-    <listitem>
-     <para>
-      Application name: This is the optional name of the application sending
-      the notification. This should be the application's formal name, rather
-      than some sort of ID.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Application Icon</term>
-    <listitem>
-     <para>
-      An optional byte array containing the application's icon.
-      This should be in PNG or GIF formats.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Application ID</term>
-    <listitem>
-     <para>
-      An optional byte array containing the application's icon.
-      This should be in PNG or GIF formats.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Replaces ID</term>
-    <listitem>
-     <para>
-      An optional ID of an existing notification that this
-      notification is intended to replace.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Notification Type ID</term>
-    <listitem>
-     <para>
-      An optional ID representing the notification type. See
-      <xref linkend="notification-types"/>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Urgency Level</term>
-    <listitem>
-     <para>
-      The urgency of the notification. See <xref linkend="urgency-levels"/>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Summary</term>
-    <listitem>
-     <para>
-      This is a single line overview of the notification. For instance,
-      "You have mail" or "A friend has come online". It should generally
-      not be longer than 40 characters, though this is not a requirement,
-      and server implementations should word wrap if necessary. The summary
-      must be encoded using UTF-8.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Body</term>
-    <listitem>
-     <para>
-      This is a multi-line body of text. Each line is a paragraph, server
-      implementations are free to word wrap them as they see fit.
-     </para>
-     <para>
-      The text may contain simple markup as specified in
-      <xref linkend="markup"/>. It must be encoded using UTF-8.
-     </para>
-     <para>
-      If the body is omitted just the summary is displayed.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Images</term>
-    <listitem>
-     <para>
-      See <xref linkend="icons-sounds"/>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Sounds</term>
-    <listitem>
-     <para>
-      See <xref linkend="icons-sounds"/>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Actions</term>
-    <listitem>
-     <para>
-      The actions send a request message back to the notification client
-      when invoked. This functionality may not be implemented by the
-      notification server, conforming clients should check if it is available
-      before using it (see the GetCapabilities message in
-      <xref linkend="protocol"/>. An implementation is free to ignore any
-      requested by the client. As an example one possible rendering of
-      actions would be as buttons in the notification popup.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Hints</term>
-    <listitem>
-     <para>
-      See <xref linkend="hints"/>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Expiration Time</term>
-    <listitem>
-     <para>
-      The timestamp in seconds since the epoch that the notification should
-      close. For example, if one wishes to have an expiration of 5 seconds
-      from now, they must grab the current timestamp and add 5 seconds to it.
-     </para>
-     <para>
-      If zero, the notification's expiration time is dependent on the
-      notification server's settings, and may vary for the type of
-      notification.
-     </para>
-     <para>
-      The expiration time should be respected by implementations, but this is
-      not required (this is for compatibility with KNotify).
-     </para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
+  <table>
+   <title>Notification Components</title>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>Component</entry>
+      <entry>Description</entry>
+     </row>
+    </thead>
+    <tbody valign="top">
+     <row>
+      <entry>Application Name</entry>
+      <entry>
+       Application name: This is the optional name of the application sending
+       the notification. This should be the application's formal name, rather
+       than some sort of ID.
+      </entry>
+     </row>
+     <row>
+      <entry>Application Icon</entry>
+      <entry>
+       An optional byte array containing the application's icon.
+       This should be in PNG or GIF formats.
+      </entry>
+     </row>
+     <row>
+      <entry>Application ID</entry>
+      <entry>
+       An optional byte array containing the application's icon.
+       This should be in PNG or GIF formats.
+      </entry>
+     </row>
+     <row>
+      <entry>Replaces ID</entry>
+      <entry>
+       An optional ID of an existing notification that this
+       notification is intended to replace.
+      </entry>
+     </row>
+     <row>
+      <entry>Notification Type ID</entry>
+      <entry>
+       An optional ID representing the notification type. See
+       <xref linkend="notification-types"/>.
+      </entry>
+     </row>
+     <row>
+      <entry>Urgency Level</entry>
+      <entry>
+       The urgency of the notification. See <xref linkend="urgency-levels"/>.
+      </entry>
+     </row>
+     <row>
+      <entry>Summary</entry>
+      <entry>
+       This is a single line overview of the notification. For instance,
+       "You have mail" or "A friend has come online". It should generally
+       not be longer than 40 characters, though this is not a requirement,
+       and server implementations should word wrap if necessary. The summary
+       must be encoded using UTF-8.
+      </entry>
+     </row>
+     <row>
+      <entry>Body</entry>
+      <entry>
+       <para>
+        This is a multi-line body of text. Each line is a paragraph, server
+        implementations are free to word wrap them as they see fit.
+       </para>
+       <para>
+        The text may contain simple markup as specified in
+        <xref linkend="markup"/>. It must be encoded using UTF-8.
+       </para>
+       <para>
+        If the body is omitted just the summary is displayed.
+       </para>
+      </entry>
+     </row>
+     <row>
+      <entry>Images</entry>
+      <entry>See <xref linkend="icons-sounds"/>.</entry>
+     </row>
+     <row>
+      <entry>Sounds</entry>
+      <entry>See <xref linkend="icons-sounds"/>.</entry>
+     </row>
+     <row>
+      <entry>Actions</entry>
+      <entry>
+       The actions send a request message back to the notification client
+       when invoked. This functionality may not be implemented by the
+       notification server, conforming clients should check if it is available
+       before using it (see the GetCapabilities message in
+       <xref linkend="protocol"/>. An implementation is free to ignore any
+       requested by the client. As an example one possible rendering of
+       actions would be as buttons in the notification popup.
+      </entry>
+     </row>
+     <row>
+      <entry>Hints</entry>
+      <entry>See <xref linkend="hints"/>.</entry>
+     </row>
+     <row>
+      <entry>Expiration Time</entry>
+      <entry>
+       <para>
+        The timestamp in seconds since the epoch that the notification should
+        close. For example, if one wishes to have an expiration of 5 seconds
+        from now, they must grab the current timestamp and add 5 seconds to it.
+       </para>
+       <para>
+        If zero, the notification's expiration time is dependent on the
+        notification server's settings, and may vary for the type of
+        notification.
+       </para>
+       <para>
+        The expiration time should be respected by implementations, but this is
+        not required (this is for compatibility with KNotify).
+       </para>
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
 
   <para>
    Each notification displayed is allocated a unique ID by the server.
