@@ -20,6 +20,9 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
+
+/* FIXME: do we want so many arguments in the API? */
+
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -43,6 +46,8 @@
 struct _NotifyHandle
 {
 	guint32 id;
+
+	guint32 replaces;
 
 	gpointer user_data;
 
@@ -100,6 +105,8 @@ _notify_handle_new(guint32 id)
 	handle = g_new0(NotifyHandle, 1);
 
 	handle->id = id;
+
+	handle->replaces = -1;
 
 	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
 
@@ -571,7 +578,7 @@ notify_icon_destroy(NotifyIcon *icon)
  * Notifications API
  **************************************************************************/
 NotifyHandle *
-notify_send_notification(NotifyUrgency urgency, const char *summary,
+notify_send_notification(guint32 replaces, NotifyUrgency urgency, const char *summary,
 						 const char *detailed, const NotifyIcon *icon,
 						 gboolean expires, time_t expire_time,
 						 gpointer user_data, size_t action_count, ...)
@@ -582,7 +589,7 @@ notify_send_notification(NotifyUrgency urgency, const char *summary,
 	g_return_val_if_fail(summary != NULL, 0);
 
 	va_start(actions, action_count);
-	handle = notify_send_notification_varg(urgency, summary, detailed, icon,
+	handle = notify_send_notification_varg(replaces, urgency, summary, detailed, icon,
 										   expires, expire_time, user_data,
 										   action_count, actions);
 	va_end(actions);
@@ -591,7 +598,7 @@ notify_send_notification(NotifyUrgency urgency, const char *summary,
 }
 
 NotifyHandle *
-notify_send_notification_varg(NotifyUrgency urgency, const char *summary,
+notify_send_notification_varg(guint32 replaces, NotifyUrgency urgency, const char *summary,
 							  const char *detailed, const NotifyIcon *icon,
 							  gboolean expires, time_t expire_time,
 							  gpointer user_data, size_t action_count,
@@ -612,6 +619,7 @@ notify_send_notification_varg(NotifyUrgency urgency, const char *summary,
 #if 0
 	_notify_dbus_message_iter_append_app_info(&iter);
 #endif
+	dbus_message_iter_append_uint32(&iter, replaces);
 	dbus_message_iter_append_byte(&iter, urgency);
 	dbus_message_iter_append_string(&iter, summary);
 	_notify_dbus_message_iter_append_string_or_nil(&iter, detailed);

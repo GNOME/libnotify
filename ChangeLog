@@ -1,3 +1,6 @@
+Tue Jul 13 23:58:54 2004  Mike Hearn  <mike@navi.cx>
+	* SPECIFICATION: CloseNotification sends NotificationClosed signal.
+
 Mon Jul  5 00:12:03 2004  Mike Hearn  <mike@navi.cx>
 	* tools/notify-send.c (main): Treat expiry times < current time
 	  as timeouts from current instant

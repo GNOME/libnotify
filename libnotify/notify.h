@@ -150,6 +150,7 @@ void notify_icon_destroy(NotifyIcon *icon);
  * void callback(NotifyHandle *handle, guint32 action_id, void *user_data);
  * @endcode
  *
+ * @param replaces       The ID of the notification to atomically replace
  * @param urgency        The urgency level.
  * @param summary        The summary of the notification.
  * @param detailed       The optional detailed information.
@@ -164,7 +165,8 @@ void notify_icon_destroy(NotifyIcon *icon);
  *
  * @return A unique ID for the notification.
  */
-NotifyHandle *notify_send_notification(NotifyUrgency urgency,
+NotifyHandle *notify_send_notification(guint32 replaces,
+									   NotifyUrgency urgency,
 									   const char *summary,
 									   const char *detailed,
 									   const NotifyIcon *icon,
@@ -181,6 +183,7 @@ NotifyHandle *notify_send_notification(NotifyUrgency urgency,
  * void callback(NotifyHandle *handle, guint32 action, void *user_data);
  * @endcode
  *
+ * @param replaces       The ID of the notification to atomically replace
  * @param urgency        The urgency level.
  * @param summary        The summary of the notification.
  * @param detailed       The optional detailed information.
@@ -195,7 +198,8 @@ NotifyHandle *notify_send_notification(NotifyUrgency urgency,
  *
  * @return A unique ID for the notification.
  */
-NotifyHandle *notify_send_notification_varg(NotifyUrgency urgency,
+NotifyHandle *notify_send_notification_varg(guint32 replaces,
+											NotifyUrgency urgency,
 											const char *summary,
 											const char *detailed,
 											const NotifyIcon *icon,

@@ -185,18 +185,20 @@ The following messages must be supported by all implementations.
   "body": Supports body text. Some implementations may only show the
           summary (for instance, onscreen displays, marquee/scrollers)
 
-  "markup": Supports markup in the body text.
+  "markup": Supports markup in the body text. If marked up text is sent
+            to a server that does not give this cap, the markup will show
+            through as regular text so must be stripped clientside.
 
   "static-image" : Supports display of exactly 1 frame of any given
                    image array.  This value is mutually exclusive with
                    "multi-image", it is a protocol error for the
-                   server to specify both. The client may still
-                   specify multiple frames even if this cap is
-                   missing, however the server is free to ignore them
-                   and use only the primary frame.
-
+                   server to specify both.
+                   
   "multi-image": The server will render an animation of all the frames
-                 in a given image array.
+                 in a given image array. The client may still specify
+                 multiple frames even if this cap and/or static-image
+                 is missing, however the server is free to ignore them
+                 and use only the primary frame.
 
   "sound": The server will play the specified sound. Even if this cap
            is missing, a sound may still be specified however the
@@ -217,9 +219,15 @@ The following messages must be supported by all implementations.
   This message requires the following parameters in the exact order
   shown. For some parameters multiple types may be acceptable
 
+  UINT32 replaces: if non-zero this is the notification ID that
+  this notification replaces. The server must atomically (ie with
+  no flicker or other visual cues) replace the given notification
+  with this one. This allows clients to effectively modify the
+  notification while it's active.
+  
   BYTE urgency: The urgency level:
         0 - low urgency
-	1 - medium (default)
+	1 - medium
 	2 - high
 	3 - critical
 
@@ -238,19 +246,13 @@ The following messages must be supported by all implementations.
   code. This code will be reported back to the client if the action
   is invoked by the user.
 
-  UINT32/NIL expire time: if nil the notification never times out
-
-  UINT32/NIL replaces: if non-nil this is the notification ID that
-  this notification replaces. The server must atomically (ie with
-  no flicker or other visual cues) replace the given notification
-  with this one. This allows clients to effectively modify the
-  notification while it's active.
-  
+  UINT32/NIL expire time: if nil the notification never times out  
   
   It returns a UINT32 that will never be reused within a
   session unless more than MAXINT notifications have been generated
   (ie an acceptable implementation for this is just an incrementing
-  counter).
+  counter). The returned UINT32 will never be zero, as this is an invalid
+  ID.
 
 * CloseNotification
 
@@ -258,7 +260,8 @@ The following messages must be supported by all implementations.
   the users view. It can be used, for instance, if the event the
   notification pertains to is no longer relevant or to cancel a
   notification with no expiration. It takes one UINT32 parameter, the ID
-  of the notificaton to cancel.
+  of the notificaton to cancel. The NotificationClosed signal is emitted by this
+  method.
 
 * GetServerInformation
 
