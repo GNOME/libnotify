@@ -228,7 +228,7 @@ The following messages must be supported by all implementations.
   (ie an acceptable implementation for this is just an incrementing
   counter).
 
-* EndNotify
+* CloseNotify
 
   This message indicates that the notification should be removed from
   the users view. It can be used, for instance, if the event the
