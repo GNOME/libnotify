@@ -1,3 +1,13 @@
+Fri Sep 03 22:26:31 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* notification-spec.xml:
+	  - Changed the app_icon parameter of Notify to take a byte array,
+	    string, or NIL, so that it's the same as loading a single frame
+	    of a set of images.
+	  - Renamed "Icons and Sounds" to just "Icons."
+	  - Changed the wording about the fallback in case the notification
+	    server can't do actions.
+
 Thu Sep 02 09:18:38 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* notification-spec.xml:

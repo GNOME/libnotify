@@ -99,8 +99,8 @@
   <para>
    The server should implement the
    <literal>org.freedesktop.Notifications</literal> interface on
-   an object with the path "/org/freedesktop/Notifications". This is the
-   only interface required by this version of the specification.
+   an object with the path <literal>"/org/freedesktop/Notifications"</literal>.
+   This is the only interface required by this version of the specification.
   </para>
   <para>
    A notification has the following components:
@@ -127,8 +127,8 @@
      <row>
       <entry>Application Icon</entry>
       <entry>
-       An optional byte array containing the application's icon.
-       This should be in PNG or GIF formats.
+       The application icon. This is represented either as a path or a name
+       in an icon theme.
       </entry>
      </row>
      <row>
@@ -239,12 +239,13 @@
   </para>
   <para>
    Clients can check with the server what capabilities are supported
-   using the GetCapabilities message. See <xref linkend="protocol"/>.
+   using the <literal>GetCapabilities</literal> message. See
+   <xref linkend="protocol"/>.
   </para>
   <para>
    If a client requires a response from a passive popup, it should be
-   coded such that a non-focus-stealing message box can be used instead
-   and the notification server is only used when available.
+   coded such that a non-focus-stealing message box can be used in the
+   case that the notification server does not support this feature.
   </para>
  </sect1>
 
@@ -301,8 +302,8 @@
   </para>
  </sect1>
 
- <sect1 id="icons" xreflabel="Icons and Sounds">
-  <title>Icons and Sounds</title>
+ <sect1 id="icons" xreflabel="Icons">
+  <title>Icons</title>
   <para>
    A notification can optionally include an array of images. The array of
    images specifies frames in an animation, which always loop.
@@ -565,7 +566,7 @@
        <function>org.freedesktop.Notifications.Notify</function>
       </funcdef>
       <paramdef>STRING_OR_NIL <parameter>app_name</parameter></paramdef>
-      <paramdef>BYTE_ARRAY_OR_NIL <parameter>app_icon</parameter></paramdef>
+      <paramdef>BYTE_ARRAY_OR_STRING_OR_NIL <parameter>app_icon</parameter></paramdef>
       <paramdef>UINT32_OR_NIL <parameter>replaces_id</parameter></paramdef>
       <paramdef>STRING_OR_NIL <parameter>notification_type</parameter></paramdef>
       <paramdef>BYTE <parameter>urgency_level</parameter></paramdef>
@@ -600,8 +601,11 @@
        </row>
        <row>
         <entry><parameter>app_icon</parameter></entry>
-        <entry>BYTE_ARRAY or NIL</entry>
-        <entry>The optional program icon of the calling application.</entry>
+        <entry>BYTE_ARRAY or STRING or NIL</entry>
+        <entry>
+         The optional program icon of the calling application. This is in
+         the same format as an image frame. See <xref linkend="icons"/>.
+        </entry>
        </row>
        <row>
         <entry><parameter>replaces_id</parameter></entry>
