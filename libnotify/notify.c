@@ -101,7 +101,7 @@ _notify_handle_new(guint32 id)
 
 	handle->id = id;
 
-	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
+	g_hash_table_insert(_handles, id, handle);
 
 	return handle;
 }
@@ -353,7 +353,7 @@ notify_init(const char *app_name)
 
 	_app_name = g_strdup(app_name);
 
-	_handles = g_hash_table_new_full(g_int_hash, g_int_equal,
+	_handles = g_hash_table_new_full(g_direct_hash, g_int_equal,
 									 NULL, (GFreeFunc)_notify_handle_destroy);
 
 #ifdef HAVE_ATEXIT
