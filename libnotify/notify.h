@@ -19,9 +19,8 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  *
- * TODO:
- *  - We talk about URIs, but they are actually file paths not URIs
- *  - Un-glibify?
+ * @todo We talk about URIs, but they are actually file paths not URIs
+ * @todo Un-glibify?
  */
 
 #ifndef _LIBNOTIFY_NOTIFY_H_

@@ -1,3 +1,9 @@
+Sat Nov 06 15:40:48 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.h:
+	  - Move our TODO list to the Doxygen @todo commands, so we'll get it
+	    in a nice little page of its own in the API docs.
+
 Sat Nov 06 15:35:52 PST 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.h:
