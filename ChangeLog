@@ -1,3 +1,8 @@
+Sun Jul 04 13:46:32 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* tools/notify-send.c:
+	  - Don't initialize the library until we're ready to talk to it.
+
 Sun Jul 04 13:34:14 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

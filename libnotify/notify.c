@@ -182,16 +182,16 @@ _notify_dbus_message_iter_get_string_or_nil(DBusMessageIter *iter)
 }
 #endif
 
+#if 0
 static void
 _notify_dbus_message_iter_append_app_info(DBusMessageIter *iter)
 {
 	g_return_if_fail(iter != NULL);
 
-#if 0
 	dbus_message_iter_append_string(iter, _app_name);
 	dbus_message_iter_append_nil(iter); /* App Icon */
-#endif
 }
+#endif
 
 static DBusHandlerResult
 _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
@@ -612,7 +612,9 @@ notify_send_notification_varg(NotifyUrgency urgency, const char *summary,
 
 	g_return_val_if_fail(message != NULL, 0);
 
+#if 0
 	_notify_dbus_message_iter_append_app_info(&iter);
+#endif
 	dbus_message_iter_append_byte(&iter, urgency);
 	dbus_message_iter_append_string(&iter, summary);
 	_notify_dbus_message_iter_append_string_or_nil(&iter, detailed);
