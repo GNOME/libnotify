@@ -66,14 +66,14 @@ static GHashTable *_request_ids = NULL;
 static void format_func
 print_error(char *message, ...)
 {
-        char buf[1024];
-        va_list args;
+	char buf[1024];
+	va_list args;
 
-        va_start(args, message);
-        vsnprintf(buf, sizeof(buf), message, args);
-        va_end(args);
+	va_start(args, message);
+	vsnprintf(buf, sizeof(buf), message, args);
+	va_end(args);
 
-        fprintf(stderr, "%s (%d): libnotify: %s", getenv("_"), getpid(), buf);
+	fprintf(stderr, "%s (%d): libnotify: %s", getenv("_"), getpid(), buf);
 }
 
 static DBusMessage *
