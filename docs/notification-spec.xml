@@ -366,7 +366,9 @@
 
  <sect1 id="notification-types" xreflabel="Notification Types">
   <title>Notification Types</title>
-  <para><remark>Write me!</remark></para>
+  <para>
+   
+  </para>
  </sect1>
 
  <sect1 id="urgency-levels" xreflabel="Urgency Levels">
@@ -433,6 +435,7 @@
    hints. Both sides should assume that hints are not passed, and should
    ignore any hints they do not understand.
   </para>
+<!--
   <para>
    The following table lists the standard hints as defined by this
    specification. Future hints may be proposed and added to this list
@@ -460,6 +463,7 @@
     </tbody>
    </tgroup>
   </table>
+-->
   <para>
    Third parties, when defining their own hints, should discuss the
    possibility of standardizing on the hint with other parties, preferably
