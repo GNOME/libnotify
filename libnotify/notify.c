@@ -63,6 +63,14 @@ struct _NotifyHandle
 	} data;
 };
 
+struct _NotifyIcon
+{
+	char *uri;
+
+	size_t raw_len;
+	guchar *raw_data;
+};
+
 static DBusConnection *_dbus_conn = NULL;
 static gboolean _initted = FALSE;
 static gboolean _filters_added = FALSE;
@@ -395,6 +403,57 @@ notify_close(NotifyHandle *handle)
 	dbus_message_unref(message);
 }
 
+/**************************************************************************
+ * Icon API
+ **************************************************************************/
+NotifyIcon *
+notify_icon_new(const char *icon_uri)
+{
+	NotifyIcon *icon;
+
+	g_return_val_if_fail(icon_uri  != NULL, NULL);
+	g_return_val_if_fail(*icon_uri != '\0', NULL);
+
+	icon = g_new0(NotifyIcon, 1);
+
+	icon->uri = g_strdup(icon_uri);
+
+	return icon;
+}
+
+NotifyIcon *
+notify_icon_new_with_data(size_t icon_len, const guchar *icon_data)
+{
+	NotifyIcon *icon;
+
+	g_return_val_if_fail(icon_len  >  0,    NULL);
+	g_return_val_if_fail(icon_data != NULL, NULL);
+
+	icon = g_new0(NotifyIcon, 1);
+
+	icon->raw_len  = icon_len;
+	icon->raw_data = g_memdup(icon_data, icon_len);
+
+	return icon;
+}
+
+void
+notify_icon_destroy(NotifyIcon *icon)
+{
+	g_return_if_fail(icon != NULL);
+
+	if (icon->uri != NULL)
+		g_free(icon->uri);
+
+	if (icon->raw_data != NULL)
+		g_free(icon->raw_data);
+
+	g_free(icon);
+}
+
+/**************************************************************************
+ * Notifications API
+ **************************************************************************/
 static NotifyHandle *
 _notify_send_notification(NotifyUrgency urgency, const char *summary,
 						  const char *detailed, const char *icon_uri,

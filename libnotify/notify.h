@@ -47,6 +47,7 @@ typedef enum
 } NotifyUrgency;
 
 typedef struct _NotifyHandle NotifyHandle;
+typedef struct _NotifyIcon   NotifyIcon;
 
 typedef void (*NotifyCallback)(NotifyHandle *, guint32, gpointer);
 
@@ -85,6 +86,40 @@ gboolean notify_is_initted(void);
  * @param handle The notification or request handle.
  */
 void notify_close(NotifyHandle *handle);
+
+/*@}*/
+
+/**************************************************************************/
+/** @name NotifyIcon API                                                  */
+/**************************************************************************/
+/*@{*/
+
+/**
+ * Creates an icon with the specified icon URI.
+ *
+ * @param icon_uri The icon URI.
+ *
+ * @return The icon.
+ */
+NotifyIcon *notify_icon_new(const char *icon_uri);
+
+/**
+ * Creates an icon with the specified icon data.
+ *
+ * @param icon_len  The icon data length.
+ * @param icon_data The icon data.
+ *
+ * @return The icon.
+ */
+NotifyIcon *notify_icon_new_with_data(size_t icon_len,
+									  const guchar *icon_data);
+
+/**
+ * Destroys an icon.
+ *
+ * @param icon The icon to destroy.
+ */
+void notify_icon_destroy(NotifyIcon *icon);
 
 /*@}*/
 

@@ -1,3 +1,9 @@
+Tue Jun 29 19:26:58 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Added a NotifyIcon struct and the beginnings of the API.
+
 Tue Jun 29 18:49:38 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:
