@@ -209,10 +209,18 @@ The following messages must be supported by all implementations.
   shown. For some parameters multiple types may be acceptable
 
   STRING summary
+
   STRING/NIL body: if nil the body is considered omitted.
+
   ARRAY images: the array may be empty.
+
   STRING/NIL sound: if nil the sound is considered omitted.
-  ARRAY actions
+
+  DICT actions: each dictionary key is the localized name of the
+  action, and each key maps to a UINT32 containing an action
+  code. This code will be reported back to the client if the action
+  is invoked by the user.
+
   UINT32/NIL timeout: if nil the notification never times out
 
   It returns a UINT32 that will never be reused within a
@@ -235,5 +243,33 @@ The following messages must be supported by all implementations.
   STRING name: the product name of the server
   STRING vendor: "kde"/"freedesktop.org"/"Microsoft" etc etc
   STRING version: a version spec of arbitrary format
+
+All implementations must emit the following signals:
+
+* NotifyComplete
+
+  A completed notification is one that has timed out, or been
+  dismissed by the user.
+
+  Has two parameters:
+
+  * UINT32 id: containing the ID of the notification that was
+               completed.
+  * UINT32 reason: 1 for timeout, 2 for being dismissed by the user,
+                   3 for "other".
+
+  The ID specified in the signal is invalidated *before* the signal
+  is sent and may not be used in any further communications with the
+  server.
+
+The following signals MAY be emitted by the server.
+
+* ActionInvoked
+
+  If the server specifies "actions" in its caps array, and actions
+  were specified in the original request, this signal must be emitted
+  if the user invokes a given action (for instance, by clicking a
+  button). It has one UINT32 parameter, the ID of the action that was
+  invoked which was specified in the original dictionary.
 
 REFERENCE
