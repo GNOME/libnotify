@@ -1,3 +1,14 @@
+Sat Sep 25 00:08:45 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* notification-spec.xml:
+	  - Added <img/> tag support in the markup section.
+	  - Detailed what markup is and what it is not, and its restrictions.
+	  - Removed the High urgency level.
+	  - Gave a better categorization to notification type formats.
+	  - Added new notification types.
+	  - Fixed notification expiration so it's a timeout rather than a
+	    timestamp.
+
 Fri Sep 03 22:26:31 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* notification-spec.xml:
