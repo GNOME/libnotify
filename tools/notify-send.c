@@ -122,7 +122,8 @@ main(int argc, const char **argv)
 		}
 	}
 
-	if (!notify_init("notify-send")) exit(1);
+	if (!notify_init("notify-send"))
+		exit(1);
 
 	notify_send_notification(NULL, type, urgency, summary, body, icon,
 							 TRUE, expire_timeout, NULL, 0);

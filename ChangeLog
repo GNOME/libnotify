@@ -1,3 +1,9 @@
+Wed Sep 29 22:34:03 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* tools/notify-send.c:
+	  - Don't flush the D-BUS connection, and make sure we disconnect from it.
+
 Wed Sep 29 21:53:15 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

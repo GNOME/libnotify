@@ -312,8 +312,10 @@ _notify_disconnect(void)
 		_filters_added = FALSE;
 	}
 
-	dbus_connection_flush(_dbus_conn);
+	dbus_connection_disconnect(_dbus_conn);
 	dbus_connection_unref(_dbus_conn);
+
+	_dbus_conn = NULL;
 }
 
 gboolean
