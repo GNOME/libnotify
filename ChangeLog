@@ -1,3 +1,8 @@
+Wed Sep 01 00:30:53 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* docs/notification-spec.xml:
+	  - Finishing adding the rest of the signals to the spec.
+
 Sun Aug 29 22:27:42 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	A docs/notification-spec.ps:

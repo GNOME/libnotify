@@ -750,7 +750,7 @@
      dismissed by the user.
     </para>
     <table>
-     <title>NotificationClosed Return Values</title>
+     <title>NotificationClosed Parameters</title>
      <tgroup cols="2">
       <thead>
        <row>
@@ -783,6 +783,91 @@
      <emphasis>before</emphasis> the signal is sent and may not be used
      in any further communications with the server.
     </para>
+   </sect3>
+
+   <sect3 id="signal-action-invoked">
+    <title><literal>org.freedesktop.Notifications.ActionInvoked</literal></title>
+    <funcsynopsis>
+     <funcprototype>
+      <funcdef>
+       <function>org.freedesktop.Notifications.ActionInvoked</function>
+      </funcdef>
+      <paramdef>UINT32 <parameter>id</parameter></paramdef>
+<!--  <paramdef>BOOL <parameter>default_action</parameter></paramdef> -->
+      <paramdef>UINT32 <parameter>action_id</parameter></paramdef>
+     </funcprototype>
+    </funcsynopsis>
+    <para>
+     This signal is emitted when one of the following occurs:
+    </para>
+    <itemizedlist>
+     <listitem>
+      <para>
+       The user performs some global "invoking" action upon a notification.
+       For instance, clicking somewhere on the notification itself.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       The user invokes a specific action as specified in the original
+       Notify request. For example, clicking on an action button.
+      </para>
+     </listitem>
+    </itemizedlist>
+    <table>
+     <title>ActionInvoked Parameters</title>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>Name</entry>
+        <entry>Type</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><parameter>id</parameter></entry>
+        <entry>UINT32</entry>
+        <entry>
+         The ID of the notification emitting the ActionInvoked signal.
+        </entry>
+       </row>
+<!--
+       <row>
+        <entry><parameter>default_action</parameter></entry>
+        <entry>BOOL</entry>
+        <entry>
+         <constant>TRUE</constant> if the default action was invoked.
+         The default action is often a click on the notification. If this
+         is <constant>TRUE</constant>, the <parameter>action_id</parameter>
+         parameter is ignored.
+        </entry>
+       </row>
+-->
+       <row>
+        <entry><parameter>action_id</parameter></entry>
+        <entry>UINT32</entry>
+        <entry>
+         The ID of the action invoked. A value of 0 means that the default
+         action was invoked, i.e., clicking the notification itself.
+         IDs greater than zero are the action IDs as defined by the
+         calling application.
+<!--
+         This is ignored if
+         <parameter>default_action</parameter> is <constant>TRUE</constant>.
+-->
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+    <note>
+     <para>
+      Clients should not assume the server will generate this signal. Some
+      servers may not support user interaction at all, or may not support
+      the concept of being able to "invoke" a notification.
+     </para>
+    </note>
    </sect3>
   </sect2>
  </sect1>
