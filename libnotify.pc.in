@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libnotify
+Description: Notifications Library
+Version: @VERSION@
+Libs: -L${libdir} -lnotify @PACKAGE_LIBS@
+Cflags: -I${includedir} @PACKAGE_CFLAGS@
+
