@@ -457,6 +457,8 @@ notify_get_server_info(char **ret_name, char **ret_vendor, char **ret_version)
 	version = dbus_message_iter_get_string(&iter);
 	dbus_message_iter_next(&iter);
 
+	dbus_message_unref(reply);
+
 	if (ret_name != NULL)
 		*ret_name = g_strdup(name);
 
@@ -471,6 +473,53 @@ notify_get_server_info(char **ret_name, char **ret_vendor, char **ret_version)
 	dbus_free(version);
 
 	return TRUE;
+}
+
+GList *
+notify_get_server_caps(void)
+{
+	DBusMessage *message, *reply;
+	DBusMessageIter iter;
+	DBusError error;
+	GList *caps = NULL;
+	char **temp_array;
+	int num_items, i;
+
+	message = _notify_dbus_message_new("GetCapabilities", NULL);
+
+	g_return_val_if_fail(message != NULL, FALSE);
+
+	dbus_error_init(&error);
+
+	reply = dbus_connection_send_with_reply_and_block(_dbus_conn, message,
+													  -1, &error);
+
+	dbus_message_unref(message);
+
+	if (dbus_error_is_set(&error))
+	{
+		print_error("Error sending GetCapabilities: %s\n", error.message);
+
+		dbus_error_free(&error);
+
+		return FALSE;
+	}
+
+	dbus_error_free(&error);
+
+	dbus_message_iter_init(reply, &iter);
+
+	if (!dbus_message_iter_get_string_array(&iter, &temp_array, &num_items))
+		return NULL;
+
+	dbus_message_unref(reply);
+
+	for (i = 0; i < num_items; i++)
+		caps = g_list_append(caps, g_strdup(temp_array[i]));
+
+	dbus_free_string_array(temp_array);
+
+	return caps;
 }
 
 /**************************************************************************

@@ -91,6 +91,15 @@ void notify_close(NotifyHandle *handle);
 gboolean notify_get_server_info(char **ret_name, char **ret_vendor,
 								char **ret_version);
 
+/**
+ * Returns the server's capabilities.
+ *
+ * The returned list and the strings inside must all be freed.
+ *
+ * @return The list of capabilities, or NULL on error.
+ */
+GList *notify_get_server_caps(void);
+
 /*@}*/
 
 /**************************************************************************/
