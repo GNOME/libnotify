@@ -1,3 +1,8 @@
+Thu Sep 02 01:19:07 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* notification-spec.xml:
+	  - Wrote the section about hints.
+
 Thu Sep 02 01:05:01 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* notification-spec.xml:

@@ -443,7 +443,61 @@
 
  <sect1 id="hints" xreflabel="Hints">
   <title>Hints</title>
-  <para><remark>Write me!</remark></para>
+  <para>
+   Hints are a way to provide extra data to a notification server that
+   the server may be able to make use of. Such examples may be the
+   application's PID or the window ID.
+  </para>
+  <para>
+   Neither clients nor notification servers are required to support any
+   hints. Both sides should assume that hints are not passed, and should
+   ignore any hints they do not understand.
+  </para>
+  <para>
+   The following table lists the standard hints as defined by this
+   specification. Future hints may be proposed and added to this list
+   over time. Once again, implementations are not required to support these.
+  </para>
+  <table>
+   <title>Standard Hints</title>
+   <tgroup cols="2">
+    <thead>
+     <row>
+      <entry>Name</entry>
+      <entry>Value Type</entry>
+      <entry>Description</entry>
+     </row>
+    </thead>
+    <tbody valign="top">
+     <row>
+      <entry><literal>"pid"</literal></entry>
+      <entry>UINT32</entry>
+      <entry>
+       The Process ID of the application that sent the notification.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"winid"</literal></entry>
+      <entry>UINT32</entry>
+      <entry>
+       The Window ID that sent the notification. This may be used,
+       for example, to flash the window.
+      </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+  <para>
+   Third parties, when defining their own hints, should discuss the
+   possibilty of standardizing on the hint with other parties, preferably
+   in a place such as the
+   <ulink url="http://freedesktop.org/mailman/listinfo/xdg">xdg</ulink>
+   mailing list at
+   <ulink url="http://freedesktop.org/">freedesktop.org</ulink>. If it
+   warrants a standard, it will be added to the table above. If no
+   consensus is reached, the hint name should be in the form of
+   <literal>"x-<replaceable>vendor</replaceable>-<replaceable>name</replaceable>."</literal>
+  </para>
  </sect1>
 
  <sect1 id="protocol" xreflabel="Protocol">
@@ -532,7 +586,7 @@
     </table>
     <para>
      New vendor-specific caps may be specified as long as they start with
-     <literal>"x-vendorname"</literal>. For instance,
+     <literal>"x-<replaceable>vendor</replaceable>"</literal>. For instance,
      <literal>"x-gnome-foo-cap"</literal>. Capability names must not
      contain spaces. They are limited to alpha-numeric characters and dashes
      (<literal>"-"</literal>).
