@@ -41,6 +41,27 @@ static gboolean _filters_added = FALSE;
 static guint32 _init_ref_count = 0;
 static char *_app_name = NULL;
 
+static DBusMessage *
+_notify_dbus_message_new(const char *name, DBusMessageIter *iter)
+{
+	DBusMessage *message;
+
+	g_return_val_if_fail(name  != NULL, NULL);
+	g_return_val_if_fail(*name != '\0', NULL);
+
+	message = dbus_message_new_method_call(NOTIFY_DBUS_SERVICE,
+										   NOTIFY_DBUS_CORE_OBJECT,
+										   NOTIFY_DBUS_CORE_INTERFACE,
+										   name);
+
+	g_return_val_if_fail(message != NULL, NULL);
+
+	if (iter != NULL)
+		dbus_message_iter_init(message, iter);
+
+	return message;
+}
+
 static DBusHandlerResult
 _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 {
@@ -182,11 +203,33 @@ notify_is_initted(void)
 void
 notify_close_notification(guint32 id)
 {
+	DBusMessage *message;
+	DBusMessageIter iter;
+
+	g_return_if_fail(id > 0);
+
+	message = _notify_dbus_message_new("CloseNotification", &iter);
+
+	dbus_message_iter_append_uint32(&iter, id);
+
+	dbus_connection_send(_dbus_conn, message, NULL);
+	dbus_message_unref(message);
 }
 
 void
 notify_close_request(guint32 id)
 {
+	DBusMessage *message;
+	DBusMessageIter iter;
+
+	g_return_if_fail(id > 0);
+
+	message = _notify_dbus_message_new("CloseRequest", &iter);
+
+	dbus_message_iter_append_uint32(&iter, id);
+
+	dbus_connection_send(_dbus_conn, message, NULL);
+	dbus_message_unref(message);
 }
 
 guint32
