@@ -1,3 +1,11 @@
+Tue Jun 29 18:49:38 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Replaced the guint32 ID numbers that were passed around to represent
+	    notifications and requests and replaced them with an opaque data
+	    structure that abstracts that and other stuff.
+
 Tue Jun 29 18:21:05 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

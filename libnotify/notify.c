@@ -41,7 +41,6 @@
 
 typedef struct
 {
-	guint32 id;
 	gpointer user_data;
 
 	size_t num_buttons;
@@ -50,12 +49,26 @@ typedef struct
 
 } NotifyRequestData;
 
+struct _NotifyHandle
+{
+	NotifyType type;
+
+	guint32 id;
+
+	union
+	{
+		NotifyRequestData *request;
+		void *notify;
+
+	} data;
+};
+
 static DBusConnection *_dbus_conn = NULL;
 static gboolean _initted = FALSE;
 static gboolean _filters_added = FALSE;
 static guint32 _init_ref_count = 0;
 static char *_app_name = NULL;
-static GHashTable *_request_ids = NULL;
+static GHashTable *_handles = NULL;
 
 #ifdef __GNUC__
 #  define format_func __attribute__((format(printf, 1, 2)))
@@ -74,6 +87,42 @@ print_error(char *message, ...)
 	va_end(args);
 
 	fprintf(stderr, "%s (%d): libnotify: %s", getenv("_"), getpid(), buf);
+}
+
+static NotifyHandle *
+_notify_handle_new(NotifyType type, guint32 id)
+{
+	NotifyHandle *handle;
+
+	handle = g_new0(NotifyHandle, 1);
+
+	handle->type = type;
+	handle->id   = id;
+
+	if (type == NOTIFY_TYPE_REQUEST)
+		handle->data.request = g_new0(NotifyRequestData, 1);
+
+	return handle;
+}
+
+static void
+_notify_handle_destroy(NotifyHandle *handle)
+{
+	size_t i;
+
+	g_return_if_fail(handle != NULL);
+
+	if (handle->type == NOTIFY_TYPE_REQUEST && handle->data.request != NULL)
+	{
+		for (i = 0; i < handle->data.request->num_buttons; i++)
+			g_free(handle->data.request->texts[i]);
+
+		g_free(handle->data.request->texts);
+		g_free(handle->data.request->cbs);
+		g_free(handle->data.request);
+	}
+
+	g_free(handle);
 }
 
 static DBusMessage *
@@ -151,7 +200,7 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 									"RequestClosed"))
 	{
 		guint32 id, button;
-		NotifyRequestData *request_data;
+		NotifyHandle *handle;
 
 		dbus_message_iter_init(message, &iter);
 
@@ -160,22 +209,22 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 
 		button = dbus_message_iter_get_uint32(&iter);
 
-		request_data = g_hash_table_lookup(_request_ids, GINT_TO_POINTER(id));
+		handle = g_hash_table_lookup(_handles, GINT_TO_POINTER(id));
 
-		if (request_data != NULL)
+		if (handle != NULL && handle->type == NOTIFY_TYPE_REQUEST)
 		{
-			if (button >= request_data->num_buttons)
+			if (button >= handle->data.request->num_buttons)
 			{
 				print_error("Returned request button ID is greater"
-                                            "than the maximum number of buttons!\n");
+							"than the maximum number of buttons!\n");
 			}
-			else if (request_data->cbs[button] != NULL)
+			else if (handle->data.request->cbs[button] != NULL)
 			{
-				(request_data->cbs[button])(id, button,
-											request_data->user_data);
+				(handle->data.request->cbs[button])(handle, button,
+					handle->data.request->user_data);
 			}
 
-			g_hash_table_remove(_request_ids, GINT_TO_POINTER(id));
+			g_hash_table_remove(_handles, GINT_TO_POINTER(id));
 		}
 	}
 	else
@@ -207,7 +256,8 @@ _notify_connect(void)
 	if (!dbus_bus_activate_service(_dbus_conn, NOTIFY_DBUS_SERVICE, 0,
 								   NULL, &error))
 	{
-		print_error("Error activating %s service: %s\n", NOTIFY_DBUS_SERVICE, error.message);
+		print_error("Error activating %s service: %s\n",
+					NOTIFY_DBUS_SERVICE, error.message);
 
 		dbus_error_free(&error);
 
@@ -261,21 +311,6 @@ _notify_disconnect(void)
 	dbus_connection_unref(_dbus_conn);
 }
 
-static void
-_destroy_request_data(gpointer data)
-{
-	NotifyRequestData *request_data = (NotifyRequestData *)data;
-	size_t i;
-
-	for (i = 0; i < request_data->num_buttons; i++)
-		g_free(request_data->texts[i]);
-
-	g_free(request_data->texts);
-	g_free(request_data->cbs);
-
-	g_free(request_data);
-}
-
 gboolean
 notify_init(const char *app_name)
 {
@@ -296,8 +331,8 @@ notify_init(const char *app_name)
 
 	_app_name = g_strdup(app_name);
 
-	_request_ids = g_hash_table_new_full(g_int_hash, g_int_equal,
-										 NULL, _destroy_request_data);
+	_handles = g_hash_table_new_full(g_int_hash, g_int_equal,
+									 NULL, (GFreeFunc)_notify_handle_destroy);
 
 #ifdef HAVE_ATEXIT
 	atexit(notify_uninit);
@@ -324,10 +359,10 @@ notify_uninit(void)
 		_app_name = NULL;
 	}
 
-	if (_request_ids != NULL)
+	if (_handles != NULL)
 	{
-		g_hash_table_destroy(_request_ids);
-		_request_ids = NULL;
+		g_hash_table_destroy(_handles);
+		_handles = NULL;
 	}
 
 	_notify_disconnect();
@@ -340,46 +375,32 @@ notify_is_initted(void)
 }
 
 void
-notify_close_notification(guint32 id)
+notify_close(NotifyHandle *handle)
 {
 	DBusMessage *message;
 	DBusMessageIter iter;
 
-	g_return_if_fail(id > 0);
+	g_return_if_fail(handle != NULL);
 
-	message = _notify_dbus_message_new("CloseNotification", &iter);
+	message = _notify_dbus_message_new(
+		(handle->type == NOTIFY_TYPE_NOTIFICATION
+		 ? "CloseNotification" : "CloseRequest"),
+		&iter);
 
 	g_return_if_fail(message != NULL);
 
-	dbus_message_iter_append_uint32(&iter, id);
+	dbus_message_iter_append_uint32(&iter, handle->id);
 
 	dbus_connection_send(_dbus_conn, message, NULL);
 	dbus_message_unref(message);
 }
 
-void
-notify_close_request(guint32 id)
-{
-	DBusMessage *message;
-	DBusMessageIter iter;
-
-	g_return_if_fail(id > 0);
-
-	message = _notify_dbus_message_new("CloseRequest", &iter);
-
-	g_return_if_fail(message != NULL);
-
-	dbus_message_iter_append_uint32(&iter, id);
-
-	dbus_connection_send(_dbus_conn, message, NULL);
-	dbus_message_unref(message);
-}
-
-static guint32
+static NotifyHandle *
 _notify_send_notification(NotifyUrgency urgency, const char *summary,
 						  const char *detailed, const char *icon_uri,
 						  size_t icon_len, guchar *icon_data, time_t timeout)
 {
+	NotifyHandle *handle;
 	DBusMessage *message, *reply;
 	DBusMessageIter iter;
 	DBusError error;
@@ -423,10 +444,14 @@ _notify_send_notification(NotifyUrgency urgency, const char *summary,
 	dbus_message_unref(reply);
 	dbus_error_free(&error);
 
-	return id;
+	handle = _notify_handle_new(NOTIFY_TYPE_NOTIFICATION, id);
+
+	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
+
+	return handle;
 }
 
-guint32
+NotifyHandle *
 notify_send_notification(NotifyUrgency urgency, const char *summary,
 						 const char *detailed, const char *icon_uri,
 						 time_t timeout)
@@ -437,7 +462,7 @@ notify_send_notification(NotifyUrgency urgency, const char *summary,
 									 0, NULL, timeout);
 }
 
-guint32
+NotifyHandle *
 notify_send_notification_with_icon_data(NotifyUrgency urgency,
 										const char *summary,
 										const char *detailed,
@@ -450,7 +475,7 @@ notify_send_notification_with_icon_data(NotifyUrgency urgency,
 									 icon_len, icon_data, timeout);
 }
 
-static guint32
+static NotifyHandle *
 _notify_send_request(NotifyUrgency urgency, const char *summary,
 					 const char *detailed, const char *icon_uri,
 					 size_t icon_len, guchar *icon_data, time_t timeout,
@@ -464,7 +489,7 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 	guint32 i;
 	char *text;
 	NotifyCallback cb;
-	NotifyRequestData *request_data;
+	NotifyHandle *handle;
 
 	message = _notify_dbus_message_new("SendRequest", &iter);
 
@@ -483,24 +508,24 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 	dbus_message_iter_append_uint32(&iter, timeout);
 	dbus_message_iter_append_uint32(&iter, default_button);
 
-	request_data = g_new0(NotifyRequestData, 1);
-	request_data->texts = g_new0(char *, button_count);
-	request_data->cbs   = g_new0(NotifyCallback, button_count);
+	handle = _notify_handle_new(NOTIFY_TYPE_REQUEST, 0);
 
-	request_data->num_buttons = button_count;
+	handle->data.request->texts = g_new0(char *, button_count);
+	handle->data.request->cbs   = g_new0(NotifyCallback, button_count);
+
+	handle->data.request->num_buttons = button_count;
 
 	for (i = 0; i < button_count; i++)
 	{
 		text = va_arg(buttons, char *);
 		cb   = va_arg(buttons, NotifyCallback);
 
-		request_data->texts[i] = text;
-		request_data->cbs[i]   = cb;
+		handle->data.request->texts[i] = text;
+		handle->data.request->cbs[i]   = cb;
 	}
 
 	dbus_message_iter_append_string_array(&iter,
-										  (const char **)request_data->texts,
-										  button_count);
+		(const char **)handle->data.request->texts, button_count);
 
 	dbus_error_init(&error);
 
@@ -515,7 +540,7 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 
 		dbus_error_free(&error);
 
-		_destroy_request_data(request_data);
+		_notify_handle_destroy(handle);
 
 		return 0;
 	}
@@ -526,35 +551,35 @@ _notify_send_request(NotifyUrgency urgency, const char *summary,
 	dbus_message_unref(reply);
 	dbus_error_free(&error);
 
-	request_data->id = id;
+	handle->id = id;
 
-	g_hash_table_insert(_request_ids, GINT_TO_POINTER(id), request_data);
+	g_hash_table_insert(_handles, GINT_TO_POINTER(id), handle);
 
-	return id;
+	return handle;
 }
 
-guint32
+NotifyHandle *
 notify_send_request(NotifyUrgency urgency, const char *summary,
 					const char *detailed, const char *icon_uri,
 					time_t timeout, gpointer user_data,
 					size_t default_button, size_t button_count, ...)
 {
 	va_list buttons;
-	guint32 id;
+	NotifyHandle *handle;
 
 	g_return_val_if_fail(summary != NULL,  0);
 	g_return_val_if_fail(button_count > 1, 0);
 
 	va_start(buttons, button_count);
-	id = notify_send_request_varg(urgency, summary, detailed, icon_uri,
-								  timeout, user_data, default_button,
-								  button_count, buttons);
+	handle = notify_send_request_varg(urgency, summary, detailed, icon_uri,
+									  timeout, user_data, default_button,
+									  button_count, buttons);
 	va_end(buttons);
 
-	return id;
+	return handle;
 }
 
-guint32
+NotifyHandle *
 notify_send_request_varg(NotifyUrgency urgency, const char *summary,
 						 const char *detailed, const char *icon_uri,
 						 time_t timeout, gpointer user_data,
@@ -569,7 +594,7 @@ notify_send_request_varg(NotifyUrgency urgency, const char *summary,
 								button_count, buttons);
 }
 
-guint32
+NotifyHandle *
 notify_send_request_with_icon_data(NotifyUrgency urgency,
 								   const char *summary, const char *detailed,
 								   size_t icon_len, guchar *icon_data,
@@ -578,22 +603,23 @@ notify_send_request_with_icon_data(NotifyUrgency urgency,
 								   ...)
 {
 	va_list buttons;
-	guint32 id;
+	NotifyHandle *handle;
 
 	g_return_val_if_fail(summary != NULL,  0);
 	g_return_val_if_fail(button_count > 1, 0);
 
 	va_start(buttons, button_count);
-	id = notify_send_request_with_icon_data_varg(urgency, summary, detailed,
-												 icon_len, icon_data, timeout,
-												 user_data, default_button,
-												 button_count, buttons);
+	handle = notify_send_request_with_icon_data_varg(urgency, summary,
+													 detailed, icon_len,
+													 icon_data, timeout,
+													 user_data, default_button,
+													 button_count, buttons);
 	va_end(buttons);
 
-	return id;
+	return handle;
 }
 
-guint32
+NotifyHandle *
 notify_send_request_with_icon_data_varg(NotifyUrgency urgency,
 										const char *summary,
 										const char *detailed,
