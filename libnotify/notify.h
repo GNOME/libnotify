@@ -36,6 +36,8 @@ typedef enum
 
 } NotifyUrgency;
 
+typedef void (*NotifyCallback)(guint32, guint32, gpointer);
+
 /**************************************************************************/
 /** @name libnotify Base API                                              */
 /**************************************************************************/
@@ -75,7 +77,7 @@ void notify_close_notification(guint32 id);
 /**
  * Automatically closes a request.
  *
- * The default button's callback, if any, will be called.
+ * No callbacks for the dialog will be called.
  *
  * @param id The ID of the request.
  */
@@ -121,7 +123,7 @@ guint32 notify_send_notification_with_icon_data(NotifyUrgency urgency,
 												const char *summary,
 												const char *detailed,
 												size_t icon_len,
-												void *icon_data,
+												guchar *icon_data,
 												time_t timeout);
 
 /*@}*/
@@ -160,6 +162,34 @@ guint32 notify_send_request(NotifyUrgency urgency, const char *summary,
 							size_t button_count, ...);
 
 /**
+ * Sends a standard request, taking a va_list for the buttons.
+ *
+ * A callback has the following prototype:
+ *
+ * @code
+ * void callback(guint32 id, guint32 button, void *user_data);
+ * @endcode
+ *
+ * @param urgency        The urgency level.
+ * @param summary        The summary of the request.
+ * @param detailed       The optional detailed information.
+ * @param icon_uri       The optional icon URI.
+ * @param timeout        The optional time to automatically close the request,
+ *                       or 0.
+ * @param user_data      User-specified data to send to a callback.
+ * @param default_button The default button, or -1.
+ * @param button_count   The number of buttons.
+ * @param buttons        The buttons in string/callback pairs.
+ *
+ * @return A unique ID for the request.
+ */
+guint32 notify_send_request_varg(NotifyUrgency urgency, const char *summary,
+								 const char *detailed, const char *icon_uri,
+								 time_t timeout, gpointer user_data,
+								 size_t default_button, size_t button_count,
+								 va_list buttons);
+
+/**
  * Sends a standard request with raw icon data.
  *
  * A callback has the following prototype:
@@ -191,6 +221,41 @@ guint32 notify_send_request_with_icon_data(NotifyUrgency urgency,
 										   gpointer user_data,
 										   gint32 default_button,
 										   size_t button_count, ...);
+
+/**
+ * Sends a standard request with raw icon data, taking a va_list for the
+ * buttons.
+ *
+ * A callback has the following prototype:
+ *
+ * @code
+ * void callback(guint32 id, guint32 button, void *user_data);
+ * @endcode
+ *
+ * @param urgency        The urgency level.
+ * @param summary        The summary of the request.
+ * @param detailed       The optional detailed information.
+ * @param icon_len       The icon data length.
+ * @param icon_data      The icon data.
+ * @param timeout        The optional time to automatically close the request,
+ *                       or 0.
+ * @param user_data      User-specified data to send to a callback.
+ * @param default_button The default button, or -1.
+ * @param button_count   The number of buttons.
+ * @param buttons        The buttons in string/callback pairs.
+ *
+ * @return A unique ID for the request.
+ */
+guint32 notify_send_request_with_icon_data_varg(NotifyUrgency urgency,
+												const char *summary,
+												const char *detailed,
+												size_t icon_len,
+												guchar *icon_data,
+												time_t timeout,
+												gpointer user_data,
+												gint32 default_button,
+												size_t button_count,
+												va_list buttons);
 
 /*@}*/
 

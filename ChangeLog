@@ -1,3 +1,13 @@
+Sun Jun 27 18:30:19 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Split notify_close() into notify_close_notification() and
+	    notify_close_request().
+	  - Implement notify_send_request() and
+	    notify_send_request_with_icon_data(), and add versions of those
+	    functions that take a va_list for the buttons.
+
 Sun Jun 27 16:46:32 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:
