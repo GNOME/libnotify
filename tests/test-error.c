@@ -24,24 +24,25 @@
 #include <unistd.h>
 
 int main() {
-    notify_init("Error Handling");
-    
-    NotifyIcon *icon = notify_icon_new("/no-such");
-    
-    NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
-                                               NOTIFY_URGENCY_NORMAL,
-                                               "Summary", "Content",
-                                               icon, // no icon
-                                               TRUE, time(NULL) + 5,
-                                               NULL, // no user data
-                                               0);
+	notify_init("Error Handling");
 
-    notify_icon_destroy(icon);
-    
-    if (n) {
-        fprintf(stderr, "failed to get an error ??\n");
-        return 1;
-    }
+	NotifyIcon *icon = notify_icon_new("/no-such");
 
-    return 0;
+	NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
+											   NULL,
+											   NOTIFY_URGENCY_NORMAL,
+											   "Summary", "Content",
+											   icon, // no icon
+											   TRUE, time(NULL) + 5,
+											   NULL, // no user data
+											   0);
+
+	notify_icon_destroy(icon);
+
+	if (n) {
+		fprintf(stderr, "failed to get an error ??\n");
+		return 1;
+	}
+
+	return 0;
 }

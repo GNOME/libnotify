@@ -1,3 +1,18 @@
+Wed Sep 29 21:53:15 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	* tests/test-animation.c:
+	* tests/test-basic.c:
+	* tests/test-default-action.c:
+	* tests/test-error.c:
+	* tests/test-image.c:
+	* tests/test-markup.c:
+	* tests/test-multi-actions.c:
+	* tests/test-replace.c:
+	* tools/notify-send.c:
+	  - Updated to match the spec.
+
 Sat Sep 25 12:59:26 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

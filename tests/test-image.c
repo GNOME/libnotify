@@ -36,81 +36,83 @@
 #include <glib.h>
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 
 GMainLoop *loop;
 NotifyHandle *n;
 
 static void send(char *i, size_t rawlen, char *s, char *b)
 {
-    NotifyIcon *icon;
+	NotifyIcon *icon;
 
-    if (rawlen > 0)
-        icon = notify_icon_new_with_data(rawlen, i);
-    else
-        icon = notify_icon_new(i);
-    
-    n = notify_send_notification(NULL, // replaces nothing
-                                 NOTIFY_URGENCY_NORMAL,
-                                 s, b,
-                                 icon,
-                                 TRUE, time(NULL) + 5,
-                                 NULL, // no user data
-                                 0);
+	if (rawlen > 0)
+		icon = notify_icon_new_with_data(rawlen, i);
+	else
+		icon = notify_icon_new(i);
 
-    if (!n) {
-        fprintf(stderr, "failed to send notification\n");
-        exit(1);
-    }
+	n = notify_send_notification(NULL, // replaces nothing
+								 NULL,
+								 NOTIFY_URGENCY_NORMAL,
+								 s, b,
+								 icon,
+								 TRUE, time(NULL) + 5,
+								 NULL, // no user data
+								 0);
 
-    notify_icon_destroy(icon);    
+	if (!n) {
+		fprintf(stderr, "failed to send notification\n");
+		exit(1);
+	}
+
+	notify_icon_destroy(icon);	
 }
 
 int main() {
-    if (!notify_init("Images Test")) exit(1);
+	if (!notify_init("Images Test")) exit(1);
 
-    DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
-    loop = g_main_loop_new(NULL, FALSE);
+	DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
+	loop = g_main_loop_new(NULL, FALSE);
 
-    dbus_connection_setup_with_g_main(conn, NULL);
+	dbus_connection_setup_with_g_main(conn, NULL);
 
-    // these images exist on fedora core 2 workstation profile. might not on yours
-    
-    send("gnome-starthere",
-         0,
-         "Welcome to Linux!",
-         "This is your first login. To begin exploring the system, click on 'Start Here', 'Computer' or 'Applications'");
+	// these images exist on fedora core 2 workstation profile. might not on yours
 
-    char file[1024];
-    readlink("/proc/self/exe", file, sizeof(file));
-    *strrchr(file, '/') = '\0';
-    strcat(file, "/../applet-critical.png");
-    
-    printf("sending %s\n", file);
+	send("gnome-starthere",
+		 0,
+		 "Welcome to Linux!",
+		 "This is your first login. To begin exploring the system, click on 'Start Here', 'Computer' or 'Applications'");
 
-    send(file,
-         0,
-         "Alert!",
-         "Warning!");
+	char file[1024];
+	readlink("/proc/self/exe", file, sizeof(file));
+	*strrchr(file, '/') = '\0';
+	strcat(file, "/../applet-critical.png");
 
-    
-    // FIXME: test raw image transfer
-    struct stat buf;
-    if (stat(file, &buf) == -1)
-    {
-        fprintf(stderr, "could not stat %s: %s", file, strerror(errno));
-        exit(1);
-    }
+	printf("sending %s\n", file);
 
-    int fd = open(file, O_RDONLY);
-    
-    void *pngbase = mmap(NULL, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	send(file,
+		 0,
+		 "Alert!",
+		 "Warning!");
 
-    close(fd);
-    
-    send(pngbase,
-         buf.st_size,
-         "Raw image test",
-         "This is an image marshalling test");
 
-    return 0;
+	// FIXME: test raw image transfer
+	struct stat buf;
+	if (stat(file, &buf) == -1)
+	{
+		fprintf(stderr, "could not stat %s: %s", file, strerror(errno));
+		exit(1);
+	}
+
+	int fd = open(file, O_RDONLY);
+
+	void *pngbase = mmap(NULL, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+	close(fd);
+
+	send(pngbase,
+		 buf.st_size,
+		 "Raw image test",
+		 "This is an image marshalling test");
+
+	return 0;
 }

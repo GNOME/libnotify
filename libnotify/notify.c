@@ -21,8 +21,6 @@
  * Boston, MA  02111-1307, USA.
  */
 
-/* FIXME: do we want so many arguments in the API? */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -168,34 +166,6 @@ _notify_dbus_message_iter_append_string_or_nil(DBusMessageIter *iter,
 	else
 		dbus_message_iter_append_string(iter, str);
 }
-
-#if 0
-static char *
-_notify_dbus_message_iter_get_string_or_nil(DBusMessageIter *iter)
-{
-	int arg_type;
-
-	g_return_val_if_fail(iter != NULL, NULL);
-
-	arg_type = dbus_message_iter_get_arg_type(iter);
-
-	if (arg_type == DBUS_TYPE_STRING)
-		return dbus_message_iter_get_string(iter);
-
-	g_return_val_if_fail(arg_type == DBUS_TYPE_NIL, NULL);
-
-	return NULL;
-}
-
-static void
-_notify_dbus_message_iter_append_app_info(DBusMessageIter *iter)
-{
-	g_return_if_fail(iter != NULL);
-
-	dbus_message_iter_append_string(iter, _app_name);
-	dbus_message_iter_append_nil(iter); /* App Icon */
-}
-#endif
 
 static DBusHandlerResult
 _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
@@ -584,9 +554,10 @@ notify_icon_destroy(NotifyIcon *icon)
  * Notifications API
  **************************************************************************/
 NotifyHandle *
-notify_send_notification(NotifyHandle *replaces, NotifyUrgency urgency, const char *summary,
-						 const char *detailed, const NotifyIcon *icon,
-						 gboolean expires, time_t expire_time,
+notify_send_notification(NotifyHandle *replaces, const char *type,
+						 NotifyUrgency urgency, const char *summary,
+						 const char *body, const NotifyIcon *icon,
+						 gboolean expires, time_t timeout,
 						 gpointer user_data, size_t action_count, ...)
 {
 	va_list actions;
@@ -595,8 +566,9 @@ notify_send_notification(NotifyHandle *replaces, NotifyUrgency urgency, const ch
 	g_return_val_if_fail(summary != NULL, 0);
 
 	va_start(actions, action_count);
-	handle = notify_send_notification_varg(replaces, urgency, summary, detailed, icon,
-										   expires, expire_time, user_data,
+	handle = notify_send_notification_varg(replaces, type, urgency, summary,
+										   body, icon, expires,
+										   timeout, user_data,
 										   action_count, actions);
 	va_end(actions);
 
@@ -604,9 +576,10 @@ notify_send_notification(NotifyHandle *replaces, NotifyUrgency urgency, const ch
 }
 
 NotifyHandle *
-notify_send_notification_varg(NotifyHandle *replaces, NotifyUrgency urgency, const char *summary,
-							  const char *detailed, const NotifyIcon *icon,
-							  gboolean expires, time_t expire_time,
+notify_send_notification_varg(NotifyHandle *replaces, const char *type,
+							  NotifyUrgency urgency, const char *summary,
+							  const char *body, const NotifyIcon *icon,
+							  gboolean expires, time_t timeout,
 							  gpointer user_data, size_t action_count,
 							  va_list actions)
 {
@@ -622,14 +595,14 @@ notify_send_notification_varg(NotifyHandle *replaces, NotifyUrgency urgency, con
 
 	g_return_val_if_fail(message != NULL, 0);
 
-#if 0
-	_notify_dbus_message_iter_append_app_info(&iter);
-#endif
-
-	dbus_message_iter_append_uint32(&iter, replaces ? replaces->id : 0);
+	_notify_dbus_message_iter_append_string_or_nil(&iter, _app_name);
+	dbus_message_iter_append_nil(&iter);
+	dbus_message_iter_append_uint32(&iter,
+									(replaces != NULL ? replaces->id : 0));
+	_notify_dbus_message_iter_append_string_or_nil(&iter, type);
 	dbus_message_iter_append_byte(&iter, urgency);
 	dbus_message_iter_append_string(&iter, summary);
-	_notify_dbus_message_iter_append_string_or_nil(&iter, detailed);
+	_notify_dbus_message_iter_append_string_or_nil(&iter, body);
 
 	/*
 	 * NOTE: D-BUS 0.22cvs is the first to allow empty arrays, *I think*.
@@ -671,10 +644,14 @@ notify_send_notification_varg(NotifyHandle *replaces, NotifyUrgency urgency, con
 		g_hash_table_insert(table, &action->id, action);
 	}
 
-	if (expires)
-		dbus_message_iter_append_uint32(&iter, expire_time);
-	else
-		dbus_message_iter_append_nil(&iter);
+	/* Hints */
+	dbus_message_iter_append_nil(&iter);
+
+	/* Expires */
+	dbus_message_iter_append_boolean(&iter, expires);
+
+	/* Expire Timeout */
+	dbus_message_iter_append_uint32(&iter, (expires ? timeout : 0));
 
 	dbus_error_init(&error);
 
@@ -693,7 +670,7 @@ notify_send_notification_varg(NotifyHandle *replaces, NotifyUrgency urgency, con
 
 		return 0;
 	}
-	
+
 	dbus_message_iter_init(reply, &iter);
 	id = dbus_message_iter_get_uint32(&iter);
 

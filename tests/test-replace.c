@@ -24,26 +24,28 @@
 #include <unistd.h>
 
 int main() {
-    notify_init("Replace Test");
-    
-    NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
-                                               NOTIFY_URGENCY_NORMAL,
-                                               "Summary", "Content",
-                                               NULL, // no icon
-                                               FALSE, 0, // does not expire
-                                               NULL, // no user data
-                                               0); // no actions
+	notify_init("Replace Test");
 
-    if (!n) {
-        fprintf(stderr, "failed to send notification\n");
-        return 1;
-    }
+	NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
+	                                           NULL,
+	                                           NOTIFY_URGENCY_NORMAL,
+	                                           "Summary", "Content",
+	                                           NULL, // no icon
+	                                           FALSE, 0, // does not expire
+	                                           NULL, // no user data
+	                                           0); // no actions
+
+	if (!n) {
+		fprintf(stderr, "failed to send notification\n");
+		return 1;
+	}
 
 
-    sleep(3);
+	sleep(3);
 
-    notify_send_notification(n, NOTIFY_URGENCY_NORMAL, "Second Summary", "Second Content",
-                             NULL, TRUE, time(NULL) + 5, NULL, 0);
-    
-    return 0;
+	notify_send_notification(n, NULL, NOTIFY_URGENCY_NORMAL,
+	                         "Second Summary", "Second Content",
+	                         NULL, TRUE, 5, NULL, 0);
+
+	return 0;
 }

@@ -34,26 +34,26 @@ int frames = 10;
 // returns array of pixbufs for a pulsing animation
 GdkPixbuf **generate_animation()
 {
-    int i;
-    GdkPixbuf *file = gdk_pixbuf_new_from_file("applet-critical.png", NULL);
-    double alpha = 1.0;
+	int i;
+	GdkPixbuf *file = gdk_pixbuf_new_from_file("applet-critical.png", NULL);
+	double alpha = 1.0;
 
-    GdkPixbuf **array = g_malloc(sizeof(GdkPixbuf *) * frames);
+	GdkPixbuf **array = g_malloc(sizeof(GdkPixbuf *) * frames);
 
-    for (i = 0; i < frames; i++)
-    {
-        GdkPixbuf *buf = gdk_pixbuf_copy(file);
+	for (i = 0; i < frames; i++)
+	{
+		GdkPixbuf *buf = gdk_pixbuf_copy(file);
 
-        alpha = sin(M_PI + ((M_PI / frames) * i)) + 1.0;
+		alpha = sin(M_PI + ((M_PI / frames) * i)) + 1.0;
 
-        gdk_pixbuf_composite(file, buf, 0, 0,
-                             gdk_pixbuf_get_width(buf),
-                             gdk_pixbuf_get_height(buf),
-                             0, 0, 1.0, 1.0, GDK_INTERP_NEAREST,
-                             alpha);
+		gdk_pixbuf_composite(file, buf, 0, 0,
+							 gdk_pixbuf_get_width(buf),
+							 gdk_pixbuf_get_height(buf),
+							 0, 0, 1.0, 1.0, GDK_INTERP_NEAREST,
+							 alpha);
 
-        array[i] = buf;
-    }
+		array[i] = buf;
+	}
 
 	return array;
 }
@@ -62,25 +62,26 @@ GdkPixbuf **generate_animation()
 int main()
 {
 	int i;
-    notify_init("Animations");
+	notify_init("Animations");
 
-    for (i = 0; i < frames; i++)
-    {
+	for (i = 0; i < frames; i++)
+	{
 
-    }
+	}
 
-    NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
-                                               NOTIFY_URGENCY_NORMAL,
-                                               "Summary", "Content",
-                                               NULL, // no icon
-                                               TRUE, time(NULL) + 5,
-                                               NULL, // no user data
-                                               0); // no actions
+	NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
+											   NULL,
+											   NOTIFY_URGENCY_NORMAL,
+											   "Summary", "Content",
+											   NULL, // no icon
+											   TRUE, time(NULL) + 5,
+											   NULL, // no user data
+											   0); // no actions
 
-    if (!n) {
-        fprintf(stderr, "failed to send notification\n");
-        return 1;
-    }
+	if (!n) {
+		fprintf(stderr, "failed to send notification\n");
+		return 1;
+	}
 
-    return 0;
+	return 0;
 }

@@ -24,20 +24,21 @@
 #include <unistd.h>
 
 int main() {
-    notify_init("Basics");
-    
-    NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
-                                               NOTIFY_URGENCY_NORMAL,
-                                               "Summary", "Content",
-                                               NULL, // no icon
-                                               TRUE, time(NULL) + 5,
-                                               NULL, // no user data
-                                               0); // no actions
+	notify_init("Basics");
 
-    if (!n) {
-        fprintf(stderr, "failed to send notification\n");
-        return 1;
-    }
+	NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
+											   NULL,
+											   NOTIFY_URGENCY_NORMAL,
+											   "Summary", "Content",
+											   NULL, // no icon
+											   TRUE, time(NULL) + 5,
+											   NULL, // no user data
+											   0); // no actions
 
-    return 0;
+	if (!n) {
+		fprintf(stderr, "failed to send notification\n");
+		return 1;
+	}
+
+	return 0;
 }

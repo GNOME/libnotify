@@ -31,36 +31,39 @@ int
 main(int argc, const char **argv)
 {
 	const gchar *summary = NULL;
-	const gchar *description = NULL;
+	const gchar *body = NULL;
+	const gchar *type = NULL;
 	char *urgency_str = NULL;
-	gchar *sound = NULL;
 	gchar *icons = NULL;
 	gchar *icon_str = NULL;
 	NotifyIcon *icon = NULL;
 	NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
-	time_t expire_time = 0;
+	time_t expire_timeout = 0;
 	char ch;
 	poptContext opt_ctx;
 	const char **args;
 	struct poptOption options[] =
 	{
 		{ "urgency", 'u', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &urgency_str,
-		  0, N_("Specifies the urgency level (low, normal, high, critical)"),
+		  0, N_("Specifies the urgency level (low, normal, critical)."),
 		  NULL },
-		{ "expire-time", 't', POPT_ARG_INT | POPT_ARGFLAG_STRIP, &expire_time,
-		  0, N_("Specifies the timestamp at which to expire the notification, or if < current time, specifies timeout in seconds from current time"),
+		{ "expire-time", 't', POPT_ARG_INT | POPT_ARGFLAG_STRIP,
+		  &expire_timeout, 0,
+		  N_("Specifies the timeout in seconds at which to expire the "
+			 "notification."),
 		  NULL },
-		{ "sound", 's', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &sound, 0,
-		  N_("Specifies a sound file to play on notification."), NULL },
 		{ "icon",  'i', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &icons, 0,
 		  N_("Specifies an icon filename or stock icon to display."),
+		  N_("ICON1,ICON2,...") },
+		{ "type",  't', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &type, 0,
+		  N_("Specifies the notification type."),
 		  N_("ICON1,ICON2,...") },
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
 	opt_ctx = poptGetContext("notify-send", argc, argv, options, 0);
-	poptSetOtherOptionHelp(opt_ctx, "[OPTIONS]* <summary> [description]");
+	poptSetOtherOptionHelp(opt_ctx, "[OPTIONS]* <summary> [body]");
 
 	while ((ch = poptGetNextOpt(opt_ctx)) >= 0)
 		;
@@ -82,7 +85,7 @@ main(int argc, const char **argv)
 
 	if (args[1] != NULL)
 	{
-		description = args[1];
+		body = args[1];
 
 		if (args[2] != NULL)
 		{
@@ -110,8 +113,6 @@ main(int argc, const char **argv)
 			urgency = NOTIFY_URGENCY_LOW;
 		else if (!strcasecmp(urgency_str, "normal"))
 			urgency = NOTIFY_URGENCY_NORMAL;
-		else if (!strcasecmp(urgency_str, "high"))
-			urgency = NOTIFY_URGENCY_HIGH;
 		else if (!strcasecmp(urgency_str, "critical"))
 			urgency = NOTIFY_URGENCY_CRITICAL;
 		else
@@ -123,11 +124,8 @@ main(int argc, const char **argv)
 
 	if (!notify_init("notify-send")) exit(1);
 
-        /* if the given time is < current time, treat it as a timeout in seconds (ie 5 seconds) */
-	if (expire_time && expire_time < time(NULL)) expire_time += time(NULL);
-	
-	notify_send_notification(NULL, urgency, summary, description, icon,
-							 TRUE, expire_time, NULL, 0);
+	notify_send_notification(NULL, type, urgency, summary, body, icon,
+							 TRUE, expire_timeout, NULL, 0);
 
 	if (icon != NULL)
 		notify_icon_destroy(icon);

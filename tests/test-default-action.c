@@ -37,36 +37,39 @@ static NotifyHandle *n;
 
 static void callback(NotifyHandle *handle, guint32 uid, void *user_data)
 {
-    assert( uid == 0 );
+	assert( uid == 0 );
 
-    notify_close(n);
+	notify_close(n);
 
-    g_main_loop_quit(loop);
+	g_main_loop_quit(loop);
 }
 
-int main() {
-    if (!notify_init("Default Action Test")) exit(1);
+int
+main()
+{
+	if (!notify_init("Default Action Test")) exit(1);
 
-    DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
-    loop = g_main_loop_new(NULL, FALSE);
+	DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
+	loop = g_main_loop_new(NULL, FALSE);
 
-    dbus_connection_setup_with_g_main(conn, NULL);
+	dbus_connection_setup_with_g_main(conn, NULL);
 
-    n = notify_send_notification(NULL, // replaces nothing
-                                 NOTIFY_URGENCY_NORMAL,
-                                 "Matt is online", NULL,
-                                 NULL, // no icon
-                                 FALSE, 0, // does not expire
-                                 NULL, // no user data
-                                 1,
-                                 0, "default", callback); // 1 action
+	n = notify_send_notification(NULL, // replaces nothing
+	                             "presence.online",
+	                             NOTIFY_URGENCY_NORMAL,
+	                             "Matt is online", NULL,
+	                             NULL, // no icon
+	                             FALSE, 0, // does not expire
+	                             NULL, // no user data
+	                             1,
+	                             0, "default", callback); // 1 action
 
-    if (!n) {
-        fprintf(stderr, "failed to send notification\n");
-        return 1;
-    }
+	if (!n) {
+		fprintf(stderr, "failed to send notification\n");
+		return 1;
+	}
 
-    g_main_loop_run(loop);
+	g_main_loop_run(loop);
 
-    return 0;
+	return 0;
 }

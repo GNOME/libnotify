@@ -30,56 +30,59 @@
 #include <glib.h>
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 
 GMainLoop *loop;
 NotifyHandle *n;
 
 static void callback(NotifyHandle *handle, guint32 uid, void *user_data)
 {
-    char *s = NULL;
+	char *s = NULL;
 
-    assert( uid >= 0 && uid <= 2 );
-    
-    switch (uid)
-    {
-        case 0: s = "the notification"; break;
-        case 1: s = "Empty Trash"; break;
-        case 2: s = "Help Me"; break;
-    }
-    
-    printf("You clicked %s\n", s);
+	assert( uid >= 0 && uid <= 2 );
 
-    notify_close(n);
+	switch (uid)
+	{
+	    case 0: s = "the notification"; break;
+	    case 1: s = "Empty Trash"; break;
+	    case 2: s = "Help Me"; break;
+	}
 
-    g_main_loop_quit(loop);
+	printf("You clicked %s\n", s);
+
+	notify_close(n);
+
+	g_main_loop_quit(loop);
 }
 
 int main() {
-    if (!notify_init("Multi Action Test")) exit(1);
+	if (!notify_init("Multi Action Test")) exit(1);
 
-    DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
-    loop = g_main_loop_new(NULL, FALSE);
+	DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
+	loop = g_main_loop_new(NULL, FALSE);
 
-    dbus_connection_setup_with_g_main(conn, NULL);
-    
-    n = notify_send_notification(NULL, // replaces nothing
-                                 NOTIFY_URGENCY_NORMAL,
-                                 "Low disk space", "You can free up some disk space by emptying the trash can.",
-                                 NULL, // no icon
-                                 FALSE, 0, // does not expire
-                                 NULL, // no user data
-                                 
-                                 3,    // 3 actions
-                                 0, "default", callback,
-                                 1, "Empty Trash", callback,
-                                 2, "Help Me", callback ); 
+	dbus_connection_setup_with_g_main(conn, NULL);
 
-    if (!n) {
-        fprintf(stderr, "failed to send notification\n");
-        return 1;
-    }
+	n = notify_send_notification(NULL, // replaces nothing
+	                             "device",
+	                             NOTIFY_URGENCY_NORMAL,
+	                             "Low disk space",
+	                             "You can free up some disk space by "
+	                             "emptying the trash can.",
+	                             NULL, // no icon
+	                             FALSE, 0, // does not expire
+	                             NULL, // no user data
+	                             3,    // 3 actions
+	                             0, "default", callback,
+	                             1, "Empty Trash", callback,
+	                             2, "Help Me", callback );
 
-    g_main_loop_run(loop);
+	if (!n) {
+	    fprintf(stderr, "failed to send notification\n");
+	    return 1;
+	}
 
-    return 0;
+	g_main_loop_run(loop);
+
+	return 0;
 }

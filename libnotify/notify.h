@@ -31,7 +31,6 @@ typedef enum
 {
 	NOTIFY_URGENCY_LOW,       /**< Low urgency.      */
 	NOTIFY_URGENCY_NORMAL,    /**< Normal urgency.   */
-	NOTIFY_URGENCY_HIGH,      /**< High urgency.     */
 	NOTIFY_URGENCY_CRITICAL,  /**< Critical urgency. */
 
 } NotifyUrgency;
@@ -152,13 +151,14 @@ void notify_icon_destroy(NotifyIcon *icon);
  * @endcode
  *
  * @param replaces       The ID of the notification to atomically replace
+ * @param type           The optional notification type.
  * @param urgency        The urgency level.
  * @param summary        The summary of the notification.
- * @param detailed       The optional detailed information.
+ * @param body           The optional body.
  * @param icon           The optional icon.
  * @param expires        TRUE if the notification should automatically expire,,
  *                       or FALSE to keep it open until manually closed.
- * @param expire_time    The optional time to automatically close the
+ * @param timeout        The optional timeout to automatically close the
  *                       notification, or 0 for the daemon's default.
  * @param user_data      User-specified data to send to a callback.
  * @param action_count   The number of actions.
@@ -167,11 +167,12 @@ void notify_icon_destroy(NotifyIcon *icon);
  * @return A unique ID for the notification.
  */
 NotifyHandle *notify_send_notification(NotifyHandle *replaces,
+									   const char *type,
 									   NotifyUrgency urgency,
 									   const char *summary,
 									   const char *detailed,
 									   const NotifyIcon *icon,
-									   gboolean expires, time_t expire_time,
+									   gboolean expires, time_t timeout,
 									   gpointer user_data,
 									   size_t action_count, ...);
 
@@ -185,13 +186,14 @@ NotifyHandle *notify_send_notification(NotifyHandle *replaces,
  * @endcode
  *
  * @param replaces       The handle of the notification to atomically replace
+ * @param type           The optional notification type.
  * @param urgency        The urgency level.
  * @param summary        The summary of the notification.
- * @param detailed       The optional detailed information.
+ * @param detailed       The optional body.
  * @param icon           The optional icon.
  * @param expires        TRUE if the notification should automatically expire,
  *                       or FALSE to keep it open until manually closed.
- * @param expire_time    The optional time to automatically close the
+ * @param timeout        The optional timeout to automatically close the
  *                       notification, or 0 for the daemon's default.
  * @param user_data      User-specified data to send to a callback.
  * @param action_count   The number of actions.
@@ -200,12 +202,13 @@ NotifyHandle *notify_send_notification(NotifyHandle *replaces,
  * @return A unique ID for the notification.
  */
 NotifyHandle *notify_send_notification_varg(NotifyHandle *replaces,
+											const char *type,
 											NotifyUrgency urgency,
 											const char *summary,
 											const char *detailed,
 											const NotifyIcon *icon,
 											gboolean expires,
-											time_t expire_time,
+											time_t timeout,
 											gpointer user_data,
 											size_t action_count,
 											va_list actions);
