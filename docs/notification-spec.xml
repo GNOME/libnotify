@@ -528,19 +528,19 @@
       </thead>
       <tbody valign="top">
        <row>
-        <entry>app_name</entry>
+        <entry><parameter>app_name</parameter></entry>
         <entry>STRING or NIL</entry>
         <entry>
          The optional name of the application sending the notification.
         </entry>
        </row>
        <row>
-        <entry>app_icon</entry>
+        <entry><parameter>app_icon</parameter></entry>
         <entry>BYTE_ARRAY or NIL</entry>
         <entry>The optional program icon of the calling application.</entry>
        </row>
        <row>
-        <entry>replaces_id</entry>
+        <entry><parameter>replaces_id</parameter></entry>
         <entry>UINT32 or NIL</entry>
         <entry>
          The optional notification ID that this notification replaces. The
@@ -550,7 +550,7 @@
         </entry>
        </row>
        <row>
-        <entry>notification_type</entry>
+        <entry><parameter>notification_type</parameter></entry>
         <entry>STRING or NIL</entry>
         <entry>
          The optional notification type ID, for potential server
@@ -559,34 +559,34 @@
         </entry>
        </row>
        <row>
-        <entry>urgency_level</entry>
+        <entry><parameter>urgency_level</parameter></entry>
         <entry>BYTE</entry>
         <entry>The urgency level. See <xref linkend="urgency-levels"/>.</entry>
        </row>
        <row>
-        <entry>summary</entry>
+        <entry><parameter>summary</parameter></entry>
         <entry>STRING</entry>
         <entry>The summary text briefly describing the notification.</entry>
        </row>
        <row>
-        <entry>body</entry>
+        <entry><parameter>body</parameter></entry>
         <entry>STRING or NIL</entry>
         <entry>The optional detailed body text.</entry>
        </row>
        <row>
-        <entry>images</entry>
+        <entry><parameter>images</parameter></entry>
         <entry>ARRAY or NIL</entry>
         <entry>
          The optional array of images. See <xref linkend="icons-sounds"/>.
         </entry>
        </row>
        <row>
-        <entry>sound</entry>
+        <entry><parameter>sound</parameter></entry>
         <entry>STRING</entry>
         <entry>The optional sound file to play.</entry>
        </row>
        <row>
-        <entry>actions</entry>
+        <entry><parameter>actions</parameter></entry>
         <entry>DICT or NIL</entry>
         <entry>
          A dictionary key of actions. Each key is the localized name of the
@@ -596,7 +596,7 @@
         </entry>
        </row>
        <row>
-        <entry>hints</entry>
+        <entry><parameter>hints</parameter></entry>
         <entry>DICT or NIL</entry>
         <entry>
          Optional hints that can be passed to the server from the client
@@ -607,7 +607,7 @@
         </entry>
        </row>
        <row>
-        <entry>expire_time</entry>
+        <entry><parameter>expire_time</parameter></entry>
         <entry>UINT32 or NIL</entry>
         <entry>
          The notification time-out time, represented as UNIX-time (seconds
@@ -692,12 +692,12 @@
       </thead>
       <tbody valign="top">
        <row>
-        <entry>name</entry>
+        <entry><parameter>name</parameter></entry>
         <entry>STRING</entry>
         <entry>The product name of the server.</entry>
        </row>
        <row>
-        <entry>vendor</entry>
+        <entry><parameter>vendor</parameter></entry>
         <entry>STRING</entry>
         <entry>
          The vendor name. For example, "KDE," "GNOME,"
@@ -705,7 +705,7 @@
         </entry>
        </row>
        <row>
-        <entry>version</entry>
+        <entry><parameter>version</parameter></entry>
         <entry>STRING</entry>
         <entry>The server's version number.</entry>
        </row>
