@@ -270,7 +270,7 @@ The following messages must be supported by all implementations.
 
 * GetServerInformation
 
-  This message takes no parameters, and returns the following values:
+  This message takes no parameters, and returns the following values in an array:
 
   STRING name: the product name of the server
   STRING vendor: "kde"/"freedesktop.org"/"Microsoft" etc etc
@@ -296,19 +296,24 @@ All implementations must emit the following signals:
 
 The following signals MAY be emitted by the server.
 
-* ActionInvoked
+* Invoked
 
-  If the server specifies "actions" in its caps array, and actions
-  were specified in the original request, this signal must be emitted
-  if the user invokes a given action (for instance, by clicking a
-  button).
+  This signal is emitted when:
+
+  - The user performs some global "invoking" action upon a notification,
+    for instance by clicking on its graphical representation
+  - The user invokes a specific action as specified in the original
+    Notify request, for example by clicking on the action button.
 
   ActionInvoked has two parameters:
 
   * UINT32 id: The ID of the notification containing the invoked action.
 
-  * UINT32 action_id: The ID of the action that was invoked, which was
-                      specified in the original dictionary.
+  * UINT32 action_id: Zero means the default invoke action that can be
+                      performed on any notification. 1+ is the index in
+                      the actions array originally specified.
 
-
+  Clients should not assume the server will generate this signal: some
+  servers may not support user interaction at all, or may not support
+  the concept of being able to "invoke" a notification.
 
