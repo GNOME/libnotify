@@ -228,7 +228,7 @@ The following messages must be supported by all implementations.
   (ie an acceptable implementation for this is just an incrementing
   counter).
 
-* CloseNotify
+* CloseNotification
 
   This message indicates that the notification should be removed from
   the users view. It can be used, for instance, if the event the
@@ -246,7 +246,7 @@ The following messages must be supported by all implementations.
 
 All implementations must emit the following signals:
 
-* NotifyComplete
+* NotificationClosed
 
   A completed notification is one that has timed out, or been
   dismissed by the user.
@@ -269,7 +269,14 @@ The following signals MAY be emitted by the server.
   If the server specifies "actions" in its caps array, and actions
   were specified in the original request, this signal must be emitted
   if the user invokes a given action (for instance, by clicking a
-  button). It has one UINT32 parameter, the ID of the action that was
-  invoked which was specified in the original dictionary.
+  button).
+
+  ActionInvoked has two parameters:
+
+  * UINT32 id: The ID of the notification containing the invoked action.
+
+  * UINT32 action_id: The ID of the action that was invoked, which was
+                      specified in the original dictionary.
+
 
 REFERENCE
