@@ -1,3 +1,8 @@
+Sun Jun 27 16:38:42 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Make sure we include our config.h if we have one.
+
 Sun Jun 27 16:37:30 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

@@ -18,7 +18,13 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
-#define DBUS_API_SUBJECT_TO_CHANGE 1
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#ifndef DBUS_API_SUBJECT_TO_CHANGE
+# define DBUS_API_SUBJECT_TO_CHANGE 1
+#endif
 
 #include "notify.h"
 #include <dbus/dbus.h>
