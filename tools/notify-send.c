@@ -38,8 +38,7 @@ main(int argc, const char **argv)
 	gchar *icon_str = NULL;
 	NotifyIcon *icon = NULL;
 	NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
-	gboolean timeout = TRUE;
-	time_t timeout_time;
+	time_t expire_time;
 	char ch;
 	poptContext opt_ctx;
 	const char **args;
@@ -48,8 +47,9 @@ main(int argc, const char **argv)
 		{ "urgency", 'u', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &urgency_str,
 		  0, N_("Specifies the urgency level (low, normal, high, critical)"),
 		  NULL },
-		{ "timeout", 't', POPT_ARG_INT | POPT_ARGFLAG_STRIP, &timeout_time, 0,
-		  N_("Specifies the timeout time in seconds."), NULL },
+		{ "expire-time", 't', POPT_ARG_INT | POPT_ARGFLAG_STRIP, &expire_time,
+		  0, N_("Specifies the timestamp at which to expire the notification"),
+		  NULL },
 		{ "sound", 's', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &sound, 0,
 		  N_("Specifies a sound file to play on notification."), NULL },
 		{ "icon",  'i', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &icons, 0,
@@ -128,7 +128,7 @@ main(int argc, const char **argv)
 	}
 
 	notify_send_notification(urgency, summary, description, icon,
-							 time(NULL) + timeout, timeout_time, NULL, 0);
+							 TRUE, expire_time, NULL, 0);
 
 	if (icon != NULL)
 		notify_icon_destroy(icon);

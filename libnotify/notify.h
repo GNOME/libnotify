@@ -154,9 +154,9 @@ void notify_icon_destroy(NotifyIcon *icon);
  * @param summary        The summary of the notification.
  * @param detailed       The optional detailed information.
  * @param icon           The optional icon.
- * @param timeout        TRUE if the notification should automatically timeout,
+ * @param expires        TRUE if the notification should automatically expire,,
  *                       or FALSE to keep it open until manually closed.
- * @param timeout_time   The optional time to automatically close the
+ * @param expire_time    The optional time to automatically close the
  *                       notification, or 0 for the daemon's default.
  * @param user_data      User-specified data to send to a callback.
  * @param action_count   The number of actions.
@@ -168,7 +168,7 @@ NotifyHandle *notify_send_notification(NotifyUrgency urgency,
 									   const char *summary,
 									   const char *detailed,
 									   const NotifyIcon *icon,
-									   gboolean timeout, time_t timeout_time,
+									   gboolean expires, time_t expire_time,
 									   gpointer user_data,
 									   size_t action_count, ...);
 
@@ -185,9 +185,9 @@ NotifyHandle *notify_send_notification(NotifyUrgency urgency,
  * @param summary        The summary of the notification.
  * @param detailed       The optional detailed information.
  * @param icon           The optional icon.
- * @param timeout        TRUE if the notification should automatically timeout,
+ * @param expires        TRUE if the notification should automatically expire,
  *                       or FALSE to keep it open until manually closed.
- * @param timeout_time   The optional time to automatically close the
+ * @param expire_time    The optional time to automatically close the
  *                       notification, or 0 for the daemon's default.
  * @param user_data      User-specified data to send to a callback.
  * @param action_count   The number of actions.
@@ -199,8 +199,8 @@ NotifyHandle *notify_send_notification_varg(NotifyUrgency urgency,
 											const char *summary,
 											const char *detailed,
 											const NotifyIcon *icon,
-											gboolean timeout,
-											time_t timeout_time,
+											gboolean expires,
+											time_t expire_time,
 											gpointer user_data,
 											size_t action_count,
 											va_list actions);

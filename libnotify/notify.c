@@ -576,7 +576,7 @@ notify_icon_destroy(NotifyIcon *icon)
 NotifyHandle *
 notify_send_notification(NotifyUrgency urgency, const char *summary,
 						 const char *detailed, const NotifyIcon *icon,
-						 gboolean timeout, time_t timeout_time,
+						 gboolean expires, time_t expire_time,
 						 gpointer user_data, size_t action_count, ...)
 {
 	va_list actions;
@@ -586,7 +586,7 @@ notify_send_notification(NotifyUrgency urgency, const char *summary,
 
 	va_start(actions, action_count);
 	handle = notify_send_notification_varg(urgency, summary, detailed, icon,
-										   timeout, timeout_time, user_data,
+										   expires, expire_time, user_data,
 										   action_count, actions);
 	va_end(actions);
 
@@ -596,7 +596,7 @@ notify_send_notification(NotifyUrgency urgency, const char *summary,
 NotifyHandle *
 notify_send_notification_varg(NotifyUrgency urgency, const char *summary,
 							  const char *detailed, const NotifyIcon *icon,
-							  gboolean timeout, time_t timeout_time,
+							  gboolean expires, time_t expire_time,
 							  gpointer user_data, size_t action_count,
 							  va_list actions)
 {
@@ -661,8 +661,8 @@ notify_send_notification_varg(NotifyUrgency urgency, const char *summary,
 		g_hash_table_insert(table, GINT_TO_POINTER(action->id), action);
 	}
 
-	if (timeout)
-		dbus_message_iter_append_uint32(&iter, timeout_time);
+	if (expires)
+		dbus_message_iter_append_uint32(&iter, expire_time);
 	else
 		dbus_message_iter_append_nil(&iter);
 
@@ -675,7 +675,7 @@ notify_send_notification_varg(NotifyUrgency urgency, const char *summary,
 
 	if (dbus_error_is_set(&error))
 	{
-		print_error("Error sending SendNotification: %s\n", error.message);
+		print_error("Error sending Notify: %s\n", error.message);
 
 		dbus_error_free(&error);
 

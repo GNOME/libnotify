@@ -1,4 +1,4 @@
-noinst_PROGRAMS = notify-send
+bin_PROGRAMS = notify-send
 
 common_ldflags = \
 	$(top_builddir)/libnotify/libnotify.la \

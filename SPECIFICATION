@@ -79,20 +79,21 @@ A notification has the following components:
   requested by the client. As an example one possible rendering of
   actions would be as buttons in the notification popup.
 
-- A timeout: the time in milliseconds after which the notification
-  should be hidden (FIXME: should this be a function of text length
-  to accommodate different reading speeds?). If zero, the notification's
-  timeout is dependent on the notification server's settings, and may vary
-  for the type of notification.
+- An expiration time: the timestamp in seconds since the epoch that the
+  notification should close. If one wishes to have an expiration of 5 seconds
+  from now, they must grab the current timestamp and add 5 seconds to it.
 
-  The timeout should be respected by implementations, but this is not
-  required (this is for compatibility with KNotify).
+  If zero, the notification's expiration time is dependent on the notification
+  server's settings, and may vary for the type of notification.
+
+  The expiration time should be respected by implementations, but this is
+  not required (this is for compatibility with KNotify).
 
 
 Each notification displayed is allocated a unique ID by the server
 (FIXME: should this be unique within a session, or just unique while
 the notification is active?). This can be used to hide the
-notification before the timeout is over. It can also be used to
+notification before the expiration time is reached. It can also be used to
 atomically replace the notification with another: this allows you to
 (for instance) modify the contents of a notification while it's
 on-screen.
@@ -227,7 +228,7 @@ The following messages must be supported by all implementations.
   code. This code will be reported back to the client if the action
   is invoked by the user.
 
-  UINT32/NIL timeout: if nil the notification never times out
+  UINT32/NIL expire time: if nil the notification never times out
 
   It returns a UINT32 that will never be reused within a
   session unless more than MAXINT notifications have been generated
@@ -239,7 +240,7 @@ The following messages must be supported by all implementations.
   This message indicates that the notification should be removed from
   the users view. It can be used, for instance, if the event the
   notification pertains to is no longer relevant or to cancel a
-  notification with no timeout. It takes one UINT32 parameter, the ID
+  notification with no expiration. It takes one UINT32 parameter, the ID
   of the notificaton to cancel.
 
 * GetServerInformation
@@ -261,7 +262,7 @@ All implementations must emit the following signals:
 
   * UINT32 id: containing the ID of the notification that was
                completed.
-  * UINT32 reason: 1 for timeout, 2 for being dismissed by the user,
+  * UINT32 reason: 1 for expires, 2 for being dismissed by the user,
                    3 for "other".
 
   The ID specified in the signal is invalidated *before* the signal
