@@ -1,3 +1,9 @@
+Mon Jun 20 06:13:02 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Be a little better at not crashing. Just a bit better. There's
+	    still another crash I'm trying to track down.
+
 Mon Jun 20 04:53:29 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

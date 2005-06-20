@@ -452,9 +452,11 @@ notify_get_server_info(char **ret_name, char **ret_vendor, char **ret_version)
 	if (ret_version != NULL)
 		*ret_version = g_strdup(version);
 
+#if !NOTIFY_CHECK_DBUS_VERSION(0, 30)
 	dbus_free(name);
 	dbus_free(vendor);
 	dbus_free(version);
+#endif
 
 	return TRUE;
 }
