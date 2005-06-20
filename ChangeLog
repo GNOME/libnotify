@@ -1,3 +1,9 @@
+Mon Jun 20 02:49:27 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/Makefile.am:
+	A libnotify/dbus-compat.h:
+	  - Add dbus-compat.h.
+
 Mon Jun 20 02:43:26 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

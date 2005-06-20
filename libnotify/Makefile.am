@@ -6,6 +6,7 @@ notifyinc_HEADERS = \
 	notify.h
 
 libnotify_la_SOURCES = \
+	dbus-compat.h \
 	notify.c
 
 libnotify_la_LIBADD = \
