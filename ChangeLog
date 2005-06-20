@@ -1,3 +1,8 @@
+Mon Jun 20 04:53:29 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Close the right container in D-BUS 0.3x.
+
 Mon Jun 20 02:49:27 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/Makefile.am:

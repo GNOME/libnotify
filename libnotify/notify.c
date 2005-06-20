@@ -757,7 +757,7 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 		g_hash_table_insert(table, &action->id, action);
 	}
 
-	dbus_message_iter_close_container(&iter, &array_iter);
+	dbus_message_iter_close_container(&iter, &dict_iter);
 
 	/* Hints */
 #if NOTIFY_CHECK_DBUS_VERSION(0, 30)
