@@ -89,10 +89,25 @@ AM_PROG_LIBTOOL
 
 AC_CHECK_LIB([popt], [poptGetArg], , AC_MSG_ERROR([Popt is required]))
 
-pkg_modules="glib-2.0 >= 2.2.2, dbus-1 >= 0.20, dbus-glib-1 >= 0.20"
+pkg_modules="glib-2.0 >= 2.2.2, dbus-1 >= 0.23, dbus-glib-1 >= 0.23"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
+
+dnl
+dnl Check the D-BUS version.
+dnl
+
+AC_MSG_CHECKING([dbus version])
+DBUS_VERSION=`$PKG_CONFIG --modversion dbus-1`
+DBUS_MAJOR_VER=`echo $DBUS_VERSION | cut -d. -f 1`
+DBUS_MINOR_VER=`echo $DBUS_VERSION | cut -d. -f 2`
+DBUS_MICRO_VER=`echo $DBUS_VERSION | cut -d. -f 3`
+
+AC_MSG_RESULT($DBUS_VERSION)
+AC_DEFINE_UNQUOTED(DBUS_MAJOR_VER, $DBUS_MAJOR_VER, [D-BUS major version.])
+AC_DEFINE_UNQUOTED(DBUS_MINOR_VER, $DBUS_MINOR_VER, [D-BUS minor version.])
+AC_DEFINE_UNQUOTED(DBUS_MICRO_VER, $DBUS_MICRO_VER, [D-BUS micro version.])
 
 AC_DEFINE_UNQUOTED(DBUS_API_SUBJECT_TO_CHANGE, ,DBUS API is subject to change)
 

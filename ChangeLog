@@ -1,3 +1,10 @@
+Mon Jun 20 02:43:26 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* configure.ac:
+	  - Add support for compiling under D-BUS 0.3x. Actually running
+	    has not yet been tested!
+
 Fri Apr 01 09:21:26 PST 2005  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

@@ -30,6 +30,7 @@
 #endif
 
 #include "notify.h"
+#include "dbus-compat.h"
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 #include <stdio.h>
@@ -152,7 +153,7 @@ _notify_dbus_message_new(const char *name, DBusMessageIter *iter)
 	g_return_val_if_fail(message != NULL, NULL);
 
 	if (iter != NULL)
-		dbus_message_iter_init(message, iter);
+		dbus_message_iter_init_append(message, iter);
 
 	return message;
 }
@@ -163,7 +164,10 @@ _notify_dbus_message_iter_append_string_or_empty(DBusMessageIter *iter,
 {
 	g_return_if_fail(iter != NULL);
 
-	dbus_message_iter_append_string(iter, (str != NULL ? str : ""));
+	if (str == NULL)
+		str = "";
+
+	_notify_dbus_message_iter_append_string(iter, str);
 }
 
 static DBusHandlerResult
@@ -178,10 +182,10 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 
 		dbus_message_iter_init(message, &iter);
 
-		id = dbus_message_iter_get_uint32(&iter);
+		_notify_dbus_message_iter_get_uint32(&iter, id);
 		dbus_message_iter_next(&iter);
 
-		reason = dbus_message_iter_get_uint32(&iter);
+		_notify_dbus_message_iter_get_uint32(&iter, reason);
 
 		g_hash_table_remove(_handles, &id);
 	}
@@ -193,10 +197,10 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 
 		dbus_message_iter_init(message, &iter);
 
-		id = dbus_message_iter_get_uint32(&iter);
+		_notify_dbus_message_iter_get_uint32(&iter, id);
 		dbus_message_iter_next(&iter);
 
-		action_id = dbus_message_iter_get_uint32(&iter);
+		_notify_dbus_message_iter_get_uint32(&iter, action_id);
 
 		handle = g_hash_table_lookup(_handles, &id);
 
@@ -210,8 +214,7 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 		{
 			NotifyAction *action;
 
-			action = g_hash_table_lookup(handle->actions_table,
-										 &action_id);
+			action = g_hash_table_lookup(handle->actions_table, &action_id);
 
 			if (action == NULL)
 			{
@@ -250,8 +253,8 @@ _notify_connect(void)
 
 	dbus_connection_set_exit_on_disconnect(_dbus_conn, FALSE);
 
-	if (!dbus_bus_activate_service(_dbus_conn, NOTIFY_DBUS_SERVICE, 0, NULL,
-								   &error))
+	if (!dbus_bus_start_service_by_name(_dbus_conn, NOTIFY_DBUS_SERVICE,
+										0, NULL, &error))
 	{
 		print_error("Error activating %s service: %s\n",
 					NOTIFY_DBUS_SERVICE, error.message);
@@ -272,8 +275,8 @@ _notify_connect(void)
 
 	dbus_bus_add_match(_dbus_conn,
 					   "type=signal,"
-					   "interface=" DBUS_INTERFACE_ORG_FREEDESKTOP_DBUS ","
-					   "sender=" DBUS_SERVICE_ORG_FREEDESKTOP_DBUS ,
+					   "interface=" DBUS_INTERFACE_DBUS ","
+					   "sender=" DBUS_SERVICE_DBUS ,
 					   &error);
 
 	dbus_bus_add_match(_dbus_conn,
@@ -391,7 +394,7 @@ notify_close(NotifyHandle *handle)
 
 	g_return_if_fail(message != NULL);
 
-	dbus_message_iter_append_uint32(&iter, handle->id);
+	_notify_dbus_message_iter_append_uint32(&iter, handle->id);
 
 	dbus_connection_send_with_reply_and_block(_dbus_conn, message, -1, NULL);
 	dbus_message_unref(message);
@@ -429,13 +432,13 @@ notify_get_server_info(char **ret_name, char **ret_vendor, char **ret_version)
 
 	dbus_message_iter_init(reply, &iter);
 
-	name = dbus_message_iter_get_string(&iter);
+	_notify_dbus_message_iter_get_string(&iter, name);
 	dbus_message_iter_next(&iter);
 
-	vendor = dbus_message_iter_get_string(&iter);
+	_notify_dbus_message_iter_get_string(&iter, vendor);
 	dbus_message_iter_next(&iter);
 
-	version = dbus_message_iter_get_string(&iter);
+	_notify_dbus_message_iter_get_string(&iter, version);
 	dbus_message_iter_next(&iter);
 
 	dbus_message_unref(reply);
@@ -490,8 +493,8 @@ notify_get_server_caps(void)
 
 	dbus_message_iter_init(reply, &iter);
 
-	if (!dbus_message_iter_get_string_array(&iter, &temp_array, &num_items))
-		return NULL;
+	_notify_dbus_message_iter_get_string_array(&iter, &temp_array,
+											   &num_items);
 
 	dbus_message_unref(reply);
 
@@ -642,6 +645,8 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	GHashTable *table;
 	guint32 id;
 	guint32 i;
+	guint32 replaces_id;
+	guint32 timeout_time;
 	NotifyHandle *handle;
 
 	g_return_val_if_fail(notify_is_initted(), NULL);
@@ -650,47 +655,75 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 
 	g_return_val_if_fail(message != NULL, NULL);
 
+	replaces_id = (replaces != NULL ? replaces->id : 0);
+
 	_notify_dbus_message_iter_append_string_or_empty(&iter, _app_name);
-	dbus_message_iter_append_string(&iter, "");
-	dbus_message_iter_append_uint32(&iter,
-									(replaces != NULL ? replaces->id : 0));
+	_notify_dbus_message_iter_append_string_or_empty(&iter, NULL);
+	_notify_dbus_message_iter_append_uint32(&iter, replaces_id);
 	_notify_dbus_message_iter_append_string_or_empty(&iter, type);
-	dbus_message_iter_append_byte(&iter, urgency);
-	dbus_message_iter_append_string(&iter, summary);
+	_notify_dbus_message_iter_append_byte(&iter, urgency);
+	_notify_dbus_message_iter_append_string(&iter, summary);
 	_notify_dbus_message_iter_append_string_or_empty(&iter, body);
 
 	if (icon == NULL)
 	{
-		dbus_message_iter_append_string(&iter, "");
+		_notify_dbus_message_iter_append_string_or_empty(&iter, NULL);
 	}
 	else if (icon->raw_data)
 	{
 		int i;
 
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+		dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY,
+										 DBUS_TYPE_ARRAY_AS_STRING,
+										 &array_iter);
+#else
 		dbus_message_iter_append_array(&iter, &array_iter, DBUS_TYPE_ARRAY);
+#endif
 
 		for (i = 0; i < icon->frames; i++)
 		{
-			dbus_message_iter_append_byte_array(&array_iter, icon->raw_data[i],
-												icon->raw_len[i]);
+			_notify_dbus_message_iter_append_byte_array(&array_iter,
+														icon->raw_data[i],
+														icon->raw_len[i]);
 		}
+
+		dbus_message_iter_close_container(&iter, &array_iter);
 	}
 	else
 	{
 		int i;
 
-		dbus_message_iter_append_array(&iter, &array_iter, DBUS_TYPE_STRING);
+		g_assert(icon->uri != NULL); /* can be either raw data OR uri */
 
-		g_assert( icon->uri != NULL); /* can be either raw data OR uri */
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+		dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY,
+										 DBUS_TYPE_STRING_AS_STRING,
+										 &array_iter);
+#else
+		dbus_message_iter_append_array(&iter, &array_iter, DBUS_TYPE_STRING);
+#endif
 
 		for (i = 0; i < icon->frames; i++)
 		{
-			dbus_message_iter_append_string(&array_iter, icon->uri[i]);
+			_notify_dbus_message_iter_append_string(&array_iter,
+													icon->uri[i]);
 		}
+
+		dbus_message_iter_close_container(&iter, &array_iter);
 	}
 
 	/* Actions */
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+	dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY,
+									 DBUS_DICT_ENTRY_BEGIN_CHAR_AS_STRING
+									 DBUS_TYPE_STRING_AS_STRING
+									 DBUS_TYPE_UINT32_AS_STRING
+									 DBUS_DICT_ENTRY_END_CHAR_AS_STRING,
+									 &dict_iter);
+#else
 	dbus_message_iter_append_dict(&iter, &dict_iter);
+#endif
 
 	table = g_hash_table_new_full(g_int_hash, g_int_equal, NULL,
 								  (GFreeFunc)_notify_action_destroy);
@@ -698,6 +731,9 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	for (i = 0; i < action_count; i++)
 	{
 		NotifyAction *action;
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+		DBusMessageIter entry_iter;
+#endif
 
 		action = g_new0(NotifyAction, 1);
 
@@ -705,20 +741,43 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 		action->text = g_strdup((va_arg(actions, char *)));
 		action->cb   = va_arg(actions, NotifyCallback);
 
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+		dbus_message_iter_open_container(&dict_iter, DBUS_TYPE_DICT_ENTRY,
+										 NULL, &entry_iter);
+		dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING,
+									   &action->text);
+		dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_UINT32,
+									   &action->id);
+		dbus_message_iter_close_container(&dict_iter, &entry_iter);
+#else
 		dbus_message_iter_append_dict_key(&dict_iter, action->text);
 		dbus_message_iter_append_uint32(&dict_iter, action->id);
+#endif
 
 		g_hash_table_insert(table, &action->id, action);
 	}
 
+	dbus_message_iter_close_container(&iter, &array_iter);
+
 	/* Hints */
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+	dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY,
+									 DBUS_DICT_ENTRY_BEGIN_CHAR_AS_STRING
+									 DBUS_TYPE_UINT32_AS_STRING
+									 DBUS_TYPE_STRING_AS_STRING
+									 DBUS_DICT_ENTRY_END_CHAR_AS_STRING,
+									 &dict_iter);
+	dbus_message_iter_close_container(&iter, &dict_iter);
+#else
 	dbus_message_iter_append_dict(&iter, &dict_iter);
+#endif
 
 	/* Expires */
-	dbus_message_iter_append_boolean(&iter, expires);
+	_notify_dbus_message_iter_append_boolean(&iter, expires);
 
 	/* Expire Timeout */
-	dbus_message_iter_append_uint32(&iter, (expires ? timeout : 0));
+	timeout_time = (expires ? timeout : 0);
+	_notify_dbus_message_iter_append_uint32(&iter, timeout_time);
 
 	dbus_error_init(&error);
 
@@ -739,7 +798,7 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	}
 
 	dbus_message_iter_init(reply, &iter);
-	id = dbus_message_iter_get_uint32(&iter);
+	_notify_dbus_message_iter_get_uint32(&iter, id);
 
 	dbus_message_unref(reply);
 	dbus_error_free(&error);
