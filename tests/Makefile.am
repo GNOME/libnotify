@@ -1,4 +1,13 @@
-bin_PROGRAMS = test-replace test-default-action test-multi-actions test-image test-basic test-error test-animation test-markup
+noinst_PROGRAMS = \
+	test-replace \
+	test-default-action \
+	test-multi-actions \
+	test-image \
+	test-basic \
+	test-error \
+	test-animation \
+	test-markup \
+	test-xy
 
 common_ldflags = \
 	$(top_builddir)/libnotify/libnotify.la \
@@ -25,5 +34,8 @@ test_animation_LDFLAGS = `pkg-config --libs gdk-pixbuf-2.0`
 
 test_markup_SOURCES = test-markup.c
 test_markup_LDADD = $(common_ldflags)
+
+test_xy_SOURCES = test-xy.c
+test_xy_LDADD = $(common_ldflags)
 
 INCLUDES = $(PACKAGE_CFLAGS) `pkg-config --cflags gdk-pixbuf-2.0`

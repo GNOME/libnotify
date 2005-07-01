@@ -71,6 +71,7 @@ int main() {
 								 "emptying the trash can.",
 								 NULL, // no icon
 								 FALSE, 0, // does not expire
+								 NULL, // no hints
 								 NULL, // no user data
 								 3,	   // 3 actions
 								 0, "default", callback,

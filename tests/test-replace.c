@@ -32,6 +32,7 @@ int main() {
 	                                           "Summary", "Content",
 	                                           NULL, // no icon
 	                                           FALSE, 0, // does not expire
+											   NULL, // no hints
 	                                           NULL, // no user data
 	                                           0); // no actions
 
@@ -41,12 +42,11 @@ int main() {
 	}
 
 
-	sleep(3);
+	sleep(20);
 
 	notify_send_notification(n, NULL, NOTIFY_URGENCY_NORMAL,
 	                         "Second Summary", "Second Content",
-	                         NULL, TRUE, 5, NULL, 0);
+	                         NULL, TRUE, 5, NULL, NULL, 0);
 
 	return 0;
 }
-        

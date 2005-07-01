@@ -60,6 +60,7 @@ main()
 								 "Matt is online", NULL,
 								 NULL, // no icon
 								 FALSE, 0, // does not expire
+								 NULL, // no hints
 								 NULL, // no user data
 								 1,
 								 0, "default", callback); // 1 action

@@ -1,7 +1,7 @@
 /*
- * @file tests/test-default-action.c Unit test: error handling
+ * @file tests/test-xy.c Unit test: X, Y hints
  *
- * @Copyright (C) 2004 Mike Hearn <mike@navi.cx>
+ * @Copyright (C) 2005 Christian Hammond <chipx86@chipx86.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,24 +24,28 @@
 #include <unistd.h>
 
 int main() {
-	notify_init("Error Handling");
+	GHashTable *hints;
 
-	NotifyIcon *icon = notify_icon_new("/no-such");
+	notify_init("XY");
 
-	NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
-											   NULL,
-											   NOTIFY_URGENCY_NORMAL,
-											   "Summary", "Content",
-											   icon, // no icon
-											   TRUE, time(NULL) + 5,
-											   NULL, // no hints
-											   NULL, // no user data
-											   0);
+	hints = notify_hints_new();
+	notify_hints_set_int(hints, "x", 150);
+	notify_hints_set_int(hints, "y", 10);
 
-	notify_icon_destroy(icon);
+	NotifyHandle *n = notify_send_notification(
+		NULL, // replaces nothing
+		NULL,
+		NOTIFY_URGENCY_NORMAL,
+		"X, Y Test",
+		"This notification should point to 150, 10.",
+		NULL, // no icon
+		TRUE, time(NULL) + 5,
+		hints,
+		NULL, // no user data
+		0); // no actions
 
-	if (n) {
-		fprintf(stderr, "failed to get an error ??\n");
+	if (!n) {
+		fprintf(stderr, "failed to send notification\n");
 		return 1;
 	}
 

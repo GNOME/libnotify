@@ -56,6 +56,7 @@ static void send(char *i, size_t rawlen, char *s, char *b)
 								 s, b,
 								 icon,
 								 TRUE, time(NULL) + 5,
+								 NULL, // no hints
 								 NULL, // no user data
 								 0);
 

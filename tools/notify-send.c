@@ -126,7 +126,7 @@ main(int argc, const char **argv)
 		exit(1);
 
 	notify_send_notification(NULL, type, urgency, summary, body, icon,
-							 TRUE, expire_timeout, NULL, 0);
+							 TRUE, expire_timeout, NULL, NULL, 0);
 
 	if (icon != NULL)
 		notify_icon_destroy(icon);

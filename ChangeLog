@@ -1,3 +1,23 @@
+Thu Jun 30 21:09:18 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/Makefile.am:
+	  - Don't install the test programs during make install.
+
+Thu Jun 30 21:03:30 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	* tests/test-animation.c:
+	* tests/test-basic.c:
+	* tests/test-default-action.c:
+	* tests/test-error.c:
+	* tests/test-image.c:
+	* tests/test-markup.c:
+	* tests/test-multi-actions.c:
+	* tests/test-replace.c:
+	* tools/notify-send.c:
+	  - Added support for hints in the API.
+
 Mon Jun 20 06:13:02 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

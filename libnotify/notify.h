@@ -42,6 +42,7 @@ typedef enum
 
 typedef struct _NotifyHandle NotifyHandle;
 typedef struct _NotifyIcon   NotifyIcon;
+typedef GHashTable           NotifyHints;
 
 typedef void (*NotifyCallback)(NotifyHandle *, guint32, gpointer);
 
@@ -106,6 +107,40 @@ gboolean notify_get_server_info(char **ret_name, char **ret_vendor,
 GList *notify_get_server_caps(void);
 
 /*@}*/
+
+/**************************************************************************/
+/** @name Hints API                                                       */
+/**************************************************************************/
+/*@{*/
+
+/**
+ * Creates a hints table.
+ *
+ * @return A hints table.
+ */
+NotifyHints *notify_hints_new(void);
+
+/**
+ * Adds a string value to the hints table.
+ *
+ * @param hints The hints table.
+ * @param key   The key.
+ * @param value The value.
+ */
+void notify_hints_set_string(NotifyHints *hints, const char *key,
+							 const char *value);
+
+/**
+ * Adds an integer value to the hints table.
+ *
+ * @param hints The hints table.
+ * @param key   The key.
+ * @param value The value.
+ */
+void notify_hints_set_int(NotifyHints *hints, const char *key, int value);
+
+/*@}*/
+
 
 /**************************************************************************/
 /** @name NotifyIcon API                                                  */
@@ -206,6 +241,7 @@ void notify_icon_destroy(NotifyIcon *icon);
  *                       or FALSE to keep it open until manually closed.
  * @param timeout        The optional timeout to automatically close the
  *                       notification, or 0 for the daemon's default.
+ * @param hints          A hashtable of hints.
  * @param user_data      User-specified data to send to a callback.
  * @param action_count   The number of actions.
  * @param ...            The actions in uint32/string/callback sets.
@@ -219,6 +255,7 @@ NotifyHandle *notify_send_notification(NotifyHandle *replaces,
 									   const char *body,
 									   const NotifyIcon *icon,
 									   gboolean expires, time_t timeout,
+									   NotifyHints *hints,
 									   gpointer user_data,
 									   size_t action_count, ...);
 
@@ -241,6 +278,7 @@ NotifyHandle *notify_send_notification(NotifyHandle *replaces,
  *                       or FALSE to keep it open until manually closed.
  * @param timeout        The optional timeout to automatically close the
  *                       notification, or 0 for the daemon's default.
+ * @param hints          A hashtable of hints.
  * @param user_data      User-specified data to send to a callback.
  * @param action_count   The number of actions.
  * @param actions        The actions in string/callback pairs.
@@ -255,6 +293,7 @@ NotifyHandle *notify_send_notification_varg(NotifyHandle *replaces,
 											const NotifyIcon *icon,
 											gboolean expires,
 											time_t timeout,
+											NotifyHints *hints,
 											gpointer user_data,
 											size_t action_count,
 											va_list actions);

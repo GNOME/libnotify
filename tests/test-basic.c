@@ -32,6 +32,7 @@ int main() {
 											   "Summary", "Content",
 											   NULL, // no icon
 											   TRUE, time(NULL) + 5,
+											   NULL, // no hints
 											   NULL, // no user data
 											   0); // no actions
 

@@ -32,9 +32,10 @@ int main() {
 		NOTIFY_URGENCY_NORMAL,
 		"Summary",
 		"Some <b>bold</b>, <u>underlined</u>, <i>italic</i>, "
-		"<a href='google.com'>linked</a> text",
+		"<a href='http://www.google.com'>linked</a> text",
 		NULL, // no icon
 		TRUE, time(NULL) + 5,
+		NULL, // no hints
 		NULL, // no user data
 		0); // no actions
 

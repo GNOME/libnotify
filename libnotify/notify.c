@@ -508,6 +508,38 @@ notify_get_server_caps(void)
 	return caps;
 }
 
+
+/**************************************************************************
+ * Notify Hints API
+ **************************************************************************/
+
+NotifyHints *
+notify_hints_new(void)
+{
+	return g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+}
+
+void
+notify_hints_set_string(NotifyHints *hints, const char *key,
+						const char *value)
+{
+	g_return_if_fail(hints != NULL);
+	g_return_if_fail(key != NULL && *key != '\0');
+	g_return_if_fail(value != NULL && *value != '\0');
+
+	g_hash_table_replace(hints, g_strdup(key), g_strdup(value));
+}
+
+void
+notify_hints_set_int(NotifyHints *hints, const char *key, int value)
+{
+	g_return_if_fail(hints != NULL);
+	g_return_if_fail(key != NULL && *key != '\0');
+
+	g_hash_table_replace(hints, g_strdup(key), g_strdup_printf("%d", value));
+}
+
+
 /**************************************************************************
  * Icon API
  **************************************************************************/
@@ -616,7 +648,8 @@ notify_send_notification(NotifyHandle *replaces, const char *type,
 						 NotifyUrgency urgency, const char *summary,
 						 const char *body, const NotifyIcon *icon,
 						 gboolean expires, time_t timeout,
-						 gpointer user_data, size_t action_count, ...)
+						 GHashTable *hints, gpointer user_data,
+						 size_t action_count, ...)
 {
 	va_list actions;
 	NotifyHandle *handle;
@@ -626,11 +659,28 @@ notify_send_notification(NotifyHandle *replaces, const char *type,
 	va_start(actions, action_count);
 	handle = notify_send_notification_varg(replaces, type, urgency, summary,
 										   body, icon, expires,
-										   timeout, user_data,
+										   timeout, hints, user_data,
 										   action_count, actions);
 	va_end(actions);
 
 	return handle;
+}
+
+static void
+hint_foreach_func(const gchar *key, const gchar *value, DBusMessageIter *iter)
+{
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+	DBusMessageIter entry_iter;
+
+	dbus_message_iter_open_container(iter, DBUS_TYPE_DICT_ENTRY, NULL,
+									 &entry_iter);
+	dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING, key);
+	dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING, value);
+	dbus_message_iter_close_container(iter, &entry_iter);
+#else
+	dbus_message_iter_append_dict_key(iter, key);
+	dbus_message_iter_append_string(iter, value);
+#endif
 }
 
 NotifyHandle *
@@ -638,8 +688,8 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 							  NotifyUrgency urgency, const char *summary,
 							  const char *body, const NotifyIcon *icon,
 							  gboolean expires, time_t timeout,
-							  gpointer user_data, size_t action_count,
-							  va_list actions)
+							  GHashTable *hints, gpointer user_data,
+							  size_t action_count, va_list actions)
 {
 	DBusMessage *message, *reply;
 	DBusMessageIter iter, array_iter, dict_iter;
@@ -769,9 +819,17 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 									 DBUS_TYPE_STRING_AS_STRING
 									 DBUS_DICT_ENTRY_END_CHAR_AS_STRING,
 									 &dict_iter);
-	dbus_message_iter_close_container(&iter, &dict_iter);
 #else
 	dbus_message_iter_append_dict(&iter, &dict_iter);
+#endif
+
+	if (hints != NULL)
+	{
+		g_hash_table_foreach(hints, (GHFunc)hint_foreach_func, &dict_iter);
+	}
+
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+	dbus_message_iter_close_container(&iter, &dict_iter);
 #endif
 
 	/* Expires */
@@ -804,6 +862,9 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 
 	dbus_message_unref(reply);
 	dbus_error_free(&error);
+
+	if (hints != NULL)
+		g_hash_table_destroy(hints);
 
 	handle = _notify_handle_new(id);
 	handle->actions_table = table;
