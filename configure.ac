@@ -94,6 +94,19 @@ PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
 
+gdk_modules="gdk-2.0 gdk-pixbuf-2.0"
+PKG_CHECK_MODULES(GDK, [$gdk_modules], have_gdk=yes,
+[
+	have_gdk=no
+
+	AC_WARN("Some test apps will not be built")
+])
+
+AM_CONDITIONAL(HAVE_GDK, test "x$have_gdk" = "xyes")
+
+AC_SUBST(GDK_CFLAGS)
+AC_SUBST(GDK_LIBS)
+
 dnl
 dnl Check the D-BUS version.
 dnl

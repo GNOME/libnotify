@@ -34,7 +34,7 @@ int main() {
 		"Some <b>bold</b>, <u>underlined</u>, <i>italic</i>, "
 		"<a href='http://www.google.com'>linked</a> text",
 		NULL, // no icon
-		TRUE, time(NULL) + 5,
+		FALSE, 0,
 		NULL, // no hints
 		NULL, // no user data
 		0); // no actions
