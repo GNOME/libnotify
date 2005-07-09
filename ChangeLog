@@ -1,3 +1,8 @@
+Sat Jul  9 18:30:41 2005  Duarte Henriques <maxcow@users.sourceforge.net>
+
+	* libnotify/notify.c:
+	  - Fill in handle->user_data in notify_send_notification_varg
+
 Mon Jul 04 02:13:56 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/Makefile.am:
