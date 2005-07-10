@@ -42,7 +42,7 @@ int main() {
 	}
 
 
-	sleep(20);
+	sleep(5);
 
 	notify_send_notification(n, NULL, NOTIFY_URGENCY_NORMAL,
 	                         "Second Summary", "Second Content",

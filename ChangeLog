@@ -1,3 +1,8 @@
+Sun Jul 10 16:46:57 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/test-replace.c:
+	  - Decrease the wait time for the replacement notification.
+
 Sat Jul  9 18:30:41 2005  Duarte Henriques <maxcow@users.sourceforge.net>
 
 	* libnotify/notify.c:
