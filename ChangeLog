@@ -1,3 +1,8 @@
+Tue Jul 12 12:29:08 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* AUTHORS:
+	  - Update the AUTHORs file with our current contributors.
+
 Tue Jul 12 12:28:16 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/Makefile.am:
