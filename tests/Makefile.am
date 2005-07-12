@@ -48,4 +48,4 @@ test_xy_LDADD = $(common_ldflags)
 
 test_xy_stress_LDADD = $(common_ldflags)
 
-INCLUDES = $(PACKAGE_CFLAGS) $(GDK_CFLAGS)
+INCLUDES = $(PACKAGE_CFLAGS) $(GDK_CFLAGS) -I$(top_srcdir)

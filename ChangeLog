@@ -1,3 +1,11 @@
+Tue Jul 12 12:28:16 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/Makefile.am:
+	* tools/Makefile.am:
+	* libnotify.spec.in:
+	  - Patch by Richard Hughes to fix make distcheck, and to provide a
+	    Fedora Core 4 RPM spec file.
+
 Sun Jul 10 16:46:57 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/test-replace.c:
