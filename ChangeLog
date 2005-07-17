@@ -1,3 +1,9 @@
+Sat Jul 16 02:53:06 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Fix the key type for the dictionary for hints on D-BUS 0.3x. The
+	    notification-daemon side is still broken in this regard.
+
 Sat Jul 16 02:51:42 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/dbus-compat.h:

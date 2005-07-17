@@ -833,7 +833,7 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 #if NOTIFY_CHECK_DBUS_VERSION(0, 30)
 	dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY,
 									 DBUS_DICT_ENTRY_BEGIN_CHAR_AS_STRING
-									 DBUS_TYPE_UINT32_AS_STRING
+									 DBUS_TYPE_STRING_AS_STRING
 									 DBUS_TYPE_STRING_AS_STRING
 									 DBUS_DICT_ENTRY_END_CHAR_AS_STRING,
 									 &dict_iter);
