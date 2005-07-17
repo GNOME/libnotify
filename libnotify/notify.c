@@ -468,8 +468,12 @@ notify_get_server_caps(void)
 	DBusMessageIter iter;
 	DBusError error;
 	GList *caps = NULL;
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+	DBusMessageIter array_iter;
+#else
 	char **temp_array;
 	int num_items, i;
+#endif
 
 	message = _notify_dbus_message_new("GetCapabilities", NULL);
 
@@ -495,15 +499,29 @@ notify_get_server_caps(void)
 
 	dbus_message_iter_init(reply, &iter);
 
-	_notify_dbus_message_iter_get_string_array(&iter, &temp_array,
-											   &num_items);
+#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
+	dbus_message_iter_recurse(&iter, &array_iter);
 
-	dbus_message_unref(reply);
+	while (dbus_message_iter_get_arg_type(&array_iter) == DBUS_TYPE_STRING)
+	{
+		const char *value;
+
+		dbus_message_iter_get_basic(&array_iter, &value);
+
+		caps = g_list_append(caps, g_strdup(value));
+
+		dbus_message_iter_next(&array_iter);
+	}
+#else /* D-BUS < 0.30 */
+	dbus_message_iter_get_string_array(&iter, &temp_array, &num_items);
 
 	for (i = 0; i < num_items; i++)
 		caps = g_list_append(caps, g_strdup(temp_array[i]));
 
 	dbus_free_string_array(temp_array);
+#endif /* D-BUS < 0.30 */
+
+	dbus_message_unref(reply);
 
 	return caps;
 }
@@ -674,8 +692,8 @@ hint_foreach_func(const gchar *key, const gchar *value, DBusMessageIter *iter)
 
 	dbus_message_iter_open_container(iter, DBUS_TYPE_DICT_ENTRY, NULL,
 									 &entry_iter);
-	dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING, key);
-	dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING, value);
+	dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING, &key);
+	dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING, &value);
 	dbus_message_iter_close_container(iter, &entry_iter);
 #else
 	dbus_message_iter_append_dict_key(iter, key);
