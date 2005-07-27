@@ -412,6 +412,9 @@ notify_close(NotifyHandle *handle)
 
 	g_return_if_fail(handle != NULL);
 
+	/* Don't close other applications' notifications! */
+	g_return_if_fail(g_hash_table_lookup(_handles, &handle->id) != NULL);
+
 	message = _notify_dbus_message_new("CloseNotification", &iter);
 
 	g_return_if_fail(message != NULL);
