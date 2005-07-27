@@ -33,7 +33,7 @@ int main() {
 											   NOTIFY_URGENCY_NORMAL,
 											   "Summary", "Content",
 											   icon, // no icon
-											   TRUE, time(NULL) + 5,
+											   TRUE, 0,
 											   NULL, // no hints
 											   NULL, // no user data
 											   0);

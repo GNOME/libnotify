@@ -55,7 +55,7 @@ static void send(char *i, size_t rawlen, char *s, char *b)
 								 NOTIFY_URGENCY_NORMAL,
 								 s, b,
 								 icon,
-								 TRUE, time(NULL) + 5,
+								 TRUE, 0,
 								 NULL, // no hints
 								 NULL, // no user data
 								 0);

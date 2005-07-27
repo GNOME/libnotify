@@ -39,7 +39,7 @@ int main() {
 		"X, Y Test",
 		"This notification should point to 150, 10.",
 		NULL, // no icon
-		TRUE, time(NULL) + 5,
+		TRUE, 0,
 		hints,
 		NULL, // no user data
 		0); // no actions

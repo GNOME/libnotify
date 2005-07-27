@@ -44,7 +44,7 @@ emit_notification(int x, int y)
 		"X, Y Test",
 		buffer,
 		NULL, // no icon
-		TRUE, time(NULL) + 5,
+		TRUE, 0,
 		hints,
 		NULL, // no user data
 		0); // no actions

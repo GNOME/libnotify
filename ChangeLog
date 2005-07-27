@@ -1,3 +1,16 @@
+Wed Jul 27 00:51:58 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/test-animation.c:
+	* tests/test-basic.c:
+	* tests/test-error.c:
+	* tests/test-image.c:
+	* tests/test-markup.c:
+	* tests/test-xy.c:
+	* tests/test-xy-stress.c:
+	  - Actually support our own spec and use the number of seconds until
+	    expiration instead of current time + number of seconds. That was
+	    creating all kinds of problems.
+
 Wed Jul 27 00:31:47 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/dbus-compat.h:
