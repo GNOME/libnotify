@@ -132,6 +132,11 @@
 # define dbus_message_iter_init_append(msg, iter) \
 	dbus_message_iter_init(msg, iter)
 
+# define dbus_bus_start_service_by_name(conn, service, flags, result, error) \
+	dbus_bus_activate_service((conn), (service), (flags), (result), (error))
+
+# define dbus_message_iter_close_container(iter, container_iter)
+
 # define _notify_dbus_message_iter_append_byte(iter, val) \
 	dbus_message_iter_append_byte((iter), (val))
 # define _notify_dbus_message_iter_append_boolean(iter, val) \
