@@ -33,6 +33,7 @@
 #include "dbus-compat.h"
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -356,6 +357,17 @@ notify_init(const char *app_name)
 	return TRUE;
 }
 
+gboolean
+notify_glib_init(const char *app_name, GMainContext *context)
+{
+	if (!notify_init(app_name))
+		return FALSE;
+
+	notify_setup_with_g_main(context);
+
+	return TRUE;
+}
+
 void
 notify_uninit(void)
 {
@@ -384,6 +396,12 @@ gboolean
 notify_is_initted(void)
 {
 	return _initted;
+}
+
+void
+notify_setup_with_g_main(GMainContext *context)
+{
+	dbus_connection_setup_with_g_main(_dbus_conn, context);
 }
 
 void

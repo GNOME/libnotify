@@ -55,13 +55,13 @@ static void callback(NotifyHandle *handle, guint32 uid, void *user_data)
 	g_main_loop_quit(loop);
 }
 
-int main() {
-	if (!notify_init("Multi Action Test")) exit(1);
-
-	DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
+int
+main(int argc, char **argv)
+{
 	loop = g_main_loop_new(NULL, FALSE);
 
-	dbus_connection_setup_with_g_main(conn, NULL);
+	if (!notify_glib_init("Multi Action Test", NULL))
+		exit(1);
 
 	n = notify_send_notification(NULL, // replaces nothing
 								 "device",

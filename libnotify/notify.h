@@ -62,6 +62,18 @@ typedef void (*NotifyCallback)(NotifyHandle *, guint32, gpointer);
 gboolean notify_init(const char *app_name);
 
 /**
+ * Initializes the notifications library and sets it up with the
+ * glib mainloop.
+ *
+ * @param app_name The application name.
+ * @param context  The mainloop context, or NULL for the default.
+ *
+ * @return TRUE if the library initialized properly and a connection to a
+ *         notification server was made.
+ */
+gboolean notify_glib_init(const char *app_name, GMainContext *context);
+
+/**
  * Uninitializes the notifications library.
  *
  * This will be automatically called on exit unless previously called.
@@ -74,6 +86,16 @@ void notify_uninit(void);
  * @return TRUE if the library is initialized, or FALSE.
  */
 gboolean notify_is_initted(void);
+
+/**
+ * Sets up libnotify with the glib mainloop.
+ *
+ * This is usually best done by simply calling notify_glib_init(). However,
+ * there's no harm in calling this yourself.
+ *
+ * @param context the #GMainContext or NULL for default context
+ */
+void notify_setup_with_g_main(GMainContext *context);
 
 /**
  * Manually closes a notification.

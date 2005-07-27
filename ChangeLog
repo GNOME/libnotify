@@ -1,3 +1,14 @@
+Wed Jul 27 01:08:56 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	* tests/test-default-action.c:
+	* tests/test-image.c:
+	* tests/test-multi-actions.c:
+	  - Patch (bug #3734) by Duarte Henriques to provide a convenient way
+	    of integrating libnotify with the glib mainloop. Modifications by
+	    me to make it even easier.
+
 Wed Jul 27 00:51:58 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/test-animation.c:

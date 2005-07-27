@@ -68,15 +68,18 @@ static void send(char *i, size_t rawlen, char *s, char *b)
 	notify_icon_destroy(icon);	
 }
 
-int main() {
-	if (!notify_init("Images Test")) exit(1);
-
-	DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
+int
+main(int argc, char **argv)
+{
 	loop = g_main_loop_new(NULL, FALSE);
 
-	dbus_connection_setup_with_g_main(conn, NULL);
+	if (!notify_glib_init("Images Test", NULL))
+		exit(1);
 
-	// these images exist on fedora core 2 workstation profile. might not on yours
+	/*
+	 * These images exist on fedora core 2 workstation profile.
+	 * Might not on yours
+	 */
 
 	send("gnome-starthere",
 		 0,
