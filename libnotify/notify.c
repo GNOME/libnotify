@@ -34,6 +34,7 @@
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -48,6 +49,7 @@ struct _NotifyHandle
 	guint32 id;
 
 	guint32 replaces;
+	gboolean expires;
 
 	gpointer user_data;
 
@@ -325,6 +327,22 @@ _notify_disconnect(void)
 	_dbus_conn = NULL;
 }
 
+static void
+sig_handler(int sig)
+{
+	static volatile sig_atomic_t in_progress = 0;
+
+	if (in_progress)
+		raise(sig);
+
+	in_progress = 1;
+
+	notify_uninit();
+
+	signal(sig, SIG_DFL);
+	raise(sig);
+}
+
 gboolean
 notify_init(const char *app_name)
 {
@@ -348,9 +366,9 @@ notify_init(const char *app_name)
 	_handles = g_hash_table_new_full(g_int_hash, g_int_equal,
 									 NULL, (GFreeFunc)_notify_handle_destroy);
 
-#ifdef HAVE_ATEXIT
-	atexit(notify_uninit);
-#endif /* HAVE_ATEXIT */
+	g_atexit(notify_uninit);
+	signal(SIGINT, sig_handler);
+	signal(SIGTERM, sig_handler);
 
 	_initted = TRUE;
 
@@ -368,10 +386,16 @@ notify_glib_init(const char *app_name, GMainContext *context)
 	return TRUE;
 }
 
+static void
+foreach_handle(int *id, NotifyHandle *handle, gpointer user_data)
+{
+	if (!handle->expires)
+		notify_close(handle);
+}
+
 void
 notify_uninit(void)
 {
-
 	_init_ref_count--;
 
 	if (_init_ref_count != 0)
@@ -385,6 +409,7 @@ notify_uninit(void)
 
 	if (_handles != NULL)
 	{
+		g_hash_table_foreach(_handles, (GHFunc)foreach_handle, NULL);
 		g_hash_table_destroy(_handles);
 		_handles = NULL;
 	}

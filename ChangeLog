@@ -1,3 +1,12 @@
+Wed Jul 27 01:47:25 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	  - Handle SIGINT and SIGTERM When raised, we call notify_uninit.
+	    notify_uninit now checks if there are any non-expiring notifications
+	    and closes them. This is a best-effort to preventing stale
+	    notifications from a dead process from displaying on the screen. Of
+	    course, we can't handle SIGKILL, so we're stuck there.
+
 Wed Jul 27 01:13:12 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.c:
