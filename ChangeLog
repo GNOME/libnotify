@@ -1,3 +1,11 @@
+Wed Jul 27 00:18:16 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	  - If the handle given in ActionInvoked is not found in the local
+	    table of handles, return from the ActionInvoked handler. Otherwise,
+	    every program using libnotify will crash when a notification is
+	    clicked. Oops!
+
 Sat Jul 16 02:53:06 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:

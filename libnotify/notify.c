@@ -204,6 +204,9 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 
 		handle = g_hash_table_lookup(_handles, &id);
 
+		if (handle == NULL)
+			goto exit;
+
 		if (handle->actions_table == NULL)
 		{
 			print_error("An action (%d) was invoked for a notification (%d) "
@@ -230,6 +233,7 @@ _filter_func(DBusConnection *dbus_conn, DBusMessage *message, void *user_data)
 	else
 		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 
+exit:
 	return DBUS_HANDLER_RESULT_HANDLED;
 }
 
