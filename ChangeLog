@@ -1,3 +1,10 @@
+Wed Jul 27 02:12:31 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	  - Actually set the expires flag in the notification handle so we
+	    don't just kill off all notifications as soon as we create them
+	    and exit.
+
 Wed Jul 27 01:47:25 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.c:

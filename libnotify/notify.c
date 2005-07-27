@@ -937,7 +937,8 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	handle = _notify_handle_new(id);
 	handle->actions_table = table;
 	handle->action_count  = action_count;
-	handle->user_data = user_data;
+	handle->user_data     = user_data;
+	handle->expires       = expires;
 
 	return handle;
 }
