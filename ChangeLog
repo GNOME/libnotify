@@ -1,3 +1,12 @@
+Thu Jul 28 01:54:27 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* docs/notification-spec.xml:
+	  - Bump to version 0.7, and add the x, y hint info.
+
+	* NEWS:
+	* configure.ac:
+	  - Bump to version 0.2.0.
+
 Thu Jul 28 01:52:03 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.c:
