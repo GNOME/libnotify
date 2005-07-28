@@ -1,2 +1,5 @@
+version 0.2.1 (28-July-2005):
+	* Fixed hint support for D-BUS 0.3x.
+
 version 0.2.0 (28-July-2005):
 	* Initial public release.
