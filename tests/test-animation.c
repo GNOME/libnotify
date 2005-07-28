@@ -84,7 +84,7 @@ int main()
 
 		g_assert(error == NULL);
 
-		notify_icon_add_frame_from_data(icon, size, pngdata);
+		notify_icon_add_frame_from_data(icon, size, (guchar *)pngdata);
 	}
 
 	NotifyHandle *n = notify_send_notification(NULL, // replaces nothing

@@ -322,6 +322,7 @@ _notify_disconnect(void)
 	}
 
 	dbus_connection_disconnect(_dbus_conn);
+	dbus_connection_dispatch(_dbus_conn);
 	dbus_connection_unref(_dbus_conn);
 
 	_dbus_conn = NULL;

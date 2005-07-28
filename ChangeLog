@@ -1,3 +1,12 @@
+Mon Jul 25 18:00:12 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* tests/test-animation.c:
+	  - Flush the D-BUS connection queue on uninit so that messages go
+	    through and so we don't trigger this ugly little warning on
+	    D-BUS 0.3x.
+	  - Fix a compiler warning on gcc4.
+
 Wed Jul 27 02:12:31 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.c:
