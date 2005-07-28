@@ -34,7 +34,7 @@
     <date>28 July 2005</date>
     <authorinitials>cdh</authorinitials>
     <revremark>
-     Added "x" and "y" hints.
+     Added "x" and "y" hints. Talk about the variant type for hint values.
     </revremark>
    </revision>
    <revision>
@@ -701,6 +701,13 @@
    warrants a standard, it will be added to the table above. If no
    consensus is reached, the hint name should be in the form of
    <literal>"x-<replaceable>vendor</replaceable>-<replaceable>name</replaceable>."</literal>
+  </para>
+  <para>
+   The value type for the hint dictionary in D-BUS is of the
+   <literal>DBUS_TYPE_VARIANT</literal> container type. This allows different
+   data types (string, integer, boolean, etc.) to be used for hints. When
+   adding a dictionary of hints, this type must be used, rather than putting
+   the actual hint value in as the dictionary value.
   </para>
   <para>
    The following table lists the standard hints as defined by this
