@@ -794,13 +794,8 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	{
 		int i;
 
-#if NOTIFY_CHECK_DBUS_VERSION(0, 30)
-		dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY,
-										 DBUS_TYPE_ARRAY_AS_STRING,
-										 &array_iter);
-#else
+#if !NOTIFY_CHECK_DBUS_VERSION(0, 30)
 		dbus_message_iter_append_array(&iter, &array_iter, DBUS_TYPE_ARRAY);
-#endif
 
 		for (i = 0; i < icon->frames; i++)
 		{
@@ -808,8 +803,13 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 														icon->raw_data[i],
 														icon->raw_len[i]);
 		}
-
-		dbus_message_iter_close_container(&iter, &array_iter);
+#else
+		/*
+		 * I can't figure this out for D-BUS 0.3x, so we just won't
+		 * support it
+		 */
+		_notify_dbus_message_iter_append_string_or_empty(&iter, NULL);
+#endif
 	}
 	else
 	{

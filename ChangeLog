@@ -1,3 +1,9 @@
+Mon Jul 25 18:03:12 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Disable animation support on D-BUS 0.3x, since arrays of arrays
+	    of a type seems broken.
+
 Mon Jul 25 18:00:12 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
 
 	* libnotify/notify.c:
