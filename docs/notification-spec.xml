@@ -6,8 +6,8 @@
 <article id="index">
  <articleinfo>
   <title>Desktop Notifications Specification</title>
-  <releaseinfo>Version 0.5</releaseinfo>
-  <date>2 October 2004</date>
+  <releaseinfo>Version 0.7</releaseinfo>
+  <date>28 July 2005</date>
   <authorgroup>
    <author>
     <firstname>Mike</firstname>
@@ -29,6 +29,14 @@
    </author>
   </authorgroup>
   <revhistory>
+   <revision>
+    <revnumber>0.7</revnumber>
+    <date>28 July 2005</date>
+    <authorinitials>cdh</authorinitials>
+    <revremark>
+     Added "x" and "y" hints.
+    </revremark>
+   </revision>
    <revision>
     <revnumber>0.6</revnumber>
     <date>1 April 2005</date>
@@ -724,6 +732,22 @@
        Causes the server to suppress playing any sounds, if it has that
        ability. This is usually set when the client itself is going to
        play its own sound.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"x"</literal></entry>
+      <entry>int</entry>
+      <entry>
+       Specifies the X location on the screen that the notification should
+       point to. The <literal>"y"</literal> hint must also be specified.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"y"</literal></entry>
+      <entry>int</entry>
+      <entry>
+       Specifies the Y location on the screen that the notification should
+       point to. The <literal>"x"</literal> hint must also be specified.
       </entry>
      </row>
     </tbody>

@@ -67,6 +67,11 @@ struct _NotifyIcon
 	guchar **raw_data;
 };
 
+struct _NotifyHints
+{
+    GHashTable *data;
+};
+
 typedef struct
 {
 	guint32 id;
@@ -581,41 +586,101 @@ notify_get_server_caps(void)
 /**************************************************************************
  * Notify Hints API
  **************************************************************************/
+typedef enum
+{
+    HINT_TYPE_STRING,
+    HINT_TYPE_INT,
+    HINT_TYPE_BOOL
+
+} NotifyHintType;
+
+typedef struct
+{
+    NotifyHintType type;
+
+    union
+    {
+        char *string;
+        int integer;
+        gboolean boolean;
+    } u;
+
+} NotifyHintData;
+
+static void
+destroy_hint(NotifyHintData *hint_data)
+{
+    if (hint_data->type == HINT_TYPE_STRING)
+        g_free(hint_data->u.string);
+
+    g_free(hint_data);
+}
 
 NotifyHints *
 notify_hints_new(void)
 {
-	return g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    NotifyHints *hints = g_new0(NotifyHints, 1);
+
+    hints->data = g_hash_table_new_full(g_str_hash, g_str_equal,
+                                        g_free, (GFreeFunc)destroy_hint);
+
+    return hints;
+}
+
+void
+notify_hints_destroy(NotifyHints *hints)
+{
+	g_return_if_fail(hints != NULL);
+
+	g_hash_table_destroy(hints->data);
+	g_free(hints);
 }
 
 void
 notify_hints_set_string(NotifyHints *hints, const char *key,
 						const char *value)
 {
+    NotifyHintData *hint_data;
+
 	g_return_if_fail(hints != NULL);
 	g_return_if_fail(key != NULL && *key != '\0');
 	g_return_if_fail(value != NULL && *value != '\0');
 
-	g_hash_table_replace(hints, g_strdup(key), g_strdup(value));
+    hint_data = g_new0(NotifyHintData, 1);
+    hint_data->type = HINT_TYPE_STRING;
+    hint_data->u.string = g_strdup(value);
+
+	g_hash_table_replace(hints->data, g_strdup(key), hint_data);
 }
 
 void
 notify_hints_set_int(NotifyHints *hints, const char *key, int value)
 {
+    NotifyHintData *hint_data;
+
 	g_return_if_fail(hints != NULL);
 	g_return_if_fail(key != NULL && *key != '\0');
 
-	g_hash_table_replace(hints, g_strdup(key), g_strdup_printf("%d", value));
+    hint_data = g_new0(NotifyHintData, 1);
+    hint_data->type = HINT_TYPE_INT;
+    hint_data->u.integer = value;
+
+	g_hash_table_replace(hints->data, g_strdup(key), hint_data);
 }
 
 void
 notify_hints_set_bool(NotifyHints *hints, const char *key, gboolean value)
 {
+    NotifyHintData *hint_data;
+
 	g_return_if_fail(hints != NULL);
 	g_return_if_fail(key != NULL && *key != '\0');
 
-	g_hash_table_replace(hints, g_strdup(key),
-						 g_strdup(value? "true" : "false"));
+    hint_data = g_new0(NotifyHintData, 1);
+    hint_data->type = HINT_TYPE_BOOL;
+    hint_data->u.boolean = value;
+
+	g_hash_table_replace(hints->data, g_strdup(key), hint_data);
 }
 
 
@@ -727,7 +792,7 @@ notify_send_notification(NotifyHandle *replaces, const char *type,
 						 NotifyUrgency urgency, const char *summary,
 						 const char *body, const NotifyIcon *icon,
 						 gboolean expires, time_t timeout,
-						 GHashTable *hints, gpointer user_data,
+						 NotifyHints *hints, gpointer user_data,
 						 size_t action_count, ...)
 {
 	va_list actions;
@@ -746,7 +811,8 @@ notify_send_notification(NotifyHandle *replaces, const char *type,
 }
 
 static void
-hint_foreach_func(const gchar *key, const gchar *value, DBusMessageIter *iter)
+hint_foreach_func(const gchar *key, NotifyHintData *hint,
+                  DBusMessageIter *iter)
 {
 #if NOTIFY_CHECK_DBUS_VERSION(0, 30)
 	DBusMessageIter entry_iter;
@@ -754,11 +820,59 @@ hint_foreach_func(const gchar *key, const gchar *value, DBusMessageIter *iter)
 	dbus_message_iter_open_container(iter, DBUS_TYPE_DICT_ENTRY, NULL,
 									 &entry_iter);
 	dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING, &key);
-	dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING, &value);
+
+    switch (hint->type)
+    {
+        case HINT_TYPE_STRING:
+            dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING,
+                                           &hint->u.string);
+            break;
+
+        case HINT_TYPE_INT:
+            dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_INT32,
+                                           &hint->u.integer);
+            break;
+
+        case HINT_TYPE_BOOL:
+            dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_BOOLEAN,
+                                           &hint->u.boolean);
+            break;
+
+        default:
+        {
+            /* Better than nothing... */
+            char *empty = "";
+            dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING,
+                                           &empty);
+            break;
+        }
+    }
+
 	dbus_message_iter_close_container(iter, &entry_iter);
 #else
 	dbus_message_iter_append_dict_key(iter, key);
-	dbus_message_iter_append_string(iter, value);
+
+    switch (hint->type)
+    {
+        case HINT_TYPE_STRING:
+            dbus_message_iter_append_string(iter, hint->u.string);
+            break;
+
+        case HINT_TYPE_INT:
+            dbus_message_iter_append_int32(iter, hint->u.integer);
+            break;
+
+        case HINT_TYPE_BOOL:
+            dbus_message_iter_append_boolean(iter, hint->u.boolean);
+            break;
+
+        default:
+        {
+            /* Better than nothing... */
+            dbus_message_iter_append_string(iter, "");
+            break;
+        }
+    }
 #endif
 }
 
@@ -767,7 +881,7 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 							  NotifyUrgency urgency, const char *summary,
 							  const char *body, const NotifyIcon *icon,
 							  gboolean expires, time_t timeout,
-							  GHashTable *hints, gpointer user_data,
+							  NotifyHints *hints, gpointer user_data,
 							  size_t action_count, va_list actions)
 {
 	DBusMessage *message, *reply;
@@ -904,7 +1018,8 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 
 	if (hints != NULL)
 	{
-		g_hash_table_foreach(hints, (GHFunc)hint_foreach_func, &dict_iter);
+		g_hash_table_foreach(hints->data,
+							 (GHFunc)hint_foreach_func, &dict_iter);
 	}
 
 #if NOTIFY_CHECK_DBUS_VERSION(0, 30)
@@ -943,7 +1058,7 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	dbus_error_free(&error);
 
 	if (hints != NULL)
-		g_hash_table_destroy(hints);
+		notify_hints_destroy(hints);
 
 	handle = _notify_handle_new(id);
 	handle->actions_table = table;

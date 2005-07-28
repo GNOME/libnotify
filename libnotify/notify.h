@@ -41,7 +41,7 @@ typedef enum
 
 typedef struct _NotifyHandle NotifyHandle;
 typedef struct _NotifyIcon   NotifyIcon;
-typedef GHashTable           NotifyHints;
+typedef struct _NotifyHints  NotifyHints;
 
 typedef void (*NotifyCallback)(NotifyHandle *, guint32, gpointer);
 
