@@ -24,7 +24,7 @@
 #include <unistd.h>
 
 int main() {
-	GHashTable *hints;
+	NotifyHints *hints;
 
 	notify_init("XY");
 

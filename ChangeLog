@@ -1,3 +1,10 @@
+Mon Jul 25 22:47:02 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* tests/test-xy.c:
+	  - Use a variant type for the hint dictionary values. This let's us
+	    actually use various data types in D-BUS 0.3x.
+
 Thu Jul 28 01:54:27 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* docs/notification-spec.xml:

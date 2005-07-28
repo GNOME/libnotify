@@ -815,7 +815,7 @@ hint_foreach_func(const gchar *key, NotifyHintData *hint,
                   DBusMessageIter *iter)
 {
 #if NOTIFY_CHECK_DBUS_VERSION(0, 30)
-	DBusMessageIter entry_iter;
+	DBusMessageIter entry_iter, value_iter;
 
 	dbus_message_iter_open_container(iter, DBUS_TYPE_DICT_ENTRY, NULL,
 									 &entry_iter);
@@ -824,26 +824,42 @@ hint_foreach_func(const gchar *key, NotifyHintData *hint,
     switch (hint->type)
     {
         case HINT_TYPE_STRING:
-            dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING,
+			dbus_message_iter_open_container(&entry_iter, DBUS_TYPE_VARIANT,
+											 DBUS_TYPE_STRING_AS_STRING,
+											 &value_iter);
+            dbus_message_iter_append_basic(&value_iter, DBUS_TYPE_STRING,
                                            &hint->u.string);
+			dbus_message_iter_close_container(&entry_iter, &value_iter);
             break;
 
         case HINT_TYPE_INT:
-            dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_INT32,
+			dbus_message_iter_open_container(&entry_iter, DBUS_TYPE_VARIANT,
+											 DBUS_TYPE_INT32_AS_STRING,
+											 &value_iter);
+            dbus_message_iter_append_basic(&value_iter, DBUS_TYPE_INT32,
                                            &hint->u.integer);
+			dbus_message_iter_close_container(&entry_iter, &value_iter);
             break;
 
         case HINT_TYPE_BOOL:
-            dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_BOOLEAN,
+			dbus_message_iter_open_container(&entry_iter, DBUS_TYPE_VARIANT,
+											 DBUS_TYPE_BOOLEAN_AS_STRING,
+											 &value_iter);
+            dbus_message_iter_append_basic(&value_iter, DBUS_TYPE_BOOLEAN,
                                            &hint->u.boolean);
+			dbus_message_iter_close_container(&entry_iter, &value_iter);
             break;
 
         default:
         {
             /* Better than nothing... */
             char *empty = "";
-            dbus_message_iter_append_basic(&entry_iter, DBUS_TYPE_STRING,
+			dbus_message_iter_open_container(&entry_iter, DBUS_TYPE_VARIANT,
+											 DBUS_TYPE_STRING_AS_STRING,
+											 &value_iter);
+            dbus_message_iter_append_basic(&value_iter, DBUS_TYPE_STRING,
                                            &empty);
+			dbus_message_iter_close_container(&entry_iter, &value_iter);
             break;
         }
     }
@@ -916,9 +932,8 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	}
 	else if (icon->raw_data)
 	{
-		int i;
-
 #if !NOTIFY_CHECK_DBUS_VERSION(0, 30)
+		int i;
 		dbus_message_iter_append_array(&iter, &array_iter, DBUS_TYPE_ARRAY);
 
 		for (i = 0; i < icon->frames; i++)
@@ -1009,7 +1024,7 @@ notify_send_notification_varg(NotifyHandle *replaces, const char *type,
 	dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY,
 									 DBUS_DICT_ENTRY_BEGIN_CHAR_AS_STRING
 									 DBUS_TYPE_STRING_AS_STRING
-									 DBUS_TYPE_STRING_AS_STRING
+									 DBUS_TYPE_VARIANT_AS_STRING
 									 DBUS_DICT_ENTRY_END_CHAR_AS_STRING,
 									 &dict_iter);
 #else
