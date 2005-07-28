@@ -20,7 +20,6 @@
  * Boston, MA  02111-1307, USA.
  *
  * @todo We talk about URIs, but they are actually file paths not URIs
- * @todo Un-glibify?
  */
 
 #ifndef _LIBNOTIFY_NOTIFY_H_
@@ -160,6 +159,15 @@ void notify_hints_set_string(NotifyHints *hints, const char *key,
  * @param value The value.
  */
 void notify_hints_set_int(NotifyHints *hints, const char *key, int value);
+
+/**
+ * Adds a boolean value to the hints table.
+ *
+ * @param hints The hints table.
+ * @param key   The key.
+ * @param value The value.
+ */
+void notify_hints_set_bool(NotifyHints *hints, const char *key, gboolean value);
 
 /*@}*/
 

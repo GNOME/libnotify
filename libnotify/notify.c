@@ -608,6 +608,16 @@ notify_hints_set_int(NotifyHints *hints, const char *key, int value)
 	g_hash_table_replace(hints, g_strdup(key), g_strdup_printf("%d", value));
 }
 
+void
+notify_hints_set_bool(NotifyHints *hints, const char *key, gboolean value)
+{
+	g_return_if_fail(hints != NULL);
+	g_return_if_fail(key != NULL && *key != '\0');
+
+	g_hash_table_replace(hints, g_strdup(key),
+						 g_strdup(value? "true" : "false"));
+}
+
 
 /**************************************************************************
  * Icon API
