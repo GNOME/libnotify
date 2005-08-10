@@ -1,3 +1,6 @@
+version 0.2.2:
+	* Fixed many run-time issues with PPC and AMD64.
+
 version 0.2.1 (28-July-2005):
 	* Fixed hint support for D-BUS 0.3x.
 
