@@ -74,8 +74,7 @@ main(int argc, const char **argv)
 		exit(1);
 	}
 
-	if (args[0] != NULL)
-		summary = args[0];
+	summary = args[0];
 
 	if (summary == NULL)
 	{
@@ -83,15 +82,12 @@ main(int argc, const char **argv)
 		exit(1);
 	}
 
-	if (args[1] != NULL)
-	{
-		body = args[1];
+	body = args[1];
 
-		if (args[2] != NULL)
-		{
-			poptPrintUsage(opt_ctx, stderr, 0);
-			exit(1);
-		}
+	if (body != NULL && args[2] != NULL)
+	{
+		poptPrintUsage(opt_ctx, stderr, 0);
+		exit(1);
 	}
 
 	if (icons != NULL)

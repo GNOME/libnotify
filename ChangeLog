@@ -1,3 +1,10 @@
+Wed Aug 10 01:13:56 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	D tools/test-replace.c:
+	* tools/notify-send.c:
+	  - Simplify notify-send a little, and nuke tools/test-replace. It
+	    doesn't belong there.
+
 Wed Aug 10 01:12:55 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* NEWS:
