@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <limits.h>
 
 #define NOTIFY_DBUS_SERVICE        "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_INTERFACE "org.freedesktop.Notifications"
@@ -59,7 +60,7 @@ struct _NotifyHandle
 
 struct _NotifyIcon
 {
-	int frames;
+	size_t frames;
 
 	char **uri;
 
@@ -741,6 +742,9 @@ notify_icon_add_frame_from_data(NotifyIcon *icon, size_t icon_len, const guchar 
 	g_return_val_if_fail(icon_data != NULL, FALSE);
 	g_return_val_if_fail(icon_len != 0, FALSE);
 
+	/* check for integer overflow */
+	g_return_val_if_fail(icon->frames + 1 < INT_MAX, FALSE);
+
 	if (icon->frames) g_return_val_if_fail(icon->raw_len != NULL, FALSE);
 
 	icon->frames++;
@@ -762,6 +766,9 @@ notify_icon_add_frame_from_uri(NotifyIcon *icon, const char *uri)
 	{
 		g_return_val_if_fail(icon->uri != NULL, FALSE);
 	}
+
+	/* check for integer overflow */
+	g_return_val_if_fail(icon->frames + 1 < INT_MAX, FALSE);
 
 	icon->frames++;
 	icon->uri = g_realloc(icon->uri, sizeof(char *) * icon->frames);
