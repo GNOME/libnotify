@@ -1,3 +1,10 @@
+Sun Nov 06 16:33:30 PST 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/Makefile.am:
+	  - Add applet-critical.png to EXTRA_DIST.
+
+==================== 0.2.2 ====================
+
 Wed Aug 10 01:59:26 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* NEWS:
