@@ -1,3 +1,10 @@
+Wed Nov 09 00:50:23 PST 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* tools/notify-send.c:
+	  - Call notify_icon_new_from_uri() and not notify_icon_new(),
+	    since notify_icon_new() doesn't actually take parameters.
+	  - Fix the help for --type.
+
 Sun Nov 06 16:33:30 PST 2005  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/Makefile.am:

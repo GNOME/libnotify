@@ -57,7 +57,7 @@ main(int argc, const char **argv)
 		  N_("ICON1,ICON2,...") },
 		{ "type",  't', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &type, 0,
 		  N_("Specifies the notification type."),
-		  N_("ICON1,ICON2,...") },
+		  N_("TYPE") },
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -100,7 +100,7 @@ main(int argc, const char **argv)
 
 		icon_str = icons;
 
-		icon = notify_icon_new(icon_str);
+		icon = notify_icon_new_from_uri(icon_str);
 	}
 
 	if (urgency_str != NULL)

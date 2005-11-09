@@ -1,3 +1,6 @@
+version 0.2.3:
+	* Fix notify-send to work with icon parameters.
+
 version 0.2.2 (10-August-2005):
 	* Fixed many run-time issues with PPC and AMD64 (Martin Pitt)
 
