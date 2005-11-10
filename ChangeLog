@@ -1,0 +1,335 @@
+Thu Nov 10 14:00:00 EST 2005  John (J5) Palmieri <johnp@redhat.com>
+
+	* Complete rewrite and first import to libnotify-ng module in SVN
+
+Mon Jul 04 02:13:56 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/Makefile.am:
+	* tests/test-markup.c:
+	A tests/test-xy-stress.c:
+	* configure.ac:
+	  - Conditionally build gdk-dependent test apps if we have gdk.
+	  - Added a X, Y stress test that will be used to help test
+	    accurately positioning the arrows.
+
+Thu Jun 30 21:09:18 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/Makefile.am:
+	  - Don't install the test programs during make install.
+
+Thu Jun 30 21:03:30 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	* tests/test-animation.c:
+	* tests/test-basic.c:
+	* tests/test-default-action.c:
+	* tests/test-error.c:
+	* tests/test-image.c:
+	* tests/test-markup.c:
+	* tests/test-multi-actions.c:
+	* tests/test-replace.c:
+	* tools/notify-send.c:
+	  - Added support for hints in the API.
+
+Mon Jun 20 06:13:02 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Be a little better at not crashing. Just a bit better. There's
+	    still another crash I'm trying to track down.
+
+Mon Jun 20 04:53:29 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Close the right container in D-BUS 0.3x.
+
+Mon Jun 20 02:49:27 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/Makefile.am:
+	A libnotify/dbus-compat.h:
+	  - Add dbus-compat.h.
+
+Mon Jun 20 02:43:26 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* configure.ac:
+	  - Add support for compiling under D-BUS 0.3x. Actually running
+	    has not yet been tested!
+
+Fri Apr 01 09:21:26 PST 2005  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Updated to work with 0.6 of the notification spec.
+
+Sat Nov 06 15:40:48 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.h:
+	  - Move our TODO list to the Doxygen @todo commands, so we'll get it
+	    in a nice little page of its own in the API docs.
+
+Sat Nov 06 15:35:52 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.h:
+	  - Move the emacs mode string out of the Doxygen comment and into its
+	    own.
+
+Sat Nov 06 15:11:53 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.h:
+	A Doxyfile.in:
+	* Makefile.am:
+	* configure.ac:
+	  - Add a Doxyfile.in and update things so we can get doxygen
+	    docs.
+
+Wed Nov 03 23:39:23 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Use glib's memory allocation stuff instead of libc's.
+
+Wed Nov 03 23:34:10 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	* tests/test-animation.c:
+	* tests/test-image.c:
+	  - Patch from Mike Hearn to do a bunch of stuff, like handling icons
+	    and animations better.
+
+Wed Nov 03 01:19:42 PST 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* configure.ac:
+	A libnotify.spec.in:
+	  - Fix make distcheck.
+
+Wed Sep 29 22:34:03 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* tools/notify-send.c:
+	  - Don't flush the D-BUS connection, and make sure we disconnect from it.
+
+Wed Sep 29 21:53:15 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	* tests/test-animation.c:
+	* tests/test-basic.c:
+	* tests/test-default-action.c:
+	* tests/test-error.c:
+	* tests/test-image.c:
+	* tests/test-markup.c:
+	* tests/test-multi-actions.c:
+	* tests/test-replace.c:
+	* tools/notify-send.c:
+	  - Updated to match the spec.
+
+Sat Sep 25 12:59:26 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* tests/test-animation.c:
+	* tests/test-default-action.c:
+	  - Fixed to compile.
+
+Wed Sep 01 00:39:23 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* docs/ChangeLog:
+	* SPECIFICATION:
+	  - Moved specification documentation.
+	  - Moved specification ChangeLog.
+
+Wed Sep 01 00:30:53 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* docs/notification-spec.xml:
+	  - Finishing adding the rest of the signals to the spec.
+
+Sun Aug 29 22:27:42 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	A docs/notification-spec.ps:
+	A docs/notification-spec.xml:
+	  - Added the notification spec in docbook format. It's not finished.
+	    I'm just tired of working on it.
+
+Wed Jul 14 02:11:48 GMT 2004  Mike Hearn  <mike@navi.cx>
+	* libnotify/notify.c: Use pointers instead of GINT_TO_POINTER
+	* tools/test-replace.c: Test replacing notifications
+
+Tue Jul 13 23:58:54 GMT 2004  Mike Hearn  <mike@navi.cx>
+	* SPECIFICATION: CloseNotification sends NotificationClosed signal.
+
+Mon Jul  5 00:12:03 GMT 2004  Mike Hearn  <mike@navi.cx>
+	* tools/notify-send.c (main): Treat expiry times < current time
+	  as timeouts from current instant
+
+Sun Jul  4 22:54:44 GMT 2004  Mike Hearn  <mike@navi.cx>
+	* libnotify/notify.c: Use a direct hash rather than an int hash
+
+Sun Jul 04 14:32:46 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Don't make IDs of 0 bad. They just want to be loved, too.
+
+Sun Jul 04 14:08:59 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	* tools/notify-send.c:
+	* SPECIFICATION:
+	  - Changed timeouts to expire times.
+	  - Install notify-send.
+
+Sun Jul 04 13:46:32 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* tools/notify-send.c:
+	  - Don't initialize the library until we're ready to talk to it.
+
+Sun Jul 04 13:34:14 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* SPECIFICATION:
+	  - Added the urgency level to the spec, and made it a byte.
+
+Sun Jul 04 13:28:51 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	A tools/:
+	R tests/:
+	* Makefile.am:
+	* configure.ac:
+	  - Renamed tests to tools.
+
+Sun Jul 04 13:28:00 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* tests/Makefile.am:
+	A tests/notify-send.c:
+	  - Added the notify-send tool.
+
+Sat Jul 03 12:35:35 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Added support for GetCapabilities.
+
+Sat Jul 03 12:27:58 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Add support for GetServerInformation.
+
+Sat Jul 03 12:21:05 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Remove the application info sent on calls to Notify for now,
+	    until/if something gets added to the spec about it.
+
+Sat Jul 03 12:14:48 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Removed the last of the request implementation.
+	  - More work toward migrating the code to the specification.
+	  - Simplified the action implementation a little bit.
+
+Sat Jul 03 11:26:03 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Cleaned up some things and updated some stuff to be compliant with
+	    the spec. More will come soon.
+
+Thu Jul  1 23:46:28 GMT 2004  Mike Hearn  <mike@navi.cx>
+	* SPECIFICATION: Add info on icons/sounds, add some
+	  protocol requests. Change "buttons" in the overview to "actions".
+
+Wed Jun 30 14:03:51 GMT 2004  Mike Hearn  <mike@navi.cx>
+	* SPECIFICATION: Initial version
+
+Wed Jun 30 13:28:18 GMT 2004  Mike Hearn  <mike@navi.cx>
+	* libnotify/notify.[ch]: Add file variables for emacs to match
+	  the settings Christian is using.
+
+Wed Jun 30 02:53:36 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Free up the handle memory for a closed notification.
+
+Tue Jun 29 19:33:43 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Due to the new icon struct, a lot of redundant functions have now
+	    been removed.
+
+Tue Jun 29 19:26:58 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Added a NotifyIcon struct and the beginnings of the API.
+
+Tue Jun 29 18:49:38 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Replaced the guint32 ID numbers that were passed around to represent
+	    notifications and requests and replaced them with an opaque data
+	    structure that abstracts that and other stuff.
+
+Tue Jun 29 18:21:05 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Changed 8 space to 4 space tabs.
+
+Tue Jun 29 14:49:51 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Patch by Mike Hearn to add a print_error() function for dumping
+	    extra info when we have an error.
+
+Sun Jun 27 21:50:33 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* configure.ac:
+	  - Pass 0.0.1 as the version number to AC_INIT().
+
+Sun Jun 27 21:39:13 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Added support for the NotificationClosed and RequestClosed signals,
+	    along with request callbacks. I wonder if any of this works.
+
+Sun Jun 27 20:23:00 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Keep track of request IDs so that we can do callback stuff in a bit.
+
+Sun Jun 27 20:02:09 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Send the list of button texts as a string array, rather than appending
+	    each one individually.
+
+Sun Jun 27 18:30:19 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Split notify_close() into notify_close_notification() and
+	    notify_close_request().
+	  - Implement notify_send_request() and
+	    notify_send_request_with_icon_data(), and add versions of those
+	    functions that take a va_list for the buttons.
+
+Sun Jun 27 16:46:32 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Added a utility function for doing most of the D-BUS message
+	    creation.
+	  - Implemented notify_close_notification() and notify_close_request().
+
+Sun Jun 27 16:38:42 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	  - Make sure we include our config.h if we have one.
+
+Sun Jun 27 16:37:30 PDT 2004  Christian Hammond <chipx86@gnupdate.org>
+
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Added the initial header file and connection code.
+
