@@ -1,3 +1,22 @@
+Fri Dec 02 2005  John (J5) Palmieri <johnp@redhat.com>
+
+	* libnotify/notifynotification.c (notify_notification_show_and_forget):
+	new method that shows and then unrefs the NotifyNotification object.
+	use this if you just want to fire off a quick notification.
+
+	* various compiler warning cleanups
+
+Fri Dec 02 2005  John (J5) Palmieri <johnp@redhat.com>
+
+	* libnotify/notifynotification.c (SIGNAL_TYPE_CLOSED): "closed" glib
+	signal added
+	(notify_notification_clear_hints): New API for clearing out the 
+	hints hash
+	(notify_notification_ref, notify_notification_unref): removed - use
+	g_object_ref/unref
+
+	* tests/*: Various changes to the test binaries
+
 Thu Nov 10 14:00:00 EST 2005  John (J5) Palmieri <johnp@redhat.com>
 
 	* Complete rewrite and first import to libnotify-ng module in SVN

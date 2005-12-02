@@ -186,7 +186,7 @@ notify_notification_finalize (GObject * object)
     priv->user_data_free_func (priv->user_data);
 
   dbus_g_proxy_disconnect_signal (priv->proxy, "NotificationClosed", 
-                                  _close_signal_handler, 
+                                  (GCallback) _close_signal_handler, 
                                   object);
 
   g_free (obj->priv);
@@ -375,16 +375,6 @@ notify_notification_set_user_data (NotifyNotification * notification,
   return TRUE;
 }
 
-static DBusHandlerResult
-filter_func (DBusConnection     *connection,
-             DBusMessage        *message,
-             void               *user_data)
-{
-  g_message ("member %s", dbus_message_get_member (message));
-
-  return DBUS_HANDLER_RESULT_HANDLED;
-}
-
 static void 
 _close_signal_handler (DBusGProxy *proxy, 
                        guint32 id, 
@@ -399,8 +389,10 @@ _close_signal_handler (DBusGProxy *proxy,
                      0);
 }
 
-gboolean
-notify_notification_show (NotifyNotification *notification, GError **error)
+static gboolean
+_notify_notification_show_internal (NotifyNotification *notification, 
+                                    GError **error,
+                                    gboolean ignore_reply)
 {
   NotifyNotificationPrivate *priv;
   GError *tmp_error;
@@ -430,7 +422,7 @@ notify_notification_show (NotifyNotification *notification, GError **error)
       dbus_g_proxy_add_signal (priv->proxy, "NotificationClosed",
                                G_TYPE_UINT, NULL);
       dbus_g_proxy_connect_signal (priv->proxy, "NotificationClosed", 
-                               _close_signal_handler, 
+                               (GCallback) _close_signal_handler, 
                                notification, NULL);
 
       dbus_g_connection_unref (bus);
@@ -440,7 +432,8 @@ notify_notification_show (NotifyNotification *notification, GError **error)
   _notify_notification_update_applet_hints (notification);
 
   /*TODO: make this nonblocking */
-  dbus_g_proxy_call (priv->proxy, "Notify", &tmp_error,
+  if (!ignore_reply)
+    dbus_g_proxy_call (priv->proxy, "Notify", &tmp_error,
 		     G_TYPE_STRING, _notify_get_app_name (),
 		     G_TYPE_STRING,
 		     (priv->icon_name != NULL) ? priv->icon_name : "",
@@ -452,6 +445,19 @@ notify_notification_show (NotifyNotification *notification, GError **error)
 							 G_TYPE_VALUE),
 		     priv->hints, G_TYPE_INT, priv->timeout, G_TYPE_INVALID,
 		     G_TYPE_UINT, &priv->id, G_TYPE_INVALID);
+  else
+    dbus_g_proxy_call_no_reply (priv->proxy, "Notify",
+		     G_TYPE_STRING, _notify_get_app_name (),
+		     G_TYPE_STRING,
+		     (priv->icon_name != NULL) ? priv->icon_name : "",
+		     G_TYPE_UINT, priv->id, G_TYPE_STRING, priv->summary,
+		     G_TYPE_STRING, priv->message,
+		     dbus_g_type_get_collection ("GSList", G_TYPE_STRING),
+		     priv->actions, dbus_g_type_get_map ("GHashTable",
+							 G_TYPE_STRING,
+							 G_TYPE_VALUE),
+		     priv->hints, G_TYPE_INT, priv->timeout, G_TYPE_INVALID);
+
 
   if (tmp_error != NULL)
     {
@@ -460,6 +466,25 @@ notify_notification_show (NotifyNotification *notification, GError **error)
     }
 
   return TRUE;
+}
+
+
+
+gboolean
+notify_notification_show (NotifyNotification *notification, GError **error)
+{
+  return _notify_notification_show_internal (notification, error, FALSE);
+}
+
+gboolean
+notify_notification_show_and_forget (NotifyNotification *notification, GError **error)
+{
+  gboolean result;
+
+  result =  _notify_notification_show_internal (notification, error, TRUE);
+  g_object_unref (G_OBJECT (notification));
+
+  return result;
 }
 
 void
