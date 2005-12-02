@@ -1,5 +1,13 @@
 Fri Dec 02 2005  John (J5) Palmieri <johnp@redhat.com>
 
+	* libnotify/notifynotification.c (notify_notification_add_action):
+	implement adding actions
+	(_action_signal_handler): handle actions coming from the server
+	(notify_notifcation_clear_actions): new method for clearning out
+	the actions list and hash
+
+Fri Dec 02 2005  John (J5) Palmieri <johnp@redhat.com>
+
 	* libnotify/notifynotification.c (notify_notification_show_and_forget):
 	new method that shows and then unrefs the NotifyNotification object.
 	use this if you just want to fire off a quick notification.

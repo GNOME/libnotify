@@ -29,6 +29,11 @@ static void _close_signal_handler (DBusGProxy *proxy,
                                    guint32 id, 
                                    NotifyNotification *notification); 
 
+static void _action_signal_handler (DBusGProxy *proxy,
+                                    guint32 id,
+                                    gchar *action, 
+                                    NotifyNotification *notification); 
+
 struct NotifyNotificationPrivate
 {
   guint32 id;
@@ -46,6 +51,7 @@ struct NotifyNotificationPrivate
   gint timeout;
 
   GSList *actions;
+  GHashTable *action_map;
   GHashTable *hints;
 
   GtkWidget *attached_widget;
@@ -145,6 +151,12 @@ notify_notification_init (NotifyNotification * obj)
 					    g_free,
 					    (GDestroyNotify) _g_value_free);
 
+  
+  obj->priv->action_map = g_hash_table_new_full (g_str_hash,
+                                                 g_str_equal,
+                                                 g_free,
+                                                 NULL);
+
   obj->priv->attached_widget = NULL;
   obj->priv->user_data = NULL;
   obj->priv->user_data_free_func = NULL;
@@ -170,11 +182,15 @@ notify_notification_finalize (GObject * object)
   g_free (priv->message);
   g_free (priv->icon_name);
 
+
   if (priv->actions != NULL)
     {
       g_slist_foreach (priv->actions, (GFunc) g_free, NULL);
       g_slist_free (priv->actions);
     }
+
+  if (priv->action_map != NULL)
+    g_hash_table_destroy (priv->action_map);
 
   if (priv->hints != NULL)
     g_hash_table_destroy (priv->hints);
@@ -189,6 +205,10 @@ notify_notification_finalize (GObject * object)
                                   (GCallback) _close_signal_handler, 
                                   object);
 
+  dbus_g_proxy_disconnect_signal (priv->proxy, "ActionInvoked", 
+                                  (GCallback) _action_signal_handler, 
+                                  object);
+  
   g_free (obj->priv);
   G_OBJECT_CLASS (parent_class)->finalize (object);
 }
@@ -389,6 +409,32 @@ _close_signal_handler (DBusGProxy *proxy,
                      0);
 }
 
+static void 
+_action_signal_handler (DBusGProxy *proxy, 
+                        guint32 id, 
+                        gchar *action,
+                        NotifyNotification *notification) 
+{
+  g_assert (NOTIFY_IS_NOTIFICATION (notification));
+
+  printf ("Got the ActionInvoked signal for action %s (id = %i, notification->id = %i)\n", 
+          action, id, notification->priv->id);
+
+  if (id == notification->priv->id)
+    {
+      NotifyActionCallback callback;
+
+      callback = (NotifyActionCallback) g_hash_table_lookup (notification->priv->action_map,
+                                                             action);
+
+      if (callback == NULL)
+        g_warning ("Recieved unknown action %s", action);
+      else
+        callback (notification, action);
+
+    }
+}
+
 static gboolean
 _notify_notification_show_internal (NotifyNotification *notification, 
                                     GError **error,
@@ -424,6 +470,13 @@ _notify_notification_show_internal (NotifyNotification *notification,
       dbus_g_proxy_connect_signal (priv->proxy, "NotificationClosed", 
                                (GCallback) _close_signal_handler, 
                                notification, NULL);
+
+      dbus_g_proxy_add_signal (priv->proxy, "ActionInvoked",
+                               G_TYPE_UINT, G_TYPE_STRING, NULL);
+      dbus_g_proxy_connect_signal (priv->proxy, "ActionInvoked", 
+                               (GCallback) _action_signal_handler, 
+                               notification, NULL);
+
 
       dbus_g_connection_unref (bus);
     }
@@ -769,15 +822,35 @@ notify_notification_clear_hints (NotifyNotification *notification)
                                (GHRFunc) _remove_all, NULL);
 }
 
+void
+notify_notification_clear_actions (NotifyNotification *notification)
+{
+  g_hash_table_foreach_remove (notification->priv->action_map, (GHRFunc) _remove_all, NULL);
+   
+  if (notification->priv->actions != NULL)
+    {
+      g_slist_foreach (notification->priv->actions, (GFunc) g_free, NULL);
+      g_slist_free (notification->priv->actions);
+    }
+
+  notification->priv->actions = NULL;
+}
+
 gboolean
 notify_notification_add_action (NotifyNotification *notification,
 				const char *action,
 				const char *label,
 				NotifyActionCallback callback)
 {
-  /* TODO: implement actions which will also set up a dbus listener 
-     for those actions
-   */
+  NotifyNotificationPrivate *priv;
+
+  priv = notification->priv;
+
+  priv->actions = g_slist_append (priv->actions, g_strdup (action));
+  priv->actions = g_slist_append (priv->actions, g_strdup (label));
+
+  g_hash_table_insert (priv->action_map, g_strdup (action), callback);
+  
   return FALSE;
 }
 

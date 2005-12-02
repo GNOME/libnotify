@@ -71,6 +71,9 @@ gboolean notify_notification_set_user_data (NotifyNotification *notification,
 gboolean notify_notification_show (NotifyNotification *notification, 
                                    GError **error);
 
+gboolean notify_notification_show_and_forget (NotifyNotification *notification, 
+                                              GError **error);
+
 void notify_notification_set_timeout (NotifyNotification *notification,
                                       gint timeout);
 
@@ -112,9 +115,10 @@ gboolean notify_notification_add_action (NotifyNotification *notification,
                                          const char *action,
                                          const char *label,
                                          NotifyActionCallback callback);
-                                         
-gboolean notify_notification_hide  (NotifyNotification *notification, 
-                                    GError **error); 
+
+void notify_notification_clear_actions (NotifyNotification *notification);                                
+gboolean notify_notification_close  (NotifyNotification *notification, 
+                                     GError **error); 
                                          
 NotifyNotification *notify_notification_ref (NotifyNotification *notification);
 void notify_notification_unref (NotifyNotification *notification);
