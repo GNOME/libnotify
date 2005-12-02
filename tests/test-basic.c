@@ -29,7 +29,7 @@ int main() {
 	notify_init("Basics");
 
 	n = notify_notification_new ("Summary", 
-                                     "Content",
+                                     "Content that is very long 8374983278r32j4 rhjjfh dw8f 43jhf 8ds7 ur2389f jdbjkt h8924yf jkdbjkt 892hjfiHER98HEJIF BDSJHF hjdhF JKLH 890YRHEJHFU 89HRJKSHFJ YE8UI HR3UIH89EFHIUEUF9DHFUIBuiew f89hsajiJ FHJKDSKJFH SDJKFH KJASDFJK HKJADSHFK JSAHF89WE HUIIUG JG kjG JKGJGHJg JHG H J HJGJHDG HJKJG hgd hgjhf df h3eui fusidyaiu rh f98ehkrnm e8rv9y 43heh vijdhjkewdkjsjfjk sdhkjf hdkj fadskj hfkjdsh",
                                      NULL, NULL);
         notify_notification_set_timeout (n, 3000); //3 seconds
 

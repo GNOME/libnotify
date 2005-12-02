@@ -25,11 +25,13 @@
 static void notify_notification_class_init (NotifyNotificationClass * klass);
 static void notify_notification_init (NotifyNotification * sp);
 static void notify_notification_finalize (GObject * object);
+static void _close_signal_handler (DBusGProxy *proxy,
+                                   guint32 id, 
+                                   NotifyNotification *notification); 
 
 struct NotifyNotificationPrivate
 {
   guint32 id;
-
   gchar *summary;
   gchar *message;
 
@@ -58,19 +60,18 @@ struct NotifyNotificationPrivate
   DBusGProxy *proxy;
 };
 
-#if 0
 typedef enum
 {
+  SIGNAL_TYPE_CLOSED, 
   LAST_SIGNAL
 } NotifyNotificationSignalType;
-#endif
 
 typedef struct
 {
   NotifyNotification *object;
 } NotifyNotificationSignal;
 
-/* static guint notify_notification_signals[LAST_SIGNAL] = { 0 }; */
+static guint notify_notification_signals[LAST_SIGNAL] = { 0 }; 
 static GObjectClass *parent_class = NULL;
 
 GType
@@ -107,9 +108,16 @@ notify_notification_class_init (NotifyNotificationClass * klass)
   parent_class = g_type_class_peek_parent (klass);
   object_class->finalize = notify_notification_finalize;
 
-  /* Create signals here:
-     notify_notification_signals[SIGNAL_TYPE_EXAMPLE] = g_signal_new(...)
-   */
+  /* Create signals here: */
+     notify_notification_signals[SIGNAL_TYPE_CLOSED] = 
+       g_signal_new ("closed",
+                     G_TYPE_FROM_CLASS (object_class),
+                     G_SIGNAL_RUN_FIRST,
+                     G_STRUCT_OFFSET (NotifyNotificationClass, closed),
+                     NULL, NULL, 
+                     g_cclosure_marshal_VOID__VOID,
+                     G_TYPE_NONE,
+                     0);
 }
 
 static void
@@ -176,6 +184,10 @@ notify_notification_finalize (GObject * object)
 
   if (priv->user_data_free_func != NULL)
     priv->user_data_free_func (priv->user_data);
+
+  dbus_g_proxy_disconnect_signal (priv->proxy, "NotificationClosed", 
+                                  _close_signal_handler, 
+                                  object);
 
   g_free (obj->priv);
   G_OBJECT_CLASS (parent_class)->finalize (object);
@@ -304,18 +316,6 @@ notify_notification_new (const gchar * summary,
   return obj;
 }
 
-NotifyNotification *
-notify_notification_ref (NotifyNotification * notification)
-{
-  return NOTIFY_NOTIFICATION (g_object_ref (G_OBJECT (notification)));
-}
-
-void
-notify_notification_unref (NotifyNotification * notification)
-{
-  g_object_unref (G_OBJECT (notification));
-}
-
 gboolean
 notify_notification_update (NotifyNotification * notification,
 			    const gchar * summary,
@@ -385,8 +385,22 @@ filter_func (DBusConnection     *connection,
   return DBUS_HANDLER_RESULT_HANDLED;
 }
 
+static void 
+_close_signal_handler (DBusGProxy *proxy, 
+                       guint32 id, 
+                       NotifyNotification *notification) 
+{
+  printf ("Got the NotificationClosed signal (id = %i, notification->id = %i)\n"
+, id, notification->priv->id);
+
+  if (id == notification->priv->id)
+      g_signal_emit (notification, 
+                     notify_notification_signals[SIGNAL_TYPE_CLOSED], 
+                     0);
+}
+
 gboolean
-notify_notification_show (NotifyNotification * notification, GError ** error)
+notify_notification_show (NotifyNotification *notification, GError **error)
 {
   NotifyNotificationPrivate *priv;
   GError *tmp_error;
@@ -408,15 +422,17 @@ notify_notification_show (NotifyNotification * notification, GError ** error)
 	  return FALSE;
 	}
 
-      /* Register the object here because 
-       * we need to start listening for signals
-       */
-      dbus_g_connection_register_g_object (bus, "/org/freedesktop/NotifyNotification", G_OBJECT (notification));
-
       priv->proxy = dbus_g_proxy_new_for_name (bus,
 					       NOTIFY_DBUS_NAME,
 					       NOTIFY_DBUS_CORE_OBJECT,
 					       NOTIFY_DBUS_CORE_INTERFACE);
+
+      dbus_g_proxy_add_signal (priv->proxy, "NotificationClosed",
+                               G_TYPE_UINT, NULL);
+      dbus_g_proxy_connect_signal (priv->proxy, "NotificationClosed", 
+                               _close_signal_handler, 
+                               notification, NULL);
+
       dbus_g_connection_unref (bus);
     }
 
@@ -715,8 +731,21 @@ notify_notification_set_hint_string (NotifyNotification * notification,
   return TRUE;
 }
 
+static gboolean
+_remove_all (void)
+{
+  return TRUE;
+}
+
+void 
+notify_notification_clear_hints (NotifyNotification *notification)
+{
+  g_hash_table_foreach_remove (notification->priv->hints,
+                               (GHRFunc) _remove_all, NULL);
+}
+
 gboolean
-notify_notification_add_action (NotifyNotification * notification,
+notify_notification_add_action (NotifyNotification *notification,
 				const char *action,
 				const char *label,
 				NotifyActionCallback callback)

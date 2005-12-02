@@ -45,6 +45,7 @@ typedef struct {
 typedef struct {
 	GObjectClass parent_class;
 	/* Add Signal Functions Here */
+	void (*closed) (void);
 } NotifyNotificationClass;
 
 typedef void (*NotifyActionCallback )(NotifyNotification *, gchar *);
@@ -104,6 +105,8 @@ gboolean notify_notification_set_hint_byte_array (
                                          const gchar *key,
                                          const guchar *value,
                                          gsize len);
+
+void notify_notification_clear_hints (NotifyNotification *notification);
 
 gboolean notify_notification_add_action (NotifyNotification *notification,
                                          const char *action,

@@ -56,6 +56,10 @@ int main(int argc, char *argv[]) {
 	if (!notify_init("Images Test")) exit(1);
 
 	n = notify_notification_new ("Icon Test", "Testing stock icon", "stock_help", NULL);
+
+        notify_notification_set_hint_int32 (n, "x", 300);
+        notify_notification_set_hint_int32 (n, "y", 24);
+
         notify_notification_set_timeout (n, NOTIFY_TIMEOUT_NEVER);
 	if (!notify_notification_show (n, NULL)) {
 		fprintf(stderr, "failed to send notification\n");

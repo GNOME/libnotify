@@ -24,6 +24,16 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <dbus/dbus.h>
+#include <dbus/dbus-glib.h>
+
+static void
+_handle_closed (GObject *o)
+{
+  g_message ("closing");
+  g_object_unref (o);
+}
+
 static void
 emit_notification(int x, int y)
 {
@@ -40,47 +50,51 @@ emit_notification(int x, int y)
 	notify_notification_set_hint_int32 (n, "x", x);
 	notify_notification_set_hint_int32 (n, "y", y);	
 
+	g_signal_connect (n, "closed", _handle_closed, NULL);
+
 	if (!notify_notification_show (n, NULL)) {
 		fprintf(stderr, "failed to send notification\n");
 		return 1;
 	}
 }
 
-int
-main(int argc, char **argv)
+static gboolean
+_popup_random_bubble (void)
 {
 	GdkDisplay *display;
 	GdkScreen *screen;
+
 	int screen_x2, screen_y2;
-
-	gdk_init(&argc, &argv);
-
-	notify_init("XY");
+	int x, y;
 
 	display   = gdk_display_get_default();
 	screen    = gdk_display_get_default_screen(display);
 	screen_x2 = gdk_screen_get_width(screen)  - 1;
 	screen_y2 = gdk_screen_get_height(screen) - 1;
 
-	emit_notification(0, 0);
-	g_usleep (1000000);
-	emit_notification(screen_x2, 0);
-	g_usleep (1000000);
-	emit_notification(5, 150);
-	g_usleep (1000000);
-	emit_notification(screen_x2 - 5, 150);
-	g_usleep (1000000);
-	emit_notification(0, screen_y2 / 2);
-	g_usleep (1000000);
-	emit_notification(screen_x2, screen_y2 / 2);
-	g_usleep (1000000);
-	emit_notification(5, screen_y2 - 150);
-	g_usleep (1000000);
-	emit_notification(screen_x2 - 5, screen_y2 - 150);
-	g_usleep (1000000);
-	emit_notification(0, screen_y2);
-	g_usleep (1000000);
-	emit_notification(screen_x2, screen_y2);
+	x = g_random_int_range (0, screen_x2);
+	y = g_random_int_range (0, screen_y2);
+	emit_notification(x, y);
 
-	return 0;
+	return TRUE;
+}
+
+int
+main(int argc, char **argv)
+{
+        GMainLoop *loop;
+        DBusConnection *conn;
+ 
+	gdk_init(&argc, &argv);
+
+	notify_init("XY");
+
+        conn = dbus_bus_get (DBUS_BUS_SESSION, NULL);
+
+        dbus_connection_setup_with_g_main (conn, NULL);
+
+        g_timeout_add (1000, _popup_random_bubble, NULL);
+
+        loop = g_main_loop_new (NULL, FALSE);
+        g_main_loop_run (loop);
 }
