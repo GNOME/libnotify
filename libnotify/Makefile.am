@@ -5,12 +5,14 @@ lib_LTLIBRARIES = libnotify.la
 notifyinc_HEADERS = 		\
 	notify.h		\
 	notifynotification.h	\
-	notifycommon.h
+	notifycommon.h		\
+	notifymarshal.h
 
 libnotify_la_SOURCES = 		\
 	dbus-compat.h 		\
 	notify.c		\
-	notifynotification.c
+	notifynotification.c	\
+	notifymarshal.c
 
 libnotify_la_LIBADD = \
 	$(PACKAGE_LIBS)

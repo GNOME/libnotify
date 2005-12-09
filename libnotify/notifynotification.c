@@ -21,6 +21,7 @@
 
 #include "notify.h"
 #include "notifynotification.h"
+#include "notifymarshal.h"
 
 static void notify_notification_class_init (NotifyNotificationClass * klass);
 static void notify_notification_init (NotifyNotification * sp);
@@ -124,6 +125,13 @@ notify_notification_class_init (NotifyNotificationClass * klass)
                      g_cclosure_marshal_VOID__VOID,
                      G_TYPE_NONE,
                      0);
+
+  dbus_g_object_register_marshaller (_notify_marshal_VOID__UINT_STRING, 
+                                     G_TYPE_NONE, 
+                                     G_TYPE_UINT,
+                                     G_TYPE_STRING, 
+                                     G_TYPE_INVALID);
+
 }
 
 static void
@@ -167,6 +175,7 @@ notify_notification_init (NotifyNotification * obj)
   obj->priv->widget_old_y = 0;
 
   obj->priv->proxy = NULL;
+
 }
 
 static void
@@ -417,9 +426,6 @@ _action_signal_handler (DBusGProxy *proxy,
 {
   g_assert (NOTIFY_IS_NOTIFICATION (notification));
 
-  printf ("Got the ActionInvoked signal for action %s (id = %i, notification->id = %i)\n", 
-          action, id, notification->priv->id);
-
   if (id == notification->priv->id)
     {
       NotifyActionCallback callback;
@@ -435,6 +441,31 @@ _action_signal_handler (DBusGProxy *proxy,
     }
 }
 
+static gchar **
+_gslist_to_string_array (GSList *list)
+{
+  GSList *element;
+  GArray *a;
+  gsize len;
+  gchar **result;
+
+  len = g_slist_length (list);
+  
+  a = g_array_sized_new (TRUE, FALSE, sizeof (gchar *), len);
+
+  element = list;
+  while (element != NULL)
+    {
+      g_array_append_val (a, element->data); 
+
+      element = g_slist_next (element);
+    }
+
+    result = (gchar **)g_array_free (a, FALSE);
+
+    return result;
+}
+
 static gboolean
 _notify_notification_show_internal (NotifyNotification *notification, 
                                     GError **error,
@@ -442,6 +473,8 @@ _notify_notification_show_internal (NotifyNotification *notification,
 {
   NotifyNotificationPrivate *priv;
   GError *tmp_error;
+  gchar **action_array;
+  int i;
 
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
@@ -466,13 +499,13 @@ _notify_notification_show_internal (NotifyNotification *notification,
 					       NOTIFY_DBUS_CORE_INTERFACE);
 
       dbus_g_proxy_add_signal (priv->proxy, "NotificationClosed",
-                               G_TYPE_UINT, NULL);
+                               G_TYPE_UINT, G_TYPE_INVALID);
       dbus_g_proxy_connect_signal (priv->proxy, "NotificationClosed", 
                                (GCallback) _close_signal_handler, 
                                notification, NULL);
 
       dbus_g_proxy_add_signal (priv->proxy, "ActionInvoked",
-                               G_TYPE_UINT, G_TYPE_STRING, NULL);
+                               G_TYPE_UINT, G_TYPE_STRING, G_TYPE_INVALID);
       dbus_g_proxy_connect_signal (priv->proxy, "ActionInvoked", 
                                (GCallback) _action_signal_handler, 
                                notification, NULL);
@@ -484,6 +517,8 @@ _notify_notification_show_internal (NotifyNotification *notification,
   /*if attached to a widget modify x and y in hints */
   _notify_notification_update_applet_hints (notification);
 
+  action_array = _gslist_to_string_array (priv->actions);
+
   /*TODO: make this nonblocking */
   if (!ignore_reply)
     dbus_g_proxy_call (priv->proxy, "Notify", &tmp_error,
@@ -492,8 +527,8 @@ _notify_notification_show_internal (NotifyNotification *notification,
 		     (priv->icon_name != NULL) ? priv->icon_name : "",
 		     G_TYPE_UINT, priv->id, G_TYPE_STRING, priv->summary,
 		     G_TYPE_STRING, priv->message,
-		     dbus_g_type_get_collection ("GSList", G_TYPE_STRING),
-		     priv->actions, dbus_g_type_get_map ("GHashTable",
+		     G_TYPE_STRV,
+		     action_array, dbus_g_type_get_map ("GHashTable",
 							 G_TYPE_STRING,
 							 G_TYPE_VALUE),
 		     priv->hints, G_TYPE_INT, priv->timeout, G_TYPE_INVALID,
@@ -505,12 +540,16 @@ _notify_notification_show_internal (NotifyNotification *notification,
 		     (priv->icon_name != NULL) ? priv->icon_name : "",
 		     G_TYPE_UINT, priv->id, G_TYPE_STRING, priv->summary,
 		     G_TYPE_STRING, priv->message,
-		     dbus_g_type_get_collection ("GSList", G_TYPE_STRING),
-		     priv->actions, dbus_g_type_get_map ("GHashTable",
+		     G_TYPE_STRV,
+		     action_array, dbus_g_type_get_map ("GHashTable",
 							 G_TYPE_STRING,
 							 G_TYPE_VALUE),
 		     priv->hints, G_TYPE_INT, priv->timeout, G_TYPE_INVALID);
 
+  
+
+  /*don't free the elements because they are owned by priv->actions */
+  g_free (action_array);
 
   if (tmp_error != NULL)
     {

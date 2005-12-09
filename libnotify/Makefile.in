@@ -58,7 +58,8 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libnotify_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am_libnotify_la_OBJECTS = notify.lo notifynotification.lo
+am_libnotify_la_OBJECTS = notify.lo notifynotification.lo \
+	notifymarshal.lo
 libnotify_la_OBJECTS = $(am_libnotify_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -191,12 +192,14 @@ lib_LTLIBRARIES = libnotify.la
 notifyinc_HEADERS = \
 	notify.h		\
 	notifynotification.h	\
-	notifycommon.h
+	notifycommon.h		\
+	notifymarshal.h
 
 libnotify_la_SOURCES = \
 	dbus-compat.h 		\
 	notify.c		\
-	notifynotification.c
+	notifynotification.c	\
+	notifymarshal.c
 
 libnotify_la_LIBADD = \
 	$(PACKAGE_LIBS)
@@ -277,6 +280,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/notify.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/notifymarshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/notifynotification.Plo@am__quote@
 
 .c.o:
