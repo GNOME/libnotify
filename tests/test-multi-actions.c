@@ -35,7 +35,7 @@
 
 GMainLoop *loop;
 
-static void help_callback(NotifyNotification *n, const char *action, void *user_data)
+static void help_callback(NotifyNotification *n, const char *action)
 {
 	assert( action != NULL ); 
 	assert( strcmp (action, "help") == 0 );
@@ -47,7 +47,7 @@ static void help_callback(NotifyNotification *n, const char *action, void *user_
 	g_main_loop_quit(loop);
 }
 
-static void ignore_callback(NotifyNotification *n, const char *action, void *user_data)
+static void ignore_callback(NotifyNotification *n, const char *action)
 {
 	assert( action != NULL ); 
 	assert( strcmp (action, "ignore") == 0 );
@@ -60,7 +60,7 @@ static void ignore_callback(NotifyNotification *n, const char *action, void *use
 }
 
 
-static void empty_callback(NotifyNotification *n, const char *action, void *user_data)
+static void empty_callback(NotifyNotification *n, const char *action)
 {
 	assert( action != NULL ); 
 	assert( strcmp (action, "empty") == 0 );

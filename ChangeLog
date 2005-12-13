@@ -1,3 +1,20 @@
+Fri Dec 09 2005  John (J5) Palmieri <johnp@redhat.com>
+
+	* libnotify/notifymarshal.[c|h]: new files where GLib callback
+	marshalers are added
+
+	* libnotify/notifynotification.c (notify_notifiaction_init): Add a 
+	marshaller for signals with uint, string parameters
+	(_gslist_to_string_array): new internal method that coverts
+	a GSList to a NULL terminated array of strings
+	(_notify_notification_show_internal): send the actions list as an
+	array of strings, not a GSList which does not work with the bindings
+	
+	* libnotify/Makefile.am: notifymarshal.[c|h] added
+
+	* tests/test-multi-actions.c: working example of using actions
+	
+
 Fri Dec 02 2005  John (J5) Palmieri <johnp@redhat.com>
 
 	* libnotify/notifynotification.c (notify_notification_add_action):
