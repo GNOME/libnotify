@@ -1,3 +1,12 @@
+Tue Dec 13 2005  John (J5) Palmieri <johnp@redhat.com>
+	
+	* Release 0.3.0 
+
+	* tests/Makefile.am, tools/Makefile.am: patch from Rodney
+	Dawes <dobey at novell.com> fixing make distcheck
+
+	* tools/notify-send.c: use show_and_forget
+
 Fri Dec 09 2005  John (J5) Palmieri <johnp@redhat.com>
 
 	* libnotify/notifymarshal.[c|h]: new files where GLib callback
