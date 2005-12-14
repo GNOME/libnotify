@@ -1,0 +1,4 @@
+libnotify 0.3.0
+===
+
+* First release of the new GObject based API and simpler wire protocol
