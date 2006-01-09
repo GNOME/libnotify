@@ -474,10 +474,8 @@ _notify_notification_show_internal (NotifyNotification *notification,
   NotifyNotificationPrivate *priv;
   GError *tmp_error;
   gchar **action_array;
-  int i;
 
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
-
 
   priv = notification->priv;
 

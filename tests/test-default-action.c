@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <string.h>
 
-#define DBUS_API_SUBJECT_TO_CHANGE 1
+#define DBUS_API_SUBJECT_TO_CHANGE
 
 #include <glib.h>
 #include <dbus/dbus.h>
@@ -59,7 +59,8 @@ main()
 
         n = notify_notification_new ("Matt is online", "", NULL, NULL);
         notify_notification_set_timeout (n, NOTIFY_TIMEOUT_NEVER);
-        notify_notification_add_action (n, "default", "Do Default Action", callback); 
+        notify_notification_add_action (n, "default", "Do Default Action",
+										(NotifyActionCallback)callback);
 	notify_notification_set_category (n, "presence.online");
 
 	if (!notify_notification_show (n, NULL)) {

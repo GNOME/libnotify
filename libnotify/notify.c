@@ -46,6 +46,7 @@ static gchar *_app_name = NULL;
 #  define format_func
 #endif
 
+#if 0
 static void format_func
 print_error (char *message, ...)
 {
@@ -59,6 +60,7 @@ print_error (char *message, ...)
   fprintf (stderr, "%s(%d): libnotify: %s",
 	   (getenv ("_") ? getenv ("_") : ""), getpid (), buf);
 }
+#endif
 
 gboolean
 notify_init (const char *app_name)

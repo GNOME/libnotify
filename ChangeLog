@@ -1,3 +1,17 @@
+Mon Jan 09 10:15:57 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/Makefile.in:
+	* libnotify/notify.c:
+	* libnotify/notifynotification.c:
+	* tests/test-default-action.c:
+	* tests/test-image.c:
+	* tests/test-multi-actions.c:
+	* tests/test-replace-widget.c:
+	* tests/test-xy-stress.c:
+	  - Clean up lots of warnings.
+
+========================= 0.3.0 =========================
+
 Tue Dec 13 2005  John (J5) Palmieri <johnp@redhat.com>
 	
 	* Release 0.3.0 

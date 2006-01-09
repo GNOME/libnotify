@@ -1,12 +1,12 @@
 /*
  * @file tests/test-multi-actions.c Unit test: multiple actions
  *
- * @Copyright (C) 2004 Mike Hearn <mike@navi.cx>
+ * @Copyright(C) 2004 Mike Hearn <mike@navi.cx>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or(at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,22 +23,22 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 
-#define DBUS_API_SUBJECT_TO_CHANGE 1
+#define DBUS_API_SUBJECT_TO_CHANGE
 
 #include <glib.h>
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
 
-GMainLoop *loop;
+static GMainLoop *loop;
 
-static void help_callback(NotifyNotification *n, const char *action)
+static void
+help_callback(NotifyNotification *n, const char *action)
 {
-	assert( action != NULL ); 
-	assert( strcmp (action, "help") == 0 );
+	g_assert(action != NULL);
+	g_assert(strcmp(action, "help") == 0);
 
 	printf("You clicked Help\n");
 
@@ -47,10 +47,11 @@ static void help_callback(NotifyNotification *n, const char *action)
 	g_main_loop_quit(loop);
 }
 
-static void ignore_callback(NotifyNotification *n, const char *action)
+static void
+ignore_callback(NotifyNotification *n, const char *action)
 {
-	assert( action != NULL ); 
-	assert( strcmp (action, "ignore") == 0 );
+	g_assert(action != NULL);
+	g_assert(strcmp(action, "ignore") == 0);
 
 	printf("You clicked Ignore\n");
 
@@ -59,11 +60,11 @@ static void ignore_callback(NotifyNotification *n, const char *action)
 	g_main_loop_quit(loop);
 }
 
-
-static void empty_callback(NotifyNotification *n, const char *action)
+static void
+empty_callback(NotifyNotification *n, const char *action)
 {
-	assert( action != NULL ); 
-	assert( strcmp (action, "empty") == 0 );
+	g_assert(action != NULL);
+	g_assert(strcmp(action, "empty") == 0);
 
 	printf("You clicked Empty Trash\n");
 
@@ -73,27 +74,35 @@ static void empty_callback(NotifyNotification *n, const char *action)
 }
 
 
-int main() {
-        NotifyNotification *n;
+int
+main(int argc, char **argv)
+{
+	NotifyNotification *n;
+	DBusConnection *conn;
 
-	if (!notify_init("Multi Action Test")) exit(1);
+	if (!notify_init("Multi Action Test"))
+		exit(1);
 
-	DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
+	conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
 	loop = g_main_loop_new(NULL, FALSE);
 
 	dbus_connection_setup_with_g_main(conn, NULL);
 
-        n = notify_notification_new ("Low disk space", 
-                                     "You can free up some disk space by "
-                                     "emptying the trash can.",
-                                     NULL, NULL);
-        notify_notification_set_timeout (n, NOTIFY_TIMEOUT_NEVER);
-        notify_notification_add_action (n, "help", "Help", help_callback);
-        notify_notification_add_action (n, "ignore", "Ignore", ignore_callback);
-        notify_notification_add_action (n, "empty", "Empty Trash", empty_callback);
-	notify_notification_set_category (n, "device");
+	n = notify_notification_new("Low disk space",
+								"You can free up some disk space by "
+								"emptying the trash can.",
+								NULL, NULL);
+	notify_notification_set_timeout(n, NOTIFY_TIMEOUT_NEVER);
+	notify_notification_add_action(n, "help", "Help",
+								   (NotifyActionCallback)help_callback);
+	notify_notification_add_action(n, "ignore", "Ignore",
+								   (NotifyActionCallback)ignore_callback);
+	notify_notification_add_action(n, "empty", "Empty Trash",
+								   (NotifyActionCallback)empty_callback);
+	notify_notification_set_category(n, "device");
 
-	if (!notify_notification_show (n, NULL)) {
+	if (!notify_notification_show(n, NULL))
+	{
 		fprintf(stderr, "failed to send notification\n");
 		return 1;
 	}

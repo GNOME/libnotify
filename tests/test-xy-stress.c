@@ -1,12 +1,12 @@
 /*
  * @file tests/test-xy.c Unit test: X, Y hints
  *
- * @Copyright (C) 2005 Christian Hammond <chipx86@chipx86.com>
+ * @Copyright(C) 2005 Christian Hammond <chipx86@chipx86.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or(at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,40 +26,39 @@
 
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 
 static void
-_handle_closed (GObject *o)
+_handle_closed(GObject *obj)
 {
-  g_message ("closing");
-  g_object_unref (o);
+	g_message("closing");
+	g_object_unref(obj);
 }
 
 static void
 emit_notification(int x, int y)
 {
-	static char buffer[BUFSIZ];
+	char *buffer;
 	NotifyNotification *n;
 
-	g_snprintf(buffer, sizeof(buffer),
-			   "This notification should point to %d, %d.", x, y);
+	buffer = g_strdup_printf("This notification should point to %d, %d.",
+							 x, y);
 
-	n = notify_notification_new ("X, Y Test", 
-                                     buffer,
-                                     NULL, NULL);
+	n = notify_notification_new("X, Y Test", buffer, NULL, NULL);
+	g_free(buffer);
 
-	notify_notification_set_hint_int32 (n, "x", x);
-	notify_notification_set_hint_int32 (n, "y", y);	
+	notify_notification_set_hint_int32(n, "x", x);
+	notify_notification_set_hint_int32(n, "y", y);
 
-	g_signal_connect (n, "closed", _handle_closed, NULL);
+	g_signal_connect(G_OBJECT(n), "closed",
+					 G_CALLBACK(_handle_closed), NULL);
 
-	if (!notify_notification_show (n, NULL)) {
+	if (!notify_notification_show(n, NULL))
 		fprintf(stderr, "failed to send notification\n");
-		return 1;
-	}
 }
 
 static gboolean
-_popup_random_bubble (void)
+_popup_random_bubble(gpointer unused)
 {
 	GdkDisplay *display;
 	GdkScreen *screen;
@@ -72,8 +71,8 @@ _popup_random_bubble (void)
 	screen_x2 = gdk_screen_get_width(screen)  - 1;
 	screen_y2 = gdk_screen_get_height(screen) - 1;
 
-	x = g_random_int_range (0, screen_x2);
-	y = g_random_int_range (0, screen_y2);
+	x = g_random_int_range(0, screen_x2);
+	y = g_random_int_range(0, screen_y2);
 	emit_notification(x, y);
 
 	return TRUE;
@@ -82,19 +81,20 @@ _popup_random_bubble (void)
 int
 main(int argc, char **argv)
 {
-        GMainLoop *loop;
-        DBusConnection *conn;
- 
+	GMainLoop *loop;
+	DBusConnection *conn;
+
 	gdk_init(&argc, &argv);
 
 	notify_init("XY");
 
-        conn = dbus_bus_get (DBUS_BUS_SESSION, NULL);
+	conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
+	dbus_connection_setup_with_g_main(conn, NULL);
 
-        dbus_connection_setup_with_g_main (conn, NULL);
+	g_timeout_add(1000, _popup_random_bubble, NULL);
 
-        g_timeout_add (1000, _popup_random_bubble, NULL);
+	loop = g_main_loop_new(NULL, FALSE);
+	g_main_loop_run(loop);
 
-        loop = g_main_loop_new (NULL, FALSE);
-        g_main_loop_run (loop);
+	return 0;
 }
