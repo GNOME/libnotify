@@ -21,7 +21,7 @@
 
 #include "notify.h"
 #include "notifynotification.h"
-#include "notifymarshal.h"
+#include "notify-marshal.h"
 
 static void notify_notification_class_init (NotifyNotificationClass * klass);
 static void notify_notification_init (NotifyNotification * sp);
@@ -126,7 +126,7 @@ notify_notification_class_init (NotifyNotificationClass * klass)
                      G_TYPE_NONE,
                      0);
 
-  dbus_g_object_register_marshaller (_notify_marshal_VOID__UINT_STRING, 
+  dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_STRING,
                                      G_TYPE_NONE, 
                                      G_TYPE_UINT,
                                      G_TYPE_STRING, 

@@ -40,8 +40,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = libnotify
-DIST_COMMON = $(notifyinc_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(noinst_HEADERS) $(notifyinc_HEADERS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -61,7 +61,7 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libnotify_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_libnotify_la_OBJECTS = notify.lo notifynotification.lo \
-	notifymarshal.lo
+	notify-marshal.lo
 libnotify_la_OBJECTS = $(am_libnotify_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -77,7 +77,7 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 SOURCES = $(libnotify_la_SOURCES)
 DIST_SOURCES = $(libnotify_la_SOURCES)
 notifyincHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(notifyinc_HEADERS)
+HEADERS = $(noinst_HEADERS) $(notifyinc_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -112,6 +112,7 @@ F77 = @F77@
 FFLAGS = @FFLAGS@
 GDK_CFLAGS = @GDK_CFLAGS@
 GDK_LIBS = @GDK_LIBS@
+GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 HAVE_GDK_FALSE = @HAVE_GDK_FALSE@
 HAVE_GDK_TRUE = @HAVE_GDK_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
@@ -190,24 +191,35 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 notifyincdir = $(includedir)/libnotify
+MARSHAL_PREFIX = notify_marshal
+MARSHAL_FILE = notify-marshal
 lib_LTLIBRARIES = libnotify.la
 notifyinc_HEADERS = \
 	notify.h		\
 	notifynotification.h	\
-	notifycommon.h		\
-	notifymarshal.h
+	notifycommon.h
+
+noinst_HEADERS = \
+	notify-marshal.h
 
 libnotify_la_SOURCES = \
 	dbus-compat.h 		\
 	notify.c		\
 	notifynotification.c	\
-	notifymarshal.c
+	notify-marshal.c
 
 libnotify_la_LIBADD = \
 	$(PACKAGE_LIBS)
 
 libnotify_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+
+EXTRA_DIST = \
+	notify-marshal.list
+
+CLEANFILES = \
+	notify-marshal.c \
+	notify-marshal.h
 
 INCLUDES = \
 	$(PACKAGE_CFLAGS)
@@ -281,8 +293,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/notify-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/notify.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/notifymarshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/notifynotification.Plo@am__quote@
 
 .c.o:
@@ -432,6 +444,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -505,6 +518,14 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES \
 	uninstall-info-am uninstall-libLTLIBRARIES \
 	uninstall-notifyincHEADERS
 
+
+notify-marshal.h: notify-marshal.list
+	$(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
+		--header > notify-marshal.h
+
+notify-marshal.c: notify-marshal.list
+	$(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
+		--body > notify-marshal.c
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

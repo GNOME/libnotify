@@ -1,3 +1,15 @@
+Mon Jan 09 11:13:15 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/Makefile.am:
+	* libnotify/Makefile.in:
+	A libnotify/notify-marshal.list:
+	D libnotify/notifymarshal.c:
+	D libnotify/notifymarshal.h:
+	* libnotify/notifynotification.c:
+	* configure.ac:
+	  - Generate the marshal files automatically. We shouldn't be doing it
+	    by hand.
+
 Mon Jan 09 10:15:57 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/Makefile.in:

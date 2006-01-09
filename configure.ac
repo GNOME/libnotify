@@ -107,6 +107,9 @@ AM_CONDITIONAL(HAVE_GDK, test "x$have_gdk" = "xyes")
 AC_SUBST(GDK_CFLAGS)
 AC_SUBST(GDK_LIBS)
 
+GLIB_GENMARSHAL=`pkg-config --variable=glib_genmarshal glib-2.0`
+AC_SUBST(GLIB_GENMARSHAL)
+
 dnl
 dnl Check the D-BUS version.
 dnl
