@@ -3,18 +3,18 @@ dnl Process this file with autoconf to create configure.
 dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
-AC_INIT(libnotify, 0.2.2, chipx86@chipx86.com)
+AC_INIT(libnotify, 0.3.0, chipx86@gnupdate.org)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
-AC_COPYRIGHT([Copyright 2004-2005 Christian Hammond])
+AC_COPYRIGHT([Copyright 2004 Christian Hammond])
 
 
 dnl ################################################################
 dnl # Version information
 dnl ################################################################
 LIBGALAGO_MAJOR_VERSION=0
-LIBGALAGO_MINOR_VERSION=2
-LIBGALAGO_MICRO_VERSION=2
+LIBGALAGO_MINOR_VERSION=3
+LIBGALAGO_MICRO_VERSION=0
 LIBGALAGO_DEVEL_VERSION=0
 
 LIBGALAGO_VERSION=$LIBGALAGO_MAJOR_VERSION.$LIBGALAGO_MINOR_VERSION.$LIBGALAGO_MICRO_VERSION
@@ -89,7 +89,8 @@ AM_PROG_LIBTOOL
 
 AC_CHECK_LIB([popt], [poptGetArg], , AC_MSG_ERROR([Popt is required]))
 
-pkg_modules="glib-2.0 >= 2.2.2, dbus-1 >= 0.23, dbus-glib-1 >= 0.23"
+REQ_DBUS_VERSION=0.36
+pkg_modules="gtk+-2.0 >= 2.2.2 glib-2.0 >= 2.2.2, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
@@ -106,6 +107,9 @@ AM_CONDITIONAL(HAVE_GDK, test "x$have_gdk" = "xyes")
 
 AC_SUBST(GDK_CFLAGS)
 AC_SUBST(GDK_LIBS)
+
+GLIB_GENMARSHAL=`pkg-config --variable=glib_genmarshal glib-2.0`
+AC_SUBST(GLIB_GENMARSHAL)
 
 dnl
 dnl Check the D-BUS version.

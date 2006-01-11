@@ -1,12 +1,12 @@
 /*
  * @file tests/test-image.c Unit test: images
  *
- * @Copyright (C) 2004 Mike Hearn <mike@navi.cx>
+ * @Copyright(C) 2004 Mike Hearn <mike@navi.cx>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or(at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,91 +31,89 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define DBUS_API_SUBJECT_TO_CHANGE 1
+#define DBUS_API_SUBJECT_TO_CHANGE
 
 #include <glib.h>
+#include <gtk/gtk.h>
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
 
 GMainLoop *loop;
-NotifyHandle *n;
-
-static void send(char *i, size_t rawlen, char *s, char *b)
-{
-	NotifyIcon *icon;
-
-	if (rawlen > 0)
-		icon = notify_icon_new_from_data(rawlen, i);
-	else
-		icon = notify_icon_new_from_uri(i);
-
-	n = notify_send_notification(NULL, // replaces nothing
-								 NULL,
-								 NOTIFY_URGENCY_NORMAL,
-								 s, b,
-								 icon,
-								 TRUE, 0,
-								 NULL, // no hints
-								 NULL, // no user data
-								 0);
-
-	if (!n) {
-		fprintf(stderr, "failed to send notification\n");
-		exit(1);
-	}
-
-	notify_icon_destroy(icon);	
-}
+NotifyNotification *n;
 
 int
-main(int argc, char **argv)
+main(int argc, char *argv[])
 {
-	loop = g_main_loop_new(NULL, FALSE);
+	char file[PATH_MAX];
+	int size;
+	char *uri;
+	GdkPixbuf *icon;
+	GtkWidget *helper;
 
-	if (!notify_glib_init("Images Test", NULL))
+	gtk_init(&argc, &argv);
+
+	if (!notify_init("Images Test"))
 		exit(1);
 
-	/*
-	 * These images exist on fedora core 2 workstation profile.
-	 * Might not on yours
-	 */
+	n = notify_notification_new("Icon Test", "Testing stock icon",
+								"stock_help", NULL);
 
-	send("gnome-starthere",
-		 0,
-		 "Welcome to Linux!",
-		 "This is your first login. To begin exploring the system, click on 'Start Here', 'Computer' or 'Applications'");
+	notify_notification_set_hint_int32(n, "x", 300);
+	notify_notification_set_hint_int32(n, "y", 24);
+	notify_notification_set_timeout(n, NOTIFY_TIMEOUT_NEVER);
 
-	char file[1024];
-	readlink("/proc/self/exe", file, sizeof(file));
-	*strrchr(file, '/') = '\0';
-	strcat(file, "/../applet-critical.png");
-
-	printf("sending %s\n", file);
-
-	send(file,
-		 0,
-		 "Alert!",
-		 "Warning!");
-
-
-	struct stat buf;
-	if (stat(file, &buf) == -1)
+	if (!notify_notification_show(n, NULL))
 	{
-		fprintf(stderr, "could not stat %s: %s", file, strerror(errno));
-		exit(1);
+		fprintf(stderr, "failed to send notification\n");
+		return 1;
 	}
 
-	int fd = open(file, O_RDONLY);
+	g_usleep(5000000); // 5 seconds
 
-	void *pngbase = mmap(NULL, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	size = readlink("/proc/self/cwd", file, PATH_MAX - 1);
+	file[size] = '\0';
+	uri = g_strdup_printf("file://%s/%s", file, "applet-critical.png");
 
-	close(fd);
+	printf("sending %s\n", uri);
 
-	send(pngbase,
-		 buf.st_size,
-		 "Raw image test",
-		 "This is an image marshalling test");
+	notify_notification_update(n, "Alert!", "Testing URI icons", uri);
+
+	if (!notify_notification_show(n, NULL))
+	{
+		fprintf(stderr, "failed to send notification\n");
+		return 1;
+	}
+
+	g_usleep(5000000); // 5 seconds
+
+	notify_notification_update(n, "Raw image test",
+							   "Testing sending raw pixbufs", NULL);
+
+	/*
+	 * This is just a hack to get a stock icon's pixbuf in a realworld app
+	 * if you were sending bitmapped data you would know the file location
+	 * and open it up with a method that could generate a bmp for you
+	 */
+	helper = gtk_button_new();
+	icon = gtk_widget_render_icon(helper,
+	                              GTK_STOCK_DIALOG_QUESTION,
+	                              GTK_ICON_SIZE_DIALOG,
+	                              "");
+
+	notify_notification_set_icon_data_from_pixbuf(n, icon);
+
+	if (!notify_notification_show(n, NULL))
+	{
+		fprintf(stderr, "failed to send notification\n");
+		return 1;
+	}
+
+
+	gtk_widget_destroy(helper);
+	g_object_unref(G_OBJECT(icon));
+
+	g_usleep(5000000); // 5 seconds
 
 	return 0;
 }

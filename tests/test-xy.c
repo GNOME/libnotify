@@ -24,27 +24,18 @@
 #include <unistd.h>
 
 int main() {
-	NotifyHints *hints;
+	NotifyNotification *n;
 
 	notify_init("XY");
 
-	hints = notify_hints_new();
-	notify_hints_set_int(hints, "x", 150);
-	notify_hints_set_int(hints, "y", 10);
+	n = notify_notification_new ("X, Y Test", 
+                                     "This notification should point to 150, 10",
+                                     NULL, NULL);
 
-	NotifyHandle *n = notify_send_notification(
-		NULL, // replaces nothing
-		NULL,
-		NOTIFY_URGENCY_NORMAL,
-		"X, Y Test",
-		"This notification should point to 150, 10.",
-		NULL, // no icon
-		TRUE, 0,
-		hints,
-		NULL, // no user data
-		0); // no actions
+	notify_notification_set_hint_int32 (n, "x", 30);
+	notify_notification_set_hint_int32 (n, "y", 10);
 
-	if (!n) {
+	if (!notify_notification_show (n, NULL)) {
 		fprintf(stderr, "failed to send notification\n");
 		return 1;
 	}

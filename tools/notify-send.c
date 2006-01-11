@@ -24,6 +24,7 @@
 #include <string.h>
 #include <time.h>
 #include <popt.h>
+#include <glib.h>
 
 #define N_(x) (x)
 
@@ -34,14 +35,15 @@ main(int argc, const char **argv)
 	const gchar *body = NULL;
 	const gchar *type = NULL;
 	char *urgency_str = NULL;
-	gchar *icons = NULL;
 	gchar *icon_str = NULL;
-	NotifyIcon *icon = NULL;
+	gchar *icons = NULL;
 	NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
-	time_t expire_timeout = 0;
+	long expire_timeout = NOTIFY_TIMEOUT_DEFAULT;
 	char ch;
 	poptContext opt_ctx;
 	const char **args;
+        NotifyNotification *notify;
+
 	struct poptOption options[] =
 	{
 		{ "urgency", 'u', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &urgency_str,
@@ -57,10 +59,12 @@ main(int argc, const char **argv)
 		  N_("ICON1,ICON2,...") },
 		{ "type",  't', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &type, 0,
 		  N_("Specifies the notification type."),
-		  N_("TYPE") },
+		  N_("ICON1,ICON2,...") },
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
+
+        g_type_init (); 
 
 	opt_ctx = poptGetContext("notify-send", argc, argv, options, 0);
 	poptSetOtherOptionHelp(opt_ctx, "[OPTIONS]* <summary> [body]");
@@ -74,7 +78,8 @@ main(int argc, const char **argv)
 		exit(1);
 	}
 
-	summary = args[0];
+	if (args[0] != NULL)
+		summary = args[0];
 
 	if (summary == NULL)
 	{
@@ -82,12 +87,15 @@ main(int argc, const char **argv)
 		exit(1);
 	}
 
-	body = args[1];
-
-	if (body != NULL && args[2] != NULL)
+	if (args[1] != NULL)
 	{
-		poptPrintUsage(opt_ctx, stderr, 0);
-		exit(1);
+		body = args[1];
+
+		if (args[2] != NULL)
+		{
+			poptPrintUsage(opt_ctx, stderr, 0);
+			exit(1);
+		}
 	}
 
 	if (icons != NULL)
@@ -100,7 +108,6 @@ main(int argc, const char **argv)
 
 		icon_str = icons;
 
-		icon = notify_icon_new_from_uri(icon_str);
 	}
 
 	if (urgency_str != NULL)
@@ -121,11 +128,13 @@ main(int argc, const char **argv)
 	if (!notify_init("notify-send"))
 		exit(1);
 
-	notify_send_notification(NULL, type, urgency, summary, body, icon,
-							 TRUE, expire_timeout, NULL, NULL, 0);
 
-	if (icon != NULL)
-		notify_icon_destroy(icon);
+	notify  = notify_notification_new (summary, body, icon_str, NULL); 
+	notify_notification_set_category (notify, type);
+	notify_notification_set_urgency (notify, urgency);
+	notify_notification_set_timeout (notify, expire_timeout);
+
+	notify_notification_show_and_forget (notify, NULL);
 
 	poptFreeContext(opt_ctx);
 	notify_uninit();

@@ -1,11 +1,4 @@
-version 0.2.3:
-	* Fix notify-send to work with icon parameters (bug #4308)
+libnotify 0.3.0
+===
 
-version 0.2.2 (10-August-2005):
-	* Fixed many run-time issues with PPC and AMD64 (Martin Pitt)
-
-version 0.2.1 (28-July-2005):
-	* Fixed hint support for D-BUS 0.3x.
-
-version 0.2.0 (28-July-2005):
-	* Initial public release.
+* First release of the new GObject based API and simpler wire protocol

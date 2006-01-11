@@ -24,22 +24,17 @@
 #include <unistd.h>
 
 int main() {
+	NotifyNotification *n;
+
 	notify_init("Markup");
 
-	NotifyHandle *n = notify_send_notification(
-		NULL, // replaces nothing
-		NULL,
-		NOTIFY_URGENCY_NORMAL,
-		"Summary",
-		"Some <b>bold</b>, <u>underlined</u>, <i>italic</i>, "
-		"<a href='http://www.google.com'>linked</a> text",
-		NULL, // no icon
-		TRUE, 0,
-		NULL, // no hints
-		NULL, // no user data
-		0); // no actions
+	n = notify_notification_new ("Summary", 
+	                             "Some <b>bold</b>, <u>underlined</u>, <i>italic</i>, "
+	                             "<a href='http://www.google.com'>linked</a> text",
+                                     NULL, NULL);
+        notify_notification_set_timeout (n, 3000); //3 seconds
 
-	if (!n) {
+	if (!notify_notification_show (n, NULL)) {
 		fprintf(stderr, "failed to send notification\n");
 		return 1;
 	}

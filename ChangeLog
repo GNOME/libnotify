@@ -1,179 +1,101 @@
-Wed Nov 09 00:50:23 PST 2005  Christian Hammond <chipx86@chipx86.com>
+Tue Jan 10 23:33:47 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
+	* configure.ac:
+	  - Require D-BUS 0.36+.
+
+Tue Jan 10 22:55:35 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/test-default-action.c:
 	* tools/notify-send.c:
-	  - Call notify_icon_new_from_uri() and not notify_icon_new(),
-	    since notify_icon_new() doesn't actually take parameters.
-	  - Fix the help for --type.
+	  - Fix some C99 usage.
 
-Sun Nov 06 16:33:30 PST 2005  Christian Hammond <chipx86@chipx86.com>
+Tue Jan 10 16:20:27 MST 2006  David Trowbridge <trowbrds@gmail.com>
 
-	* tests/Makefile.am:
-	  - Add applet-critical.png to EXTRA_DIST.
+	* libnotify/Makefile.am:
+	  - Make sure marshal files actually get built
 
-==================== 0.2.2 ====================
+Mon Jan 09 11:13:15 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
-Wed Aug 10 01:59:26 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* NEWS:
+	* libnotify/Makefile.am:
+	* libnotify/Makefile.in:
+	A libnotify/notify-marshal.list:
+	D libnotify/notifymarshal.c:
+	D libnotify/notifymarshal.h:
+	* libnotify/notifynotification.c:
 	* configure.ac:
-	  - Bump to version 0.2.2 and prepare for release.
+	  - Generate the marshal files automatically. We shouldn't be doing it
+	    by hand.
 
-Wed Aug 10 01:13:56 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+Mon Jan 09 10:15:57 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
-	D tools/test-replace.c:
-	* tools/notify-send.c:
-	  - Simplify notify-send a little, and nuke tools/test-replace. It
-	    doesn't belong there.
-
-Wed Aug 10 01:12:55 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* NEWS:
-	* configure.ac:
-	  - Bump to version 0.2.1.90.
-
-Mon Jul 25 22:50:08 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
-
-	* NEWS:
-	* configure.ac:
-	  - Bump to version 0.2.1.
-
-Mon Jul 25 22:47:02 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
-
+	* libnotify/Makefile.in:
 	* libnotify/notify.c:
-	* tests/test-xy.c:
-	  - Use a variant type for the hint dictionary values. This let's us
-	    actually use various data types in D-BUS 0.3x.
-
-Thu Jul 28 01:54:27 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* docs/notification-spec.xml:
-	  - Bump to version 0.7, and add the x, y hint info.
-
-	* NEWS:
-	* configure.ac:
-	  - Bump to version 0.2.0.
-
-Thu Jul 28 01:52:03 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* libnotify/notify.c:
-	* libnotify/notify.h:
-	  - Don't send all hint values as strings. Send as integers, booleans,
-	    or strings, depending on what the user set.
-
-Wed Jul 27 23:08:43 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* libnotify/notify.c:
-	* libnotify/notify.h:
-	  - Support setting boolean hints.
-
-Mon Jul 25 18:03:12 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
-
-	* libnotify/notify.c:
-	  - Disable animation support on D-BUS 0.3x, since arrays of arrays
-	    of a type seems broken.
-
-Mon Jul 25 18:00:12 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
-
-	* libnotify/notify.c:
-	* tests/test-animation.c:
-	  - Flush the D-BUS connection queue on uninit so that messages go
-	    through and so we don't trigger this ugly little warning on
-	    D-BUS 0.3x.
-	  - Fix a compiler warning on gcc4.
-
-Wed Jul 27 02:12:31 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* libnotify/notify.c:
-	  - Actually set the expires flag in the notification handle so we
-	    don't just kill off all notifications as soon as we create them
-	    and exit.
-
-Wed Jul 27 01:47:25 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* libnotify/notify.c:
-	  - Handle SIGINT and SIGTERM When raised, we call notify_uninit.
-	    notify_uninit now checks if there are any non-expiring notifications
-	    and closes them. This is a best-effort to preventing stale
-	    notifications from a dead process from displaying on the screen. Of
-	    course, we can't handle SIGKILL, so we're stuck there.
-
-Wed Jul 27 01:13:12 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* libnotify/notify.c:
-	  - Patch (bug #3050) by Duarte Henriques to prevent closing
-	    notifications we don't own.
-
-Wed Jul 27 01:08:56 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* libnotify/notify.c:
-	* libnotify/notify.h:
+	* libnotify/notifynotification.c:
 	* tests/test-default-action.c:
 	* tests/test-image.c:
 	* tests/test-multi-actions.c:
-	  - Patch (bug #3734) by Duarte Henriques to provide a convenient way
-	    of integrating libnotify with the glib mainloop. Modifications by
-	    me to make it even easier.
-
-Wed Jul 27 00:51:58 PDT 2005  Christian Hammond <chipx86@chipx86.com>
-
-	* tests/test-animation.c:
-	* tests/test-basic.c:
-	* tests/test-error.c:
-	* tests/test-image.c:
-	* tests/test-markup.c:
-	* tests/test-xy.c:
+	* tests/test-replace-widget.c:
 	* tests/test-xy-stress.c:
-	  - Actually support our own spec and use the number of seconds until
-	    expiration instead of current time + number of seconds. That was
-	    creating all kinds of problems.
+	  - Clean up lots of warnings.
 
-Wed Jul 27 00:31:47 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+========================= 0.3.0 =========================
 
-	* libnotify/dbus-compat.h:
-	  - Compile under D-BUS 0.2x again.
+Tue Dec 13 2005  John (J5) Palmieri <johnp@redhat.com>
+	
+	* Release 0.3.0 
 
-Wed Jul 27 00:18:16 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+	* tests/Makefile.am, tools/Makefile.am: patch from Rodney
+	Dawes <dobey at novell.com> fixing make distcheck
 
-	* libnotify/notify.c:
-	  - If the handle given in ActionInvoked is not found in the local
-	    table of handles, return from the ActionInvoked handler. Otherwise,
-	    every program using libnotify will crash when a notification is
-	    clicked. Oops!
+	* tools/notify-send.c: use show_and_forget
 
-Sat Jul 16 02:53:06 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+Fri Dec 09 2005  John (J5) Palmieri <johnp@redhat.com>
 
-	* libnotify/notify.c:
-	  - Fix the key type for the dictionary for hints on D-BUS 0.3x. The
-	    notification-daemon side is still broken in this regard.
+	* libnotify/notifymarshal.[c|h]: new files where GLib callback
+	marshalers are added
 
-Sat Jul 16 02:51:42 PDT 2005  Christian Hammond <chipx86@gnupdate.org>
+	* libnotify/notifynotification.c (notify_notifiaction_init): Add a 
+	marshaller for signals with uint, string parameters
+	(_gslist_to_string_array): new internal method that coverts
+	a GSList to a NULL terminated array of strings
+	(_notify_notification_show_internal): send the actions list as an
+	array of strings, not a GSList which does not work with the bindings
+	
+	* libnotify/Makefile.am: notifymarshal.[c|h] added
 
-	* libnotify/dbus-compat.h:
-	* libnotify/notify.c:
-	  - Fixed a couple of D-BUS 0.3x bugs. Several remain though.
+	* tests/test-multi-actions.c: working example of using actions
+	
 
-Tue Jul 12 12:29:08 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+Fri Dec 02 2005  John (J5) Palmieri <johnp@redhat.com>
 
-	* AUTHORS:
-	  - Update the AUTHORs file with our current contributors.
+	* libnotify/notifynotification.c (notify_notification_add_action):
+	implement adding actions
+	(_action_signal_handler): handle actions coming from the server
+	(notify_notifcation_clear_actions): new method for clearning out
+	the actions list and hash
 
-Tue Jul 12 12:28:16 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+Fri Dec 02 2005  John (J5) Palmieri <johnp@redhat.com>
 
-	* tests/Makefile.am:
-	* tools/Makefile.am:
-	* libnotify.spec.in:
-	  - Patch by Richard Hughes to fix make distcheck, and to provide a
-	    Fedora Core 4 RPM spec file.
+	* libnotify/notifynotification.c (notify_notification_show_and_forget):
+	new method that shows and then unrefs the NotifyNotification object.
+	use this if you just want to fire off a quick notification.
 
-Sun Jul 10 16:46:57 PDT 2005  Christian Hammond <chipx86@chipx86.com>
+	* various compiler warning cleanups
 
-	* tests/test-replace.c:
-	  - Decrease the wait time for the replacement notification.
+Fri Dec 02 2005  John (J5) Palmieri <johnp@redhat.com>
 
-Sat Jul  9 18:30:41 2005  Duarte Henriques <maxcow@users.sourceforge.net>
+	* libnotify/notifynotification.c (SIGNAL_TYPE_CLOSED): "closed" glib
+	signal added
+	(notify_notification_clear_hints): New API for clearing out the 
+	hints hash
+	(notify_notification_ref, notify_notification_unref): removed - use
+	g_object_ref/unref
 
-	* libnotify/notify.c:
-	  - Fill in handle->user_data in notify_send_notification_varg
+	* tests/*: Various changes to the test binaries
+
+Thu Nov 10 14:00:00 EST 2005  John (J5) Palmieri <johnp@redhat.com>
+
+	* Complete rewrite and first import to libnotify-ng module in SVN
 
 Mon Jul 04 02:13:56 PDT 2005  Christian Hammond <chipx86@chipx86.com>
 

@@ -24,8 +24,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
-#define DBUS_API_SUBJECT_TO_CHANGE 1
+#define DBUS_API_SUBJECT_TO_CHANGE
 
 #include <glib.h>
 #include <dbus/dbus.h>
@@ -33,13 +34,13 @@
 #include <dbus/dbus-glib-lowlevel.h>
 
 static GMainLoop *loop;
-static NotifyHandle *n;
 
-static void callback(NotifyHandle *handle, guint32 uid, void *user_data)
+static void callback(NotifyNotification *n, const char *action, void *user_data)
 {
-	assert( uid == 0 );
+	assert (action != NULL);
+        assert (strcmp ("default", action) == 0);
 
-	notify_close(n);
+	notify_notification_close (n, NULL);
 
 	g_main_loop_quit(loop);
 }
@@ -47,23 +48,23 @@ static void callback(NotifyHandle *handle, guint32 uid, void *user_data)
 int
 main()
 {
+        NotifyNotification *n;
+	DBusConnection *conn;
+
+	if (!notify_init("Default Action Test")) exit(1);
+
+	conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
 	loop = g_main_loop_new(NULL, FALSE);
 
-	if (!notify_glib_init("Default Action Test", NULL))
-		exit(1);
+	dbus_connection_setup_with_g_main(conn, NULL);
 
-	n = notify_send_notification(NULL, // replaces nothing
-								 "presence.online",
-								 NOTIFY_URGENCY_NORMAL,
-								 "Matt is online", NULL,
-								 NULL, // no icon
-								 FALSE, 0, // does not expire
-								 NULL, // no hints
-								 NULL, // no user data
-								 1,
-								 0, "default", callback); // 1 action
+        n = notify_notification_new ("Matt is online", "", NULL, NULL);
+        notify_notification_set_timeout (n, NOTIFY_TIMEOUT_NEVER);
+        notify_notification_add_action (n, "default", "Do Default Action",
+										(NotifyActionCallback)callback);
+	notify_notification_set_category (n, "presence.online");
 
-	if (!n) {
+	if (!notify_notification_show (n, NULL)) {
 		fprintf(stderr, "failed to send notification\n");
 		return 1;
 	}

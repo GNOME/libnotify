@@ -24,26 +24,25 @@
 #include <unistd.h>
 
 int main() {
+	NotifyNotification *n;
+
+	g_type_init ();
+
 	notify_init("Error Handling");
 
-	NotifyIcon *icon = notify_icon_new("/no-such");
+	n = notify_notification_new ("Summary", 
+                                     "Content",
+                                     NULL, NULL);
+        notify_notification_set_timeout (n, 3000); //3 seconds
 
-	NotifyHandle *n = notify_send_notification(NULL, // replaces nothing
-											   NULL,
-											   NOTIFY_URGENCY_NORMAL,
-											   "Summary", "Content",
-											   icon, // no icon
-											   TRUE, 0,
-											   NULL, // no hints
-											   NULL, // no user data
-											   0);
+	/* TODO: Create an error condition */
 
-	notify_icon_destroy(icon);
 
-	if (n) {
-		fprintf(stderr, "failed to get an error ??\n");
+	if (!notify_notification_show (n, NULL)) {
+		fprintf(stderr, "failed to send notification\n");
 		return 1;
 	}
+
 
 	return 0;
 }
