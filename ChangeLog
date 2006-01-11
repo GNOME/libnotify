@@ -1,3 +1,8 @@
+Tue Jan 10 23:33:47 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* configure.ac:
+	  - Require D-BUS 0.36+.
+
 Tue Jan 10 22:55:35 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/test-default-action.c:
