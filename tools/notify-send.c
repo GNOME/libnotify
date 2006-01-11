@@ -44,8 +44,6 @@ main(int argc, const char **argv)
 	const char **args;
         NotifyNotification *notify;
 
-        g_type_init (); 
-
 	struct poptOption options[] =
 	{
 		{ "urgency", 'u', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &urgency_str,
@@ -65,6 +63,8 @@ main(int argc, const char **argv)
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
+
+        g_type_init (); 
 
 	opt_ctx = poptGetContext("notify-send", argc, argv, options, 0);
 	poptSetOtherOptionHelp(opt_ctx, "[OPTIONS]* <summary> [body]");

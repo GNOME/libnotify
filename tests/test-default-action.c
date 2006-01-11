@@ -49,10 +49,11 @@ int
 main()
 {
         NotifyNotification *n;
+	DBusConnection *conn;
 
 	if (!notify_init("Default Action Test")) exit(1);
 
-	DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
+	conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
 	loop = g_main_loop_new(NULL, FALSE);
 
 	dbus_connection_setup_with_g_main(conn, NULL);

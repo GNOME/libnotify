@@ -1,3 +1,9 @@
+Tue Jan 10 22:55:35 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/test-default-action.c:
+	* tools/notify-send.c:
+	  - Fix some C99 usage.
+
 Tue Jan 10 16:20:27 MST 2006  David Trowbridge <trowbrds@gmail.com>
 
 	* libnotify/Makefile.am:
