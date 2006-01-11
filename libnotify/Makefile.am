@@ -25,6 +25,10 @@ libnotify_la_LIBADD = \
 libnotify_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
+BUILT_SOURCES = \
+	notify-marshal.c \
+	notify-marshal.h
+
 notify-marshal.h: notify-marshal.list
 	$(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
 		--header > notify-marshal.h
