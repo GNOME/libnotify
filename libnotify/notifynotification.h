@@ -68,6 +68,8 @@ gboolean notify_notification_set_user_data (NotifyNotification *notification,
                                             void *user_data,
                                             GFreeFunc free_func);
 
+gpointer notify_notification_get_user_data (NotifyNotification *notification);
+
 gboolean notify_notification_show (NotifyNotification *notification, 
                                    GError **error);
 

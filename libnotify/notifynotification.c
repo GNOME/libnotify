@@ -398,10 +398,20 @@ notify_notification_set_user_data (NotifyNotification * notification,
       priv->user_data_free_func (priv->user_data);
 
   priv->user_data = user_data;
-  priv->user_data_free_func = priv->user_data;
+  priv->user_data_free_func = free_func;
 
   /* TODO: return FALSE on OOM */
   return TRUE;
+}
+
+gpointer
+notify_notification_get_user_data (NotifyNotification * notification)
+{
+  NotifyNotificationPrivate *priv;
+
+  priv = notification->priv;
+
+  return priv->user_data;
 }
 
 static void 

@@ -1,3 +1,13 @@
+Thu Jan 12 2006  John (J5) Palmieri <johnp@redhat.com>
+
+	* libnotify/notifynotification.c (notify_notification_set_user_data):
+	fix free function addition
+	(notify_notification_get_user_data): added method for actually
+	getting the user data (fd.o bug# 5418)
+	- patches provided by Duarte Henriques 
+	<duarte.henriques at gmail dot com>
+
+
 Tue Jan 10 23:33:47 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* configure.ac:
