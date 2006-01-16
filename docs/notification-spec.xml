@@ -1033,11 +1033,13 @@
       <paramdef>out STRING <parameter>name</parameter></paramdef>
       <paramdef>out STRING <parameter>vendor</parameter></paramdef>
       <paramdef>out STRING <parameter>version</parameter></paramdef>
+      <paramdef>out STRING <parameter>spec_version</parameter></paramdef>
      </funcprototype>
     </funcsynopsis>
     <para>
      This message returns the information on the server. Specifically,
-     the server name, vendor, and version number.
+     the server name, vendor, version number, and specification version number
+     supported.
     </para>
     <table>
      <title>GetServerInformation Return Values</title>
@@ -1067,6 +1069,11 @@
         <entry><parameter>version</parameter></entry>
         <entry>STRING</entry>
         <entry>The server's version number.</entry>
+       </row>
+       <row>
+        <entry><parameter>spec_version</parameter></entry>
+        <entry>STRING</entry>
+        <entry>The supported specification version number.</entry>
        </row>
       </tbody>
      </tgroup>

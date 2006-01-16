@@ -32,7 +32,7 @@ int main() {
                                      "This notification should point to 150, 10",
                                      NULL, NULL);
 
-	notify_notification_set_hint_int32 (n, "x", 30);
+	notify_notification_set_hint_int32 (n, "x", 150);
 	notify_notification_set_hint_int32 (n, "y", 10);
 
 	if (!notify_notification_show (n, NULL)) {

@@ -530,7 +530,7 @@ _notify_notification_show_internal (NotifyNotification *notification,
   /*TODO: make this nonblocking */
   if (!ignore_reply)
     dbus_g_proxy_call (priv->proxy, "Notify", &tmp_error,
-		     G_TYPE_STRING, _notify_get_app_name (),
+		     G_TYPE_STRING, notify_get_app_name (),
 		     G_TYPE_STRING,
 		     (priv->icon_name != NULL) ? priv->icon_name : "",
 		     G_TYPE_UINT, priv->id, G_TYPE_STRING, priv->summary,
@@ -543,7 +543,7 @@ _notify_notification_show_internal (NotifyNotification *notification,
 		     G_TYPE_UINT, &priv->id, G_TYPE_INVALID);
   else
     dbus_g_proxy_call_no_reply (priv->proxy, "Notify",
-		     G_TYPE_STRING, _notify_get_app_name (),
+		     G_TYPE_STRING, notify_get_app_name (),
 		     G_TYPE_STRING,
 		     (priv->icon_name != NULL) ? priv->icon_name : "",
 		     G_TYPE_UINT, priv->id, G_TYPE_STRING, priv->summary,

@@ -18,9 +18,6 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
- *
- * @todo We talk about URIs, but they are actually file paths not URIs
- * @todo Un-glibify?
  */
 
 #ifndef _LIBNOTIFY_NOTIFY_H_
@@ -61,8 +58,30 @@ void notify_uninit(void);
  */
 gboolean notify_is_initted(void);
 
-const gchar *_notify_get_app_name(void);
-/*@}*/
+const gchar *notify_get_app_name(void);
 
+/**
+ * Returns the capabilities of the notification server.
+ *
+ * @return A list of capability strings. These strings must be freed.
+ */
+GList *notify_get_server_caps(void);
+
+/**
+ * Returns the server notification information.
+ *
+ * The strings returned must be freed.
+ *
+ * @param ret_name     The returned product name of the server.
+ * @param ret_vendor   The returned vendor.
+ * @param ret_version  The returned server version.
+ * @param ret_spec_ver The returned specification version supported.
+ *
+ * @return TRUE if the call succeeded, or FALSE if there were errors.
+ */
+gboolean notify_get_server_info(char **ret_name, char **ret_vendor,
+								char **ret_version, char **ret_spec_version);
+
+/*@}*/
 
 #endif /* _LIBNOTIFY_NOTIFY_H_ */

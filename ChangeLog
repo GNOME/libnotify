@@ -1,3 +1,14 @@
+Sun Jan 15 17:52:39 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* docs/notification-spec.xml:
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	* libnotify/notifynotification.c:
+	* tests/Makefile.am:
+	A tests/test-server-info.c:
+	* tests/test-xy.c:
+	  - Add back notify_get_server_info() and notify_get_server_caps().
+
 Thu Jan 12 2006  John (J5) Palmieri <johnp@redhat.com>
 
 	* libnotify/notifynotification.c (notify_notification_set_user_data):

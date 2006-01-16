@@ -10,6 +10,7 @@ endif
 noinst_PROGRAMS = \
 	test-replace \
 	test-replace-widget \
+	test-server-info \
 	test-default-action \
 	test-multi-actions \
 	test-image \
@@ -26,16 +27,25 @@ common_ldflags = \
 
 test_replace_SOURCES = test-replace.c
 test_replace_LDADD  = $(common_ldflags)
+
 test_replace_widget_SOURCES = test-replace-widget.c
 test_replace_widget_LDADD  = $(common_ldflags)
+
+test_server_info_SOURCES = test-server-info.c
+test_server_info_LDADD   = $(common_ldflags)
+
 test_default_action_SOURCES = test-default-action.c
 test_default_action_LDADD  = $(common_ldflags)
+
 test_multi_actions_SOURCES = test-multi-actions.c
 test_multi_actions_LDADD  = $(common_ldflags)
+
 test_image_SOURCES = test-image.c
 test_image_LDADD  = $(common_ldflags)
+
 test_basic_SOURCES = test-basic.c
 test_basic_LDADD = $(common_ldflags)
+
 test_error_SOURCES = test-error.c
 test_error_LDADD = $(common_ldflags)
 
