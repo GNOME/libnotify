@@ -18,7 +18,6 @@
 
 #ifndef NOTIFY_NOTIFICATION_H
 #define NOTIFY_NOTIFICATION_H
-#include "config.h"
 
 #include <glib.h>
 #include <glib-object.h>

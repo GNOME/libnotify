@@ -1,3 +1,9 @@
+Wed Jan 18 22:24:10 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notifynotification.h:
+	* tests/test-xy-stress.c:
+	  - Remove the config.h include from notifynotification.h.
+
 Sun Jan 15 17:52:39 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* docs/notification-spec.xml:

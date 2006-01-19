@@ -24,10 +24,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib.h>
-#include <dbus/dbus-glib-lowlevel.h>
-
 static void
 _handle_closed(GObject *obj)
 {
@@ -82,14 +78,10 @@ int
 main(int argc, char **argv)
 {
 	GMainLoop *loop;
-	DBusConnection *conn;
 
 	gdk_init(&argc, &argv);
 
 	notify_init("XY");
-
-	conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
-	dbus_connection_setup_with_g_main(conn, NULL);
 
 	g_timeout_add(1000, _popup_random_bubble, NULL);
 
