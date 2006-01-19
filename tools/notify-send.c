@@ -32,7 +32,7 @@ int
 main(int argc, const char **argv)
 {
 	const gchar *summary = NULL;
-	const gchar *body = NULL;
+	const gchar *body = "";
 	const gchar *type = NULL;
 	char *urgency_str = NULL;
 	gchar *icon_str = NULL;
@@ -42,7 +42,7 @@ main(int argc, const char **argv)
 	char ch;
 	poptContext opt_ctx;
 	const char **args;
-        NotifyNotification *notify;
+	NotifyNotification *notify;
 
 	struct poptOption options[] =
 	{
@@ -64,7 +64,7 @@ main(int argc, const char **argv)
 		POPT_TABLEEND
 	};
 
-        g_type_init (); 
+	g_type_init (); 
 
 	opt_ctx = poptGetContext("notify-send", argc, argv, options, 0);
 	poptSetOtherOptionHelp(opt_ctx, "[OPTIONS]* <summary> [body]");
@@ -128,13 +128,12 @@ main(int argc, const char **argv)
 	if (!notify_init("notify-send"))
 		exit(1);
 
+	notify  = notify_notification_new(summary, body, icon_str, NULL);
+	notify_notification_set_category(notify, type);
+	notify_notification_set_urgency(notify, urgency);
+	notify_notification_set_timeout(notify, expire_timeout);
 
-	notify  = notify_notification_new (summary, body, icon_str, NULL); 
-	notify_notification_set_category (notify, type);
-	notify_notification_set_urgency (notify, urgency);
-	notify_notification_set_timeout (notify, expire_timeout);
-
-	notify_notification_show_and_forget (notify, NULL);
+	notify_notification_show_and_forget(notify, NULL);
 
 	poptFreeContext(opt_ctx);
 	notify_uninit();

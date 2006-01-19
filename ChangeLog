@@ -1,3 +1,8 @@
+Thu Jan 19 01:34:57 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tools/notify-send.c:
+	  - Make notify-send work again when a body isn't specified.
+
 Wed Jan 18 22:24:10 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notifynotification.h:
