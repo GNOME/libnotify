@@ -133,7 +133,8 @@ main(int argc, const char **argv)
 	notify_notification_set_urgency(notify, urgency);
 	notify_notification_set_timeout(notify, expire_timeout);
 
-	notify_notification_show_and_forget(notify, NULL);
+	notify_notification_show(notify, NULL);
+	g_object_unref(G_OBJECT(notify));
 
 	poptFreeContext(opt_ctx);
 	notify_uninit();

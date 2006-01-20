@@ -33,10 +33,12 @@ int main() {
                                      NULL, NULL);
         notify_notification_set_timeout (n, 3000); //3 seconds
 
-	if (!notify_notification_show_and_forget (n, NULL)) {
+	if (!notify_notification_show (n, NULL)) {
 		fprintf(stderr, "failed to send notification\n");
 		return 1;
 	}
+
+	g_object_unref(G_OBJECT(n));
 
 	return 0;
 }

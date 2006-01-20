@@ -51,7 +51,7 @@ struct _NotifyNotificationPrivate
 	gchar *summary;
 	gchar *body;
 
-	/* NULL to use icon data anything else to have server lookup icon */
+	/* NULL to use icon data. Anything else to have server lookup icon */
 	gchar *icon_name;
 
 	/*
@@ -74,18 +74,11 @@ struct _NotifyNotificationPrivate
 	DBusGProxy *proxy;
 };
 
-typedef enum
+enum
 {
 	SIGNAL_CLOSED,
 	LAST_SIGNAL
-
-} NotifyNotificationSignalType;
-
-typedef struct
-{
-	NotifyNotification *object;
-
-} NotifyNotificationSignal;
+};
 
 static guint signals[LAST_SIGNAL] = { 0 };
 static GObjectClass *parent_class = NULL;
@@ -399,15 +392,18 @@ _gslist_to_string_array(GSList *list)
 	return (gchar **)g_array_free(a, FALSE);
 }
 
-static gboolean
-_notify_notification_show_internal(NotifyNotification *notification,
-								   GError **error, gboolean ignore_reply)
+gboolean
+notify_notification_show(NotifyNotification *notification, GError **error)
 {
-	NotifyNotificationPrivate *priv = notification->priv;
+	NotifyNotificationPrivate *priv;
 	GError *tmp_error = NULL;
 	gchar **action_array;
 
+	g_return_val_if_fail(notification != NULL, FALSE);
+	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
+
+	priv = notification->priv;
 
 	if (priv->proxy == NULL)
 	{
@@ -446,39 +442,20 @@ _notify_notification_show_internal(NotifyNotification *notification,
 	action_array = _gslist_to_string_array(priv->actions);
 
 	/* TODO: make this nonblocking */
-
-	if (ignore_reply)
-	{
-		dbus_g_proxy_call_no_reply(
-			priv->proxy, "Notify",
-			G_TYPE_STRING, notify_get_app_name(),
-			G_TYPE_UINT, priv->id,
-			G_TYPE_STRING, priv->icon_name != NULL ? priv->icon_name : "",
-			G_TYPE_STRING, priv->summary,
-			G_TYPE_STRING, priv->body,
-			G_TYPE_STRV, action_array,
-			dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
-								G_TYPE_VALUE), priv->hints,
-			G_TYPE_INT, priv->timeout,
-			G_TYPE_INVALID);
-	}
-	else
-	{
-		dbus_g_proxy_call(
-			priv->proxy, "Notify", &tmp_error,
-			G_TYPE_STRING, notify_get_app_name(),
-			G_TYPE_UINT, priv->id,
-			G_TYPE_STRING, priv->icon_name != NULL ? priv->icon_name : "",
-			G_TYPE_STRING, priv->summary,
-			G_TYPE_STRING, priv->body,
-			G_TYPE_STRV, action_array,
-			dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
-								G_TYPE_VALUE), priv->hints,
-			G_TYPE_INT, priv->timeout,
-			G_TYPE_INVALID,
-			G_TYPE_UINT, &priv->id,
-			G_TYPE_INVALID);
-	}
+	dbus_g_proxy_call(
+		priv->proxy, "Notify", &tmp_error,
+		G_TYPE_STRING, notify_get_app_name(),
+		G_TYPE_UINT, priv->id,
+		G_TYPE_STRING, priv->icon_name != NULL ? priv->icon_name : "",
+		G_TYPE_STRING, priv->summary,
+		G_TYPE_STRING, priv->body,
+		G_TYPE_STRV, action_array,
+		dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
+							G_TYPE_VALUE), priv->hints,
+		G_TYPE_INT, priv->timeout,
+		G_TYPE_INVALID,
+		G_TYPE_UINT, &priv->id,
+		G_TYPE_INVALID);
 
 	/* Don't free the elements because they are owned by priv->actions */
 	g_free(action_array);
@@ -490,33 +467,6 @@ _notify_notification_show_internal(NotifyNotification *notification,
 	}
 
 	return TRUE;
-}
-
-gboolean
-notify_notification_show(NotifyNotification *notification, GError **error)
-{
-	g_return_val_if_fail(notification != NULL, FALSE);
-	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
-	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
-
-	return _notify_notification_show_internal(notification, error, FALSE);
-}
-
-gboolean
-notify_notification_show_and_forget(NotifyNotification *notification,
-									GError **error)
-{
-	gboolean result;
-
-	g_return_val_if_fail(notification != NULL, FALSE);
-	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
-	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
-
-	result = _notify_notification_show_internal(notification, error, TRUE);
-
-	g_object_unref(G_OBJECT(notification));
-
-	return result;
 }
 
 void

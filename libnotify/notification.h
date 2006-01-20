@@ -98,9 +98,6 @@ void notify_notification_attach_to_widget(NotifyNotification* notification,
 gboolean notify_notification_show(NotifyNotification *notification,
 								  GError **error);
 
-gboolean notify_notification_show_and_forget(NotifyNotification *notification,
-											 GError **error);
-
 void notify_notification_set_timeout(NotifyNotification *notification,
 									 gint timeout);
 

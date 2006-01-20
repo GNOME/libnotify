@@ -1,3 +1,13 @@
+Fri Jan 20 02:19:29 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	* libnotify/notification.h:
+	* tests/test-basic.c:
+	* tools/notify-send.c:
+	  - Remove notify_notification_show_and_forget(). It's less confusing to
+	    have one show function, and require that the user unref. It also
+	    simplifies the code quite a bit.
+
 Fri Jan 20 02:10:50 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:
