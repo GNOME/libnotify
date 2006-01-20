@@ -59,7 +59,7 @@ main()
 	dbus_connection_setup_with_g_main(conn, NULL);
 
         n = notify_notification_new ("Matt is online", "", NULL, NULL);
-        notify_notification_set_timeout (n, NOTIFY_TIMEOUT_NEVER);
+        notify_notification_set_timeout (n, NOTIFY_EXPIRES_DEFAULT);
         notify_notification_add_action (n, "default", "Do Default Action",
 										(NotifyActionCallback)callback);
 	notify_notification_set_category (n, "presence.online");

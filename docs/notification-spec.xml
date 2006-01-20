@@ -1,13 +1,10 @@
 <?xml version="1.0"?>
-
-<!DOCTYPE article PUBLIC "-//OASIS/DTD DocBook XML V4.1.2//EN"
-                  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
-
+<!DOCTYPE article PUBLIC "-//OASIS/DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <article id="index">
  <articleinfo>
   <title>Desktop Notifications Specification</title>
-  <releaseinfo>Version 0.5</releaseinfo>
-  <date>2 October 2004</date>
+  <releaseinfo>Version 0.9</releaseinfo>
+  <date>15 January 2006</date>
   <authorgroup>
    <author>
     <firstname>Mike</firstname>
@@ -29,6 +26,34 @@
    </author>
   </authorgroup>
   <revhistory>
+   <revision>
+    <revnumber>0.9</revnumber>
+    <date>15 January 2006</date>
+    <authorinitials>cdh</authorinitials>
+    <revremark>
+     Clarify the naming for the application IDs.
+     Put back a number of things that probably shouldn't have been removed
+     from the spec.
+    </revremark>
+   </revision>
+   <revision>
+    <revnumber>0.8</revnumber>
+    <date>23 September 2005</date>
+    <authorinitials>J5</authorinitials>
+    <revremark>
+     Major overhaul of spec to work with the newer D-Bus recursive type system.
+     Simplify protocol.
+     Changed the verbage notification type to category
+    </revremark>
+   </revision>
+   <revision>
+    <revnumber>0.7</revnumber>
+    <date>28 July 2005</date>
+    <authorinitials>cdh</authorinitials>
+    <revremark>
+     Added "x" and "y" hints. Talk about the variant type for hint values.
+    </revremark>
+   </revision>
    <revision>
     <revnumber>0.6</revnumber>
     <date>1 April 2005</date>
@@ -152,13 +177,6 @@
       </entry>
      </row>
      <row>
-      <entry>Application Icon</entry>
-      <entry>
-       The application icon. This is represented either as a path or a name
-       in an icon theme.
-      </entry>
-     </row>
-     <row>
       <entry>Replaces ID</entry>
       <entry>
        An optional ID of an existing notification that this
@@ -166,16 +184,11 @@
       </entry>
      </row>
      <row>
-      <entry>Notification Type ID</entry>
+      <entry>Notification Icon</entry>
       <entry>
-       An optional ID representing the notification type. See
-       <xref linkend="notification-types"/>.
-      </entry>
-     </row>
-     <row>
-      <entry>Urgency Level</entry>
-      <entry>
-       The urgency of the notification. See <xref linkend="urgency-levels"/>.
+       The notification icon. This is represented either as a URI
+       (file:// is the only URI schema supported right now) or a name in
+       a freedesktop.org-compliant icon theme (not a GTK+ stock ID).
       </entry>
      </row>
      <row>
@@ -205,46 +218,65 @@
       </entry>
      </row>
      <row>
-      <entry>Images</entry>
-      <entry>See <xref linkend="icons"/>.</entry>
-     </row>
-     <row>
       <entry>Actions</entry>
       <entry>
        The actions send a request message back to the notification client
        when invoked. This functionality may not be implemented by the
        notification server, conforming clients should check if it is available
        before using it (see the GetCapabilities message in
-       <xref linkend="protocol"/>. An implementation is free to ignore any
+       <xref linkend="protocol"/>). An implementation is free to ignore any
        requested by the client. As an example one possible rendering of
        actions would be as buttons in the notification popup.
+
+       Actions are sent over as a list of pairs. Each even element in the
+       list (starting at index 0) represents the identifier for the action.
+       Each odd element in the list is the localized string that will be
+       displayed to the user.
       </entry>
      </row>
      <row>
       <entry>Hints</entry>
-      <entry>See <xref linkend="hints"/>.</entry>
-     </row>
-     <row>
-      <entry>Expires</entry>
-      <entry>
-       <para>
-        A boolean flag indicating whether or not this notification should
-        automatically expire.
-       </para>
-      </entry>
+      <entry><para>See <xref linkend="hints"/>.</para></entry>
+
+      <para>
+       Beyond the core protocol is the hints table. A couple of core
+       elements have been moved to hints mostly because in a huge number
+       of cases their default values would be sufficent. The elements moved
+       to hints are:
+      </para>
+      <segmentedlist>
+       <seglistitem>
+        <seg>Category ID</seg>
+        <seg>An optional ID representing the type of notification (the name
+             has been changed from Notification Type ID in pervious versions).
+             See <xref linkend="categories"/>.</seg>
+       </seglistitem>
+       <seglistitem>
+        <seg>Urgency Level</seg>
+        <seg>The urgency of the notification. See
+             <xref linkend="urgency-levels"/>. (Defaults to 1 - Normal)</seg>
+       </seglistitem>
+       <seglistitem>
+        <seg>Icon Data</seg>
+        <seg>Instead of overloading the icon field we now have an icon_data
+             field that is used when icon is blank.</seg>
+       </seglistitem>
+      </segmentedlist>
      </row>
      <row>
       <entry>Expiration Timeout</entry>
       <entry>
        <para>
-        The timeout time in seconds since the display of the notification at
-        which the notification should automatically close. This is ignored
-        if the expires flag is set to false.
+        The timeout time in milliseconds since the display of the notification
+        at which the notification should automatically close.
        </para>
        <para>
-        If zero, the notification's expiration time is dependent on the
+        If -1, the notification's expiration time is dependent on the
         notification server's settings, and may vary for the type of
         notification.
+       </para>
+       <para>
+        If 0, the notification never expires.
        </para>
       </entry>
      </row>
@@ -398,77 +430,27 @@
  <sect1 id="icons" xreflabel="Icons">
   <title>Icons</title>
   <para>
-   A notification can optionally include an array of images for use as an
-   icon representing the notification. The array of images specifies frames
-   in an animation, which always loop. Implementations are free to ignore the
-   images data, and implementations that support images need not support
-   animation.
+   A notification can optionally have an icon specified by the Notification
+   Icon field or by the icon_data hint.
   </para>
   <para>
-   If the image array has more than one element, a "primary frame" can
-   be specified. If not specified, it defaults to the first frame. For
-   implementations that support images but not animation, only the primary
-   frame will be used.
+   The icon_data field should be a raw image data structure of signature
+   (iiibiiay) which describes the width, height, rowstride, has alpha, bits
+   per sample, channels and image data respectively.
   </para>
-  <para>
-   Each element of the array must have the same type as the first
-   element. Mixtures of strings and blobs are not allowed. The element
-   types can be one of the following:
-  </para>
-  <informaltable>
-   <tgroup cols="3">
-    <thead>
-     <row>
-      <entry>Element</entry>
-      <entry>Type</entry>
-      <entry>Description</entry>
-     </row>
-    </thead>
-    <tbody valign="top">
-     <row>
-      <entry>Icon Theme Name</entry>
-      <entry>String</entry>
-      <entry>
-       Any string that does not begin with the <literal>/</literal>
-       character is assumed to be an icon theme name and is looked up
-       according to the spec. The best size to fit the servers chosen
-       presentation will be used. This is the recommended way of specifying
-       images.
-      </entry>
-     </row>
-     <row>
-      <entry>Absolute Path</entry>
-      <entry>String</entry>
-      <entry>
-       Any string that begins with a <literal>/</literal> will be used as
-       an absolute file path. Implementations should support at minimum
-       files of type image/png and image/svg.
-      </entry>
-     </row>
-     <row>
-      <entry>Image Data</entry>
-      <entry>Binary Data</entry>
-      <entry>
-       A data stream may be embedded in the message. This is assumed to be
-       of type image/png.
-      </entry>
-     </row>
-    </tbody>
-   </tgroup>
-  </informaltable>
  </sect1>
 
- <sect1 id="notification-types" xreflabel="Notification Types">
-  <title>Notification Types</title>
+ <sect1 id="categories" xreflabel="Categories">
+  <title>Categories</title>
   <para>
    Notifications can optionally have a type indicator. Although neither
    client or nor server must support this, some may choose to. Those servers
-   implementing notification types may use them to intelligently display
+   implementing categories may use them to intelligently display
    the notification in a certain way, or group notifications of similar
    types.
   </para>
   <para>
-   Notification types are in
+   Categories are in
    <literal><replaceable>class.specific</replaceable></literal> form.
    <literal>class</literal> specifies the generic type of notification, and
    <literal>specific</literal> specifies the more specific type of
@@ -480,14 +462,14 @@
    <literal><replaceable>class</replaceable></literal> is acceptable.
   </para>
   <para>
-   Third parties, when defining their own notification types, should discuss
+   Third parties, when defining their own categories, should discuss
    the possibility of standardizing on the hint with other parties, preferably
    in a place such as the
    <ulink url="http://freedesktop.org/mailman/listinfo/xdg">xdg</ulink>
    mailing list at
    <ulink url="http://freedesktop.org/">freedesktop.org</ulink>. If it
    warrants a standard, it will be added to the table above. If no
-   consensus is reached, the notification type should be in the form of
+   consensus is reached, the category should be in the form of
    "<literal>x-<replaceable>vendor</replaceable>.<replaceable>class</replaceable>.<replaceable>name</replaceable></literal>."
   </para>
   <para>
@@ -495,7 +477,7 @@
    More will be added in time.
   </para>
   <table>
-   <title>Notification Types</title>
+   <title>Categories</title>
    <tgroup cols="2">
     <thead>
      <row>
@@ -695,6 +677,13 @@
    <literal>"x-<replaceable>vendor</replaceable>-<replaceable>name</replaceable>."</literal>
   </para>
   <para>
+   The value type for the hint dictionary in D-BUS is of the
+   <literal>DBUS_TYPE_VARIANT</literal> container type. This allows different
+   data types (string, integer, boolean, etc.) to be used for hints. When
+   adding a dictionary of hints, this type must be used, rather than putting
+   the actual hint value in as the dictionary value.
+  </para>
+  <para>
    The following table lists the standard hints as defined by this
    specification. Future hints may be proposed and added to this list
    over time. Once again, implementations are not required to support these.
@@ -711,6 +700,40 @@
     </thead>
     <tbody valign="top">
      <row>
+      <entry><literal>"urgency"</literal></entry>
+      <entry>byte</entry>
+      <entry>
+       The urgency level.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"category"</literal></entry>
+      <entry>string</entry>
+      <entry>
+       The type of notification this is.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"desktop-entry"></literal></entry>b
+      <entry>Application Desktop ID</entry>
+      <entry>
+       This specifies the name of the desktop filename representing the
+       calling program. This should be the same as the prefix used for the
+       application's .desktop file. An example would be "rhythmbox" from
+       "rhythmbox.desktop". This can be used by the daemon to retrieve the
+       correct icon for the application, for logging purposes, etc.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"image_data"</literal></entry>
+      <entry>(iiibiiay)</entry>
+      <entry>
+        This is a raw data image format which describes the width, height,
+        rowstride, has alpha, bits per sample, channels and image data
+        respectively. We use this value if the icon field is left blank.
+      </entry>
+     </row>
+     <row>
       <entry><literal>"sound-file"</literal></entry>
       <entry>string</entry>
       <entry>
@@ -724,6 +747,22 @@
        Causes the server to suppress playing any sounds, if it has that
        ability. This is usually set when the client itself is going to
        play its own sound.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"x"</literal></entry>
+      <entry>int</entry>
+      <entry>
+       Specifies the X location on the screen that the notification should
+       point to. The <literal>"y"</literal> hint must also be specified.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"y"</literal></entry>
+      <entry>int</entry>
+      <entry>
+       Specifies the Y location on the screen that the notification should
+       point to. The <literal>"x"</literal> hint must also be specified.
       </entry>
      </row>
     </tbody>
@@ -844,17 +883,13 @@
        <function>org.freedesktop.Notifications.Notify</function>
       </funcdef>
       <paramdef>STRING <parameter>app_name</parameter></paramdef>
-      <paramdef>BYTE_ARRAY_OR_STRING <parameter>app_icon</parameter></paramdef>
       <paramdef>UINT32 <parameter>replaces_id</parameter></paramdef>
-      <paramdef>STRING <parameter>notification_type</parameter></paramdef>
-      <paramdef>BYTE <parameter>urgency_level</parameter></paramdef>
+      <paramdef>STRING <parameter>app_icon</parameter></paramdef>
       <paramdef>STRING <parameter>summary</parameter></paramdef>
       <paramdef>STRING <parameter>body</parameter></paramdef>
-      <paramdef>ARRAY <parameter>images</parameter></paramdef>
-      <paramdef>DICT <parameter>actions</parameter></paramdef>
+      <paramdef>ARRAY <parameter>actions</parameter></paramdef>
       <paramdef>DICT <parameter>hints</parameter></paramdef>
-      <paramdef>BOOL <parameter>expires</parameter></paramdef>
-      <paramdef>UINT32 <parameter>expire_timeout</parameter></paramdef>
+      <paramdef>INT32 <parameter>expire_timeout</parameter></paramdef>
      </funcprototype>
     </funcsynopsis>
     <para>
@@ -880,15 +915,6 @@
         </entry>
        </row>
        <row>
-        <entry><parameter>app_icon</parameter></entry>
-        <entry>BYTE_ARRAY or STRING</entry>
-        <entry>
-         The optional program icon of the calling application. This is in
-         the same format as an image frame. See <xref linkend="icons"/>.
-         Can be an empty string, indicating no icon.
-        </entry>
-       </row>
-       <row>
         <entry><parameter>replaces_id</parameter></entry>
         <entry>UINT32</entry>
         <entry>
@@ -901,18 +927,12 @@
         </entry>
        </row>
        <row>
-        <entry><parameter>notification_type</parameter></entry>
+        <entry><parameter>app_icon</parameter></entry>
         <entry>STRING</entry>
         <entry>
-         The optional notification type ID, for potential server
-         categorization and logging purposes. See
-         <xref linkend="notification-types"/>. Can be empty.
+         The optional program icon of the calling application. See <xref linkend="icons"/>.
+         Can be an empty string, indicating no icon.
         </entry>
-       </row>
-       <row>
-        <entry><parameter>urgency_level</parameter></entry>
-        <entry>BYTE</entry>
-        <entry>The urgency level. See <xref linkend="urgency-levels"/>.</entry>
        </row>
        <row>
         <entry><parameter>summary</parameter></entry>
@@ -925,22 +945,12 @@
         <entry>The optional detailed body text. Can be empty.</entry>
        </row>
        <row>
-        <entry><parameter>images</parameter></entry>
+        <entry><parameter>actions</parameter></entry>
         <entry>ARRAY</entry>
         <entry>
-         The optional array of images. See <xref linkend="icons"/>. Can
-         be empty.
-        </entry>
-       </row>
-       <row>
-        <entry><parameter>actions</parameter></entry>
-        <entry>DICT</entry>
-        <entry>
-         A dictionary key of actions. Each key is the localized name of the
-         action, as it should appear to the user, and maps to a UINT32 value
-         containing a program-specific action code. This code will be reported
-         back to the program if the action is invoked by the user. Can be
-         empty.
+         Actions are sent over as a list of pairs.  Each even element in the list 
+         (starting at index 0) represents the identifier for the action.  Each odd
+         element in the list is the localized string that will be displayed to the user.
         </entry>
        </row>
        <row>
@@ -956,26 +966,19 @@
         </entry>
        </row>
        <row>
-        <entry><parameter>expires</parameter></entry>
-        <entry>BOOL</entry>
-        <entry>
-         A boolean flag indicating whether or not this notification should
-         automatically expire.
-        </entry>
-       </row>
-       <row>
         <entry><parameter>expire_timeout</parameter></entry>
-        <entry>UINT32</entry>
+        <entry>INT32</entry>
         <entry>
          <para>
-          The timeout time in seconds since the display of the notification at
-          which the notification should automatically close. This is ignored
-          if the expires flag is set to false.
+          The timeout time in milliseconds since the display of the notification at
+          which the notification should automatically close.
          </para>
          <para>
-          If zero, the notification's expiration time is dependent on the
+          If -1, the notification's expiration time is dependent on the
           notification server's settings, and may vary for the type of
           notification.
+
+          If 0, never expire.
          </para>
         </entry>
        </row>
@@ -1033,13 +1036,11 @@
       <paramdef>out STRING <parameter>name</parameter></paramdef>
       <paramdef>out STRING <parameter>vendor</parameter></paramdef>
       <paramdef>out STRING <parameter>version</parameter></paramdef>
-      <paramdef>out STRING <parameter>spec_version</parameter></paramdef>
      </funcprototype>
     </funcsynopsis>
     <para>
      This message returns the information on the server. Specifically,
-     the server name, vendor, version number, and specification version number
-     supported.
+     the server name, vendor, and version number.
     </para>
     <table>
      <title>GetServerInformation Return Values</title>
@@ -1069,11 +1070,6 @@
         <entry><parameter>version</parameter></entry>
         <entry>STRING</entry>
         <entry>The server's version number.</entry>
-       </row>
-       <row>
-        <entry><parameter>spec_version</parameter></entry>
-        <entry>STRING</entry>
-        <entry>The supported specification version number.</entry>
        </row>
       </tbody>
      </tgroup>

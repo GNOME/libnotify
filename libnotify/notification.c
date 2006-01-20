@@ -124,7 +124,7 @@ notify_notification_init(NotifyNotification *obj)
 	obj->priv->summary = NULL;
 	obj->priv->body = NULL;
 	obj->priv->icon_name = NULL;
-	obj->priv->timeout = NOTIFY_TIMEOUT_DEFAULT;
+	obj->priv->timeout = NOTIFY_EXPIRES_DEFAULT;
 	obj->priv->actions = NULL;
 	obj->priv->hints = g_hash_table_new_full(g_str_hash, g_str_equal,
 											 g_free,
@@ -431,34 +431,35 @@ _notify_notification_show_internal(NotifyNotification *notification,
 
 	if (ignore_reply)
 	{
-		dbus_g_proxy_call_no_reply(priv->proxy, "Notify",
-								   G_TYPE_STRING, notify_get_app_name(),
-								   G_TYPE_STRING,
-								   (priv->icon_name !=
-									NULL) ? priv->icon_name : "",
-								   G_TYPE_UINT, priv->id, G_TYPE_STRING,
-								   priv->summary, G_TYPE_STRING,
-								   priv->body, G_TYPE_STRV,
-								   action_array,
-								   dbus_g_type_get_map("GHashTable",
-													   G_TYPE_STRING,
-													   G_TYPE_VALUE),
-								   priv->hints, G_TYPE_INT, priv->timeout,
-								   G_TYPE_INVALID);
+		dbus_g_proxy_call_no_reply(
+			priv->proxy, "Notify",
+			G_TYPE_STRING, notify_get_app_name(),
+			G_TYPE_UINT, priv->id,
+			G_TYPE_STRING, priv->icon_name != NULL ? priv->icon_name : "",
+			G_TYPE_STRING, priv->summary,
+			G_TYPE_STRING, priv->body,
+			G_TYPE_STRV, action_array,
+			dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
+								G_TYPE_VALUE), priv->hints,
+			G_TYPE_INT, priv->timeout,
+			G_TYPE_INVALID);
 	}
 	else
 	{
-		dbus_g_proxy_call(priv->proxy, "Notify", &tmp_error,
-						  G_TYPE_STRING, notify_get_app_name(),
-						  G_TYPE_STRING,
-						  (priv->icon_name != NULL) ? priv->icon_name : "",
-						  G_TYPE_UINT, priv->id, G_TYPE_STRING,
-						  priv->summary, G_TYPE_STRING, priv->body,
-						  G_TYPE_STRV, action_array,
-						  dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
-											  G_TYPE_VALUE), priv->hints,
-						  G_TYPE_INT, priv->timeout, G_TYPE_INVALID,
-						  G_TYPE_UINT, &priv->id, G_TYPE_INVALID);
+		dbus_g_proxy_call(
+			priv->proxy, "Notify", &tmp_error,
+			G_TYPE_STRING, notify_get_app_name(),
+			G_TYPE_UINT, priv->id,
+			G_TYPE_STRING, priv->icon_name != NULL ? priv->icon_name : "",
+			G_TYPE_STRING, priv->summary,
+			G_TYPE_STRING, priv->body,
+			G_TYPE_STRV, action_array,
+			dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
+								G_TYPE_VALUE), priv->hints,
+			G_TYPE_INT, priv->timeout,
+			G_TYPE_INVALID,
+			G_TYPE_UINT, &priv->id,
+			G_TYPE_INVALID);
 	}
 
 	/* Don't free the elements because they are owned by priv->actions */

@@ -61,7 +61,7 @@ main(int argc, char *argv[])
 
 	notify_notification_set_hint_int32(n, "x", 300);
 	notify_notification_set_hint_int32(n, "y", 24);
-	notify_notification_set_timeout(n, NOTIFY_TIMEOUT_NEVER);
+	notify_notification_set_timeout(n, NOTIFY_EXPIRES_DEFAULT);
 	helper = gtk_button_new();
 	icon = gtk_widget_render_icon(helper,
 	                              GTK_STOCK_DIALOG_QUESTION,

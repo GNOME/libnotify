@@ -28,8 +28,8 @@
 
 G_BEGIN_DECLS
 
-#define NOTIFY_TIMEOUT_DEFAULT -1
-#define NOTIFY_TIMEOUT_NEVER    0
+#define NOTIFY_EXPIRES_DEFAULT -1
+#define NOTIFY_EXPIRES_NEVER    0
 
 #define NOTIFY_TYPE_NOTIFICATION (notify_notification_get_type ())
 #define NOTIFY_NOTIFICATION(o) \

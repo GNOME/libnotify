@@ -92,7 +92,7 @@ main(int argc, char **argv)
 								"You can free up some disk space by "
 								"emptying the trash can.",
 								NULL, NULL);
-	notify_notification_set_timeout(n, NOTIFY_TIMEOUT_NEVER);
+	notify_notification_set_timeout(n, NOTIFY_EXPIRES_DEFAULT);
 	notify_notification_add_action(n, "help", "Help",
 								   (NotifyActionCallback)help_callback);
 	notify_notification_add_action(n, "ignore", "Ignore",

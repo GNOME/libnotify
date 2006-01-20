@@ -38,7 +38,7 @@ main(int argc, const char **argv)
 	gchar *icon_str = NULL;
 	gchar *icons = NULL;
 	NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
-	long expire_timeout = NOTIFY_TIMEOUT_DEFAULT;
+	long expire_timeout = NOTIFY_EXPIRES_DEFAULT;
 	char ch;
 	poptContext opt_ctx;
 	const char **args;

@@ -1,3 +1,18 @@
+Fri Jan 20 01:59:26 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* docs/notification-spec.xml:
+	* libnotify/notification.c:
+	* libnotify/notification.h:
+	* tests/test-default-action.c:
+	* tests/test-image.c:
+	* tests/test-multi-actions.c:
+	* tools/notify-send.c:
+	  - Fix some weird argument ordering in the calls to
+	    dbus_g_proxy_call_*().
+	  - Re-order the arguments as per the spec.
+	  - Change NOTIFY_TIMEOUT_* to NOTIFY_EXPIRES_*.
+	  - Update the spec to 0.9.
+
 Fri Jan 20 01:37:42 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:
