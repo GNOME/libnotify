@@ -1,3 +1,10 @@
+Thu Jan 19 21:56:29 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/Makefile.am:
+	D libnotify/dbus-compat.h:
+	* libnotify/notify.c:
+	  - Get rid of dbus-compat.h.
+
 Thu Jan 19 21:55:08 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/dbus-compat.h:

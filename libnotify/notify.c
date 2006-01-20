@@ -29,7 +29,6 @@
 #endif
 
 #include "notify.h"
-#include "dbus-compat.h"
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 #include <stdio.h>

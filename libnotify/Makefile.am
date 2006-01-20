@@ -14,7 +14,6 @@ noinst_HEADERS = \
 	notify-marshal.h
 
 libnotify_la_SOURCES = 		\
-	dbus-compat.h 		\
 	notify.c		\
 	notifynotification.c	\
 	notify-marshal.c
