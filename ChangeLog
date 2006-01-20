@@ -1,3 +1,13 @@
+Thu Jan 19 21:55:08 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/dbus-compat.h:
+	* libnotify/notify.c:
+	* libnotify/notifycommon.h:
+	* libnotify/notify.h:
+	* libnotify/notifynotification.c:
+	* libnotify/notifynotification.h:
+	  - Fixed the coding style.
+
 Thu Jan 19 01:34:57 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* tools/notify-send.c:

@@ -1,3 +1,4 @@
+
 /**
  * @file libnotify/dbus-compat.h Private D-BUS Compatibility API
  *

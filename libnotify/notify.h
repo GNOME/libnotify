@@ -1,8 +1,7 @@
-/* -*- mode: c-mode; tab-width: 4; indent-tabs-mode: t; -*- */
 /**
  * @file libnotify/notify.h Notifications library
  *
- * @Copyright (C) 2004 Christian Hammond
+ * @Copyright (C) 2004-2006 Christian Hammond
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +18,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
-
 #ifndef _LIBNOTIFY_NOTIFY_H_
 #define _LIBNOTIFY_NOTIFY_H_
 
@@ -58,6 +56,11 @@ void notify_uninit(void);
  */
 gboolean notify_is_initted(void);
 
+/**
+ * Returns the name of the application set when notify_init() was called.
+ *
+ * @return The name of the application.
+ */
 const gchar *notify_get_app_name(void);
 
 /**
@@ -79,8 +82,10 @@ GList *notify_get_server_caps(void);
  *
  * @return TRUE if the call succeeded, or FALSE if there were errors.
  */
-gboolean notify_get_server_info(char **ret_name, char **ret_vendor,
-								char **ret_version, char **ret_spec_version);
+gboolean notify_get_server_info(char **ret_name,
+								char **ret_vendor,
+								char **ret_version,
+								char **ret_spec_version);
 
 /*@}*/
 
