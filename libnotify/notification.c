@@ -37,6 +37,14 @@ static void _action_signal_handler(DBusGProxy *proxy, guint32 id,
 								   gchar *action,
 								   NotifyNotification *notification);
 
+typedef struct
+{
+	NotifyActionCallback cb;
+	GFreeFunc free_func;
+	gpointer user_data;
+
+} CallbackPair;
+
 struct _NotifyNotificationPrivate
 {
 	guint32 id;
@@ -116,6 +124,15 @@ _g_value_free(GValue *value)
 }
 
 static void
+destroy_pair(CallbackPair *pair)
+{
+	if (pair->user_data != NULL && pair->free_func != NULL)
+		pair->free_func(pair->user_data);
+
+	g_free(pair);
+}
+
+static void
 notify_notification_init(NotifyNotification *obj)
 {
 	obj->priv = g_new0(NotifyNotificationPrivate, 1);
@@ -131,7 +148,8 @@ notify_notification_init(NotifyNotification *obj)
 											 (GFreeFunc)_g_value_free);
 
 	obj->priv->action_map = g_hash_table_new_full(g_str_hash, g_str_equal,
-												  g_free, NULL);
+												  g_free,
+												  (GFreeFunc)destroy_pair);
 
 	obj->priv->attached_widget = NULL;
 
@@ -351,7 +369,7 @@ static void
 _action_signal_handler(DBusGProxy *proxy, guint32 id, gchar *action,
 					   NotifyNotification *notification)
 {
-	NotifyActionCallback callback;
+	CallbackPair *pair;
 
 	g_return_if_fail(notification != NULL);
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
@@ -359,13 +377,13 @@ _action_signal_handler(DBusGProxy *proxy, guint32 id, gchar *action,
 	if (id != notification->priv->id)
 		return;
 
-	callback = (NotifyActionCallback)g_hash_table_lookup(
+	pair = (CallbackPair *)g_hash_table_lookup(
 		notification->priv->action_map, action);
 
-	if (callback == NULL)
+	if (pair == NULL)
 		g_warning("Recieved unknown action %s", action);
 	else
-		callback(notification, action);
+		pair->cb(notification, action, pair->user_data);
 }
 
 static gchar **
@@ -777,9 +795,11 @@ void
 notify_notification_add_action(NotifyNotification *notification,
 							   const char *action,
 							   const char *label,
-							   NotifyActionCallback callback)
+							   NotifyActionCallback callback,
+							   gpointer user_data, GFreeFunc free_func)
 {
 	NotifyNotificationPrivate *priv;
+	CallbackPair *pair;
 
 	g_return_if_fail(notification != NULL);
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
@@ -792,7 +812,10 @@ notify_notification_add_action(NotifyNotification *notification,
 	priv->actions = g_slist_append(priv->actions, g_strdup(action));
 	priv->actions = g_slist_append(priv->actions, g_strdup(label));
 
-	g_hash_table_insert(priv->action_map, g_strdup(action), callback);
+	pair = g_new0(CallbackPair, 1);
+	pair->cb = callback;
+	pair->user_data = user_data;
+	g_hash_table_insert(priv->action_map, g_strdup(action), pair);
 }
 
 gboolean

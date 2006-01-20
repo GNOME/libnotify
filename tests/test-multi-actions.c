@@ -94,11 +94,14 @@ main(int argc, char **argv)
 								NULL, NULL);
 	notify_notification_set_timeout(n, NOTIFY_EXPIRES_DEFAULT);
 	notify_notification_add_action(n, "help", "Help",
-								   (NotifyActionCallback)help_callback);
+								   (NotifyActionCallback)help_callback,
+								   NULL, NULL);
 	notify_notification_add_action(n, "ignore", "Ignore",
-								   (NotifyActionCallback)ignore_callback);
+								   (NotifyActionCallback)ignore_callback,
+								   NULL, NULL);
 	notify_notification_add_action(n, "empty", "Empty Trash",
-								   (NotifyActionCallback)empty_callback);
+								   (NotifyActionCallback)empty_callback,
+								   NULL, NULL);
 	notify_notification_set_category(n, "device");
 
 	if (!notify_notification_show(n, NULL))

@@ -61,7 +61,8 @@ main()
         n = notify_notification_new ("Matt is online", "", NULL, NULL);
         notify_notification_set_timeout (n, NOTIFY_EXPIRES_DEFAULT);
         notify_notification_add_action (n, "default", "Do Default Action",
-										(NotifyActionCallback)callback);
+										(NotifyActionCallback)callback,
+										NULL, NULL);
 	notify_notification_set_category (n, "presence.online");
 
 	if (!notify_notification_show (n, NULL)) {

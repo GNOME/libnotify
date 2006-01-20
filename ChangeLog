@@ -1,3 +1,11 @@
+Fri Jan 20 02:10:50 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	* libnotify/notification.h:
+	* tests/test-default-action.c:
+	* tests/test-multi-actions.c:
+	  - Implement per-action user data.
+
 Fri Jan 20 01:59:26 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* docs/notification-spec.xml:

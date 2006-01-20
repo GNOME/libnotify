@@ -76,7 +76,9 @@ typedef enum
 
 } NotifyUrgency;
 
-typedef void (*NotifyActionCallback)(NotifyNotification *, gchar *);
+typedef void (*NotifyActionCallback)(NotifyNotification *, gchar *, gpointer);
+
+#define NOTIFY_ACTION_CALLBACK(func) ((NotifyActionCallback)(func))
 
 GType notify_notification_get_type();
 
@@ -132,7 +134,8 @@ void notify_notification_clear_hints(NotifyNotification *notification);
 
 void notify_notification_add_action(NotifyNotification *notification,
 									const char *action, const char *label,
-									NotifyActionCallback callback);
+									NotifyActionCallback callback,
+									gpointer user_data, GFreeFunc free_func);
 
 void notify_notification_clear_actions(NotifyNotification *notification);
 gboolean notify_notification_close(NotifyNotification *notification,
