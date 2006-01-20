@@ -114,7 +114,7 @@ gboolean notify_notification_set_category(NotifyNotification *notification,
 gboolean notify_notification_set_urgency(NotifyNotification *notification,
 										 NotifyUrgency l);
 
-gboolean notify_notification_set_icon_data_from_pixbuf(
+gboolean notify_notification_set_icon_from_pixbuf(
 	NotifyNotification *notification, GdkPixbuf *icon);
 
 gboolean notify_notification_set_hint_int32(NotifyNotification *notification,

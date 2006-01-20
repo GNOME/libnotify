@@ -626,8 +626,8 @@ _gvalue_array_append_byte_array(GValueArray *array, guchar *bytes, gsize len)
 }
 
 gboolean
-notify_notification_set_icon_data_from_pixbuf(
-	NotifyNotification *notification, GdkPixbuf *icon)
+notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
+										 GdkPixbuf *icon)
 {
 	gint width;
 	gint height;

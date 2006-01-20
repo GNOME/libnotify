@@ -62,6 +62,13 @@ main(int argc, char *argv[])
 	notify_notification_set_hint_int32(n, "x", 300);
 	notify_notification_set_hint_int32(n, "y", 24);
 	notify_notification_set_timeout(n, NOTIFY_TIMEOUT_NEVER);
+	helper = gtk_button_new();
+	icon = gtk_widget_render_icon(helper,
+	                              GTK_STOCK_DIALOG_QUESTION,
+	                              GTK_ICON_SIZE_DIALOG,
+	                              NULL);
+
+	notify_notification_set_icon_from_pixbuf(n, icon);
 
 	if (!notify_notification_show(n, NULL))
 	{
@@ -99,9 +106,9 @@ main(int argc, char *argv[])
 	icon = gtk_widget_render_icon(helper,
 	                              GTK_STOCK_DIALOG_QUESTION,
 	                              GTK_ICON_SIZE_DIALOG,
-	                              "");
+	                              NULL);
 
-	notify_notification_set_icon_data_from_pixbuf(n, icon);
+	notify_notification_set_icon_from_pixbuf(n, icon);
 
 	if (!notify_notification_show(n, NULL))
 	{
