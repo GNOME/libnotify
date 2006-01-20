@@ -41,7 +41,7 @@ struct _NotifyNotificationPrivate
 {
 	guint32 id;
 	gchar *summary;
-	gchar *message;
+	gchar *body;
 
 	/* NULL to use icon data anything else to have server lookup icon */
 	gchar *icon_name;
@@ -61,9 +61,6 @@ struct _NotifyNotificationPrivate
 	gint widget_old_x;
 	gint widget_old_y;
 
-	gpointer user_data;
-	GDestroyNotify user_data_free_func;
-
 	gboolean updates_pending;
 
 	DBusGProxy *proxy;
@@ -71,7 +68,7 @@ struct _NotifyNotificationPrivate
 
 typedef enum
 {
-	SIGNAL_TYPE_CLOSED,
+	SIGNAL_CLOSED,
 	LAST_SIGNAL
 
 } NotifyNotificationSignalType;
@@ -82,34 +79,10 @@ typedef struct
 
 } NotifyNotificationSignal;
 
-static guint notify_notification_signals[LAST_SIGNAL] = { 0 };
+static guint signals[LAST_SIGNAL] = { 0 };
 static GObjectClass *parent_class = NULL;
 
-GType
-notify_notification_get_type()
-{
-	static GType type = 0;
-
-	if (type == 0)
-	{
-		static const GTypeInfo our_info = {
-			sizeof(NotifyNotificationClass),
-			NULL,
-			NULL,
-			(GClassInitFunc) notify_notification_class_init,
-			NULL,
-			NULL,
-			sizeof(NotifyNotification),
-			0,
-			(GInstanceInitFunc) notify_notification_init,
-		};
-
-		type = g_type_register_static(G_TYPE_OBJECT,
-									  "NotifyNotification", &our_info, 0);
-	}
-
-	return type;
-}
+G_DEFINE_TYPE(NotifyNotification, notify_notification, G_TYPE_OBJECT);
 
 static void
 notify_notification_class_init(NotifyNotificationClass * klass)
@@ -117,10 +90,11 @@ notify_notification_class_init(NotifyNotificationClass * klass)
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 
 	parent_class = g_type_class_peek_parent(klass);
+
 	object_class->finalize = notify_notification_finalize;
 
 	/* Create signals here: */
-	notify_notification_signals[SIGNAL_TYPE_CLOSED] =
+	signals[SIGNAL_CLOSED] =
 		g_signal_new("closed",
 					 G_TYPE_FROM_CLASS(object_class),
 					 G_SIGNAL_RUN_FIRST,
@@ -148,7 +122,7 @@ notify_notification_init(NotifyNotification *obj)
 
 	obj->priv->id = 0;
 	obj->priv->summary = NULL;
-	obj->priv->message = NULL;
+	obj->priv->body = NULL;
 	obj->priv->icon_name = NULL;
 	obj->priv->timeout = NOTIFY_TIMEOUT_DEFAULT;
 	obj->priv->actions = NULL;
@@ -160,8 +134,6 @@ notify_notification_init(NotifyNotification *obj)
 												  g_free, NULL);
 
 	obj->priv->attached_widget = NULL;
-	obj->priv->user_data = NULL;
-	obj->priv->user_data_free_func = NULL;
 
 	obj->priv->updates_pending = FALSE;
 
@@ -178,7 +150,7 @@ notify_notification_finalize(GObject *object)
 	NotifyNotificationPrivate *priv = obj->priv;
 
 	g_free(priv->summary);
-	g_free(priv->message);
+	g_free(priv->body);
 	g_free(priv->icon_name);
 
 	if (priv->actions != NULL)
@@ -196,9 +168,6 @@ notify_notification_finalize(GObject *object)
 	if (priv->attached_widget != NULL)
 		g_object_unref(G_OBJECT(priv->attached_widget));
 
-	if (priv->user_data_free_func != NULL)
-		priv->user_data_free_func(priv->user_data);
-
 	dbus_g_proxy_disconnect_signal(priv->proxy, "NotificationClosed",
 								   G_CALLBACK(_close_signal_handler),
 								   object);
@@ -208,6 +177,7 @@ notify_notification_finalize(GObject *object)
 								   object);
 
 	g_free(obj->priv);
+
 	G_OBJECT_CLASS(parent_class)->finalize(object);
 }
 
@@ -302,19 +272,23 @@ _catch(GdkXEvent *xevent, GdkEvent *event, gpointer data)
 }
 
 NotifyNotification *
-notify_notification_new(const gchar *summary, const gchar *message,
+notify_notification_new(const gchar *summary, const gchar *body,
 						const gchar *icon, GtkWidget *attach)
 {
 	NotifyNotification *obj;
 
-	g_assert(summary != NULL);
-	g_assert(message != NULL);
+	g_return_val_if_fail(summary != NULL && *summary != '\0',     NULL);
+	g_return_val_if_fail(attach == NULL || GTK_IS_WIDGET(attach), NULL);
 
 	obj = NOTIFY_NOTIFICATION(g_object_new(NOTIFY_TYPE_NOTIFICATION, NULL));
 
 	obj->priv->summary = g_strdup(summary);
-	obj->priv->message = g_strdup(message);
-	obj->priv->icon_name = g_strdup(icon);
+
+	if (body != NULL && *body != '\0')
+		obj->priv->body = g_strdup(body);
+
+	if (icon != NULL && *icon != '\0')
+		obj->priv->icon_name = g_strdup(icon);
 
 	if (attach != NULL)
 	{
@@ -327,22 +301,27 @@ notify_notification_new(const gchar *summary, const gchar *message,
 
 gboolean
 notify_notification_update(NotifyNotification *notification,
-						   const gchar *summary,
-						   const gchar *message, const gchar *icon)
+						   const gchar *summary, const gchar *body,
+						   const gchar *icon)
 {
-	NotifyNotificationPrivate *priv = notification->priv;
+	g_return_val_if_fail(notification != NULL,                 FALSE);
+	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
+	g_return_val_if_fail(summary != NULL && *summary != '\0',  FALSE);
 
-	g_free(priv->summary);
-	g_free(priv->message);
-	g_free(priv->icon_name);
+	g_free(notification->priv->summary);
+	g_free(notification->priv->body);
+	g_free(notification->priv->icon_name);
 
-	priv->summary = g_strdup(summary);
-	priv->message = g_strdup(message);
-	priv->icon_name = g_strdup(icon);
+	notification->priv->summary = g_strdup(summary);
 
-	priv->updates_pending = TRUE;
+	if (body != NULL && *body != '\0')
+		notification->priv->body = g_strdup(body);
 
-	/*TODO: return false on OOM */
+	if (icon != NULL && *icon != '\0')
+		notification->priv->icon_name = g_strdup(icon);
+
+	notification->priv->updates_pending = TRUE;
+
 	return TRUE;
 }
 
@@ -350,83 +329,51 @@ void
 notify_notification_attach_to_widget(NotifyNotification *notification,
 									 GtkWidget *attach)
 {
-	NotifyNotificationPrivate *priv = notification->priv;
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 
-	if (priv->attached_widget != NULL)
-		g_object_unref(priv->attached_widget);
+	if (notification->priv->attached_widget != NULL)
+		g_object_unref(notification->priv->attached_widget);
 
-	priv->attached_widget = (attach != NULL ? g_object_ref(attach) : NULL);
-}
-
-gboolean
-notify_notification_set_user_data(NotifyNotification *notification,
-								  void *user_data, GFreeFunc free_func)
-{
-	NotifyNotificationPrivate *priv = notification->priv;
-
-	if (priv->user_data)
-	{
-		if (priv->user_data_free_func)
-			priv->user_data_free_func(priv->user_data);
-	}
-
-	priv->user_data = user_data;
-	priv->user_data_free_func = free_func;
-
-	/* TODO: return FALSE on OOM */
-	return TRUE;
-}
-
-gpointer
-notify_notification_get_user_data(NotifyNotification *notification)
-{
-	return notification->priv->user_data;
+	notification->priv->attached_widget =
+		(attach != NULL ? g_object_ref(attach) : NULL);
 }
 
 static void
 _close_signal_handler(DBusGProxy *proxy, guint32 id,
 					  NotifyNotification *notification)
 {
-	printf("Got the NotificationClosed signal (id = %i, "
-		   "notification->id = %i)\n",
-		   id, notification->priv->id);
-
 	if (id == notification->priv->id)
-	{
-		g_signal_emit(notification,
-					  notify_notification_signals[SIGNAL_TYPE_CLOSED], 0);
-	}
+		g_signal_emit(notification, signals[SIGNAL_CLOSED], 0);
 }
 
 static void
-_action_signal_handler(DBusGProxy *proxy,
-					   guint32 id,
-					   gchar *action, NotifyNotification *notification)
+_action_signal_handler(DBusGProxy *proxy, guint32 id, gchar *action,
+					   NotifyNotification *notification)
 {
-	g_assert(NOTIFY_IS_NOTIFICATION(notification));
+	NotifyActionCallback callback;
 
-	if (id == notification->priv->id)
-	{
-		NotifyActionCallback callback;
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 
-		callback = (NotifyActionCallback)g_hash_table_lookup(
-			notification->priv->action_map, action);
+	if (id != notification->priv->id)
+		return;
 
-		if (callback == NULL)
-			g_warning("Recieved unknown action %s", action);
-		else
-			callback(notification, action);
-	}
+	callback = (NotifyActionCallback)g_hash_table_lookup(
+		notification->priv->action_map, action);
+
+	if (callback == NULL)
+		g_warning("Recieved unknown action %s", action);
+	else
+		callback(notification, action);
 }
 
 static gchar **
 _gslist_to_string_array(GSList *list)
 {
 	GSList *l;
-	GArray *a;
-
-	a = g_array_sized_new(TRUE, FALSE, sizeof(gchar *),
-						  g_slist_length(list));
+	GArray *a = g_array_sized_new(TRUE, FALSE, sizeof(gchar *),
+								  g_slist_length(list));
 
 	for (l = list; l != NULL; l = l->next)
 		g_array_append_val(a, l->data);
@@ -446,9 +393,7 @@ _notify_notification_show_internal(NotifyNotification *notification,
 
 	if (priv->proxy == NULL)
 	{
-		DBusGConnection *bus;
-
-		bus = dbus_g_bus_get(DBUS_BUS_SESSION, &tmp_error);
+		DBusGConnection *bus = dbus_g_bus_get(DBUS_BUS_SESSION, &tmp_error);
 
 		if (tmp_error != NULL)
 		{
@@ -484,21 +429,7 @@ _notify_notification_show_internal(NotifyNotification *notification,
 
 	/* TODO: make this nonblocking */
 
-	if (!ignore_reply)
-	{
-		dbus_g_proxy_call(priv->proxy, "Notify", &tmp_error,
-						  G_TYPE_STRING, notify_get_app_name(),
-						  G_TYPE_STRING,
-						  (priv->icon_name != NULL) ? priv->icon_name : "",
-						  G_TYPE_UINT, priv->id, G_TYPE_STRING,
-						  priv->summary, G_TYPE_STRING, priv->message,
-						  G_TYPE_STRV, action_array,
-						  dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
-											  G_TYPE_VALUE), priv->hints,
-						  G_TYPE_INT, priv->timeout, G_TYPE_INVALID,
-						  G_TYPE_UINT, &priv->id, G_TYPE_INVALID);
-	}
-	else
+	if (ignore_reply)
 	{
 		dbus_g_proxy_call_no_reply(priv->proxy, "Notify",
 								   G_TYPE_STRING, notify_get_app_name(),
@@ -507,13 +438,27 @@ _notify_notification_show_internal(NotifyNotification *notification,
 									NULL) ? priv->icon_name : "",
 								   G_TYPE_UINT, priv->id, G_TYPE_STRING,
 								   priv->summary, G_TYPE_STRING,
-								   priv->message, G_TYPE_STRV,
+								   priv->body, G_TYPE_STRV,
 								   action_array,
 								   dbus_g_type_get_map("GHashTable",
 													   G_TYPE_STRING,
 													   G_TYPE_VALUE),
 								   priv->hints, G_TYPE_INT, priv->timeout,
 								   G_TYPE_INVALID);
+	}
+	else
+	{
+		dbus_g_proxy_call(priv->proxy, "Notify", &tmp_error,
+						  G_TYPE_STRING, notify_get_app_name(),
+						  G_TYPE_STRING,
+						  (priv->icon_name != NULL) ? priv->icon_name : "",
+						  G_TYPE_UINT, priv->id, G_TYPE_STRING,
+						  priv->summary, G_TYPE_STRING, priv->body,
+						  G_TYPE_STRV, action_array,
+						  dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
+											  G_TYPE_VALUE), priv->hints,
+						  G_TYPE_INT, priv->timeout, G_TYPE_INVALID,
+						  G_TYPE_UINT, &priv->id, G_TYPE_INVALID);
 	}
 
 	/* Don't free the elements because they are owned by priv->actions */
@@ -531,6 +476,10 @@ _notify_notification_show_internal(NotifyNotification *notification,
 gboolean
 notify_notification_show(NotifyNotification *notification, GError **error)
 {
+	g_return_val_if_fail(notification != NULL, FALSE);
+	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
+	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
+
 	return _notify_notification_show_internal(notification, error, FALSE);
 }
 
@@ -538,8 +487,13 @@ gboolean
 notify_notification_show_and_forget(NotifyNotification *notification,
 									GError **error)
 {
-	gboolean result =
-		_notify_notification_show_internal(notification, error, TRUE);
+	gboolean result;
+
+	g_return_val_if_fail(notification != NULL, FALSE);
+	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
+	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
+
+	result = _notify_notification_show_internal(notification, error, TRUE);
 
 	g_object_unref(G_OBJECT(notification));
 
@@ -550,23 +504,30 @@ void
 notify_notification_set_timeout(NotifyNotification *notification,
 								gint timeout)
 {
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+
 	notification->priv->timeout = timeout;
 }
 
-gboolean
+void
 notify_notification_set_category(NotifyNotification *notification,
 								 const char *category)
 {
-	return notify_notification_set_hint_string(notification,
-											   "category", category);
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+
+	notify_notification_set_hint_string(notification, "category", category);
 }
 
-gboolean
+void
 notify_notification_set_urgency(NotifyNotification *notification,
 								NotifyUrgency l)
 {
-	return notify_notification_set_hint_byte(notification,
-											 "urgency", (guchar)l);
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+
+	notify_notification_set_hint_byte(notification, "urgency", (guchar)l);
 }
 
 static gboolean
@@ -625,30 +586,28 @@ _gvalue_array_append_byte_array(GValueArray *array, guchar *bytes, gsize len)
 	return TRUE;
 }
 
-gboolean
+void
 notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 										 GdkPixbuf *icon)
 {
 	gint width;
 	gint height;
 	gint rowstride;
-	gboolean alpha;
 	gint bits_per_sample;
 	gint n_channels;
 	guchar *image;
 	gsize image_len;
 	GValueArray *image_struct;
 	GValue *value;
-	NotifyNotificationPrivate *priv;
 
-	priv = notification->priv;
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 
 	width           = gdk_pixbuf_get_width(icon);
 	height          = gdk_pixbuf_get_height(icon);
 	rowstride       = gdk_pixbuf_get_rowstride(icon);
 	n_channels      = gdk_pixbuf_get_n_channels(icon);
 	bits_per_sample = gdk_pixbuf_get_bits_per_sample(icon);
-	alpha           = gdk_pixbuf_get_has_alpha(icon);
 	image_len       = (height - 1) * rowstride + width *
 	                  ((n_channels * bits_per_sample + 7) / 8);
 
@@ -662,7 +621,7 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 	_gvalue_array_append_int(image_struct, width);
 	_gvalue_array_append_int(image_struct, height);
 	_gvalue_array_append_int(image_struct, rowstride);
-	_gvalue_array_append_bool(image_struct, alpha);
+	_gvalue_array_append_bool(image_struct, gdk_pixbuf_get_has_alpha(icon));
 	_gvalue_array_append_int(image_struct, bits_per_sample);
 	_gvalue_array_append_int(image_struct, n_channels);
 	_gvalue_array_append_byte_array(image_struct, image, image_len);
@@ -675,84 +634,80 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 	g_value_init(value, G_TYPE_VALUE_ARRAY);
 	g_value_set_boxed(value, image_struct);
 
-	g_hash_table_insert(priv->hints, g_strdup("icon_data"), value);
+	g_hash_table_insert(notification->priv->hints,
+						g_strdup("icon_data"), value);
 
-	return TRUE;
+	return;
 
 fail:
 	if (image_struct != NULL)
 		g_value_array_free(image_struct);
-
-	return FALSE;
 }
 
-gboolean
+void
 notify_notification_set_hint_int32(NotifyNotification *notification,
 								   const gchar *key, gint value)
 {
-	NotifyNotificationPrivate *priv;
 	GValue *hint_value;
 
-	priv = notification->priv;
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+	g_return_if_fail(key != NULL && *key != '\0');
 
 	hint_value = g_new0(GValue, 1);
 	g_value_init(hint_value, G_TYPE_INT);
 	g_value_set_int(hint_value, value);
-
-	g_hash_table_insert(priv->hints, g_strdup(key), hint_value);
-
-	/* TODO: return FALSE on OOM */
-	return TRUE;
+	g_hash_table_insert(notification->priv->hints,
+						g_strdup(key), hint_value);
 }
 
-gboolean
+void
 notify_notification_set_hint_double(NotifyNotification *notification,
 									const gchar *key, gdouble value)
 {
-	NotifyNotificationPrivate *priv;
 	GValue *hint_value;
 
-	priv = notification->priv;
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+	g_return_if_fail(key != NULL && *key != '\0');
 
 	hint_value = g_new0(GValue, 1);
 	g_value_init(hint_value, G_TYPE_FLOAT);
 	g_value_set_float(hint_value, value);
-
-	g_hash_table_insert(priv->hints, g_strdup(key), hint_value);
-
-	/* TODO: return FALSE on OOM */
-	return TRUE;
+	g_hash_table_insert(notification->priv->hints,
+						g_strdup(key), hint_value);
 }
 
-gboolean
+void
 notify_notification_set_hint_byte(NotifyNotification *notification,
 								  const gchar *key, guchar value)
 {
-	NotifyNotificationPrivate *priv;
 	GValue *hint_value;
 
-	priv = notification->priv;
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+	g_return_if_fail(key != NULL && *key != '\0');
 
 	hint_value = g_new0(GValue, 1);
 	g_value_init(hint_value, G_TYPE_UCHAR);
 	g_value_set_uchar(hint_value, value);
 
-	g_hash_table_insert(priv->hints, g_strdup(key), hint_value);
-
-	/* TODO: return FALSE on OOM */
-	return TRUE;
+	g_hash_table_insert(notification->priv->hints, g_strdup(key), hint_value);
 }
 
-gboolean
+void
 notify_notification_set_hint_byte_array(NotifyNotification *notification,
 										const gchar *key,
 										const guchar *value, gsize len)
 {
-	NotifyNotificationPrivate *priv;
 	GValue *hint_value;
 	GArray *byte_array;
 
-	priv = notification->priv;
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+	g_return_if_fail(key != NULL && *key != '\0');
+	g_return_if_fail(value != NULL);
+	g_return_if_fail(len > 0);
 
 	byte_array = g_array_sized_new(FALSE, FALSE, sizeof(guchar), len);
 	byte_array = g_array_append_vals(byte_array, value, len);
@@ -762,29 +717,25 @@ notify_notification_set_hint_byte_array(NotifyNotification *notification,
 														G_TYPE_UCHAR));
 	g_value_set_boxed_take_ownership(hint_value, byte_array);
 
-	g_hash_table_insert(priv->hints, g_strdup(key), hint_value);
-
-	/* TODO: return FALSE on OOM */
-	return TRUE;
+	g_hash_table_insert(notification->priv->hints,
+						g_strdup(key), hint_value);
 }
 
-gboolean
+void
 notify_notification_set_hint_string(NotifyNotification *notification,
 									const gchar *key, const gchar *value)
 {
-	NotifyNotificationPrivate *priv;
 	GValue *hint_value;
 
-	priv = notification->priv;
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+	g_return_if_fail(key != NULL && *key != '\0');
 
 	hint_value = g_new0(GValue, 1);
 	g_value_init(hint_value, G_TYPE_STRING);
 	g_value_set_string(hint_value, value);
-
-	g_hash_table_insert(priv->hints, g_strdup(key), hint_value);
-
-	/* TODO: return FALSE on OOM */
-	return TRUE;
+	g_hash_table_insert(notification->priv->hints,
+						g_strdup(key), hint_value);
 }
 
 static gboolean
@@ -796,6 +747,9 @@ _remove_all(void)
 void
 notify_notification_clear_hints(NotifyNotification *notification)
 {
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+
 	g_hash_table_foreach_remove(notification->priv->hints,
 								(GHRFunc)_remove_all, NULL);
 }
@@ -803,6 +757,9 @@ notify_notification_clear_hints(NotifyNotification *notification)
 void
 notify_notification_clear_actions(NotifyNotification *notification)
 {
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+
 	g_hash_table_foreach_remove(notification->priv->action_map,
 								(GHRFunc)_remove_all, NULL);
 
@@ -815,7 +772,7 @@ notify_notification_clear_actions(NotifyNotification *notification)
 	notification->priv->actions = NULL;
 }
 
-gboolean
+void
 notify_notification_add_action(NotifyNotification *notification,
 							   const char *action,
 							   const char *label,
@@ -823,14 +780,18 @@ notify_notification_add_action(NotifyNotification *notification,
 {
 	NotifyNotificationPrivate *priv;
 
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+	g_return_if_fail(action != NULL && *action != '\0');
+	g_return_if_fail(label != NULL && *label != '\0');
+	g_return_if_fail(callback != NULL);
+
 	priv = notification->priv;
 
 	priv->actions = g_slist_append(priv->actions, g_strdup(action));
 	priv->actions = g_slist_append(priv->actions, g_strdup(label));
 
 	g_hash_table_insert(priv->action_map, g_strdup(action), callback);
-
-	return FALSE;
 }
 
 gboolean
@@ -838,13 +799,13 @@ notify_notification_close(NotifyNotification *notification,
 						  GError **error)
 {
 	NotifyNotificationPrivate *priv;
-	GError *tmp_error;
+	GError *tmp_error = NULL;
 
+	g_return_val_if_fail(notification != NULL, FALSE);
+	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
 
 	priv = notification->priv;
-
-	tmp_error = NULL;
 
 	if (priv->proxy == NULL)
 	{

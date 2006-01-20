@@ -75,6 +75,7 @@ notify_init(const char *app_name)
 	_app_name = g_strdup(app_name);
 
 	g_type_init();
+	dbus_g_type_specialized_init();
 
 #ifdef HAVE_ATEXIT
 	atexit(notify_uninit);
@@ -172,20 +173,33 @@ notify_get_server_info(char **ret_name, char **ret_vendor,
 {
 	GError *error = NULL;
 	DBusGProxy *proxy = get_proxy();
+	char *name, *vendor, *version, *spec_version;
 
 	g_return_val_if_fail(proxy != NULL, FALSE);
 
 	if (!dbus_g_proxy_call(proxy, "GetServerInformation", &error,
 						   G_TYPE_INVALID,
-						   G_TYPE_STRING, ret_name,
-						   G_TYPE_STRING, ret_vendor,
-						   G_TYPE_STRING, ret_version,
-						   G_TYPE_STRING, ret_spec_version,
+						   G_TYPE_STRING, &name,
+						   G_TYPE_STRING, &vendor,
+						   G_TYPE_STRING, &version,
+						   G_TYPE_STRING, &spec_version,
 						   G_TYPE_INVALID))
 	{
 		g_message("GetServerInformation call failed: %s", error->message);
 		return FALSE;
 	}
+
+	if (ret_name != NULL)
+		*ret_name = name;
+
+	if (ret_vendor != NULL)
+		*ret_vendor = vendor;
+
+	if (ret_version != NULL)
+		*ret_version = version;
+
+	if (spec_version != NULL)
+		*ret_spec_version = spec_version;
 
 	return TRUE;
 }

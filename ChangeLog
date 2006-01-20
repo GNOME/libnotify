@@ -1,3 +1,14 @@
+Fri Jan 20 01:37:42 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	* libnotify/notification.h:
+	* libnotify/notify.c:
+	  - Clean up a lot of the API. Several functions returned gboolean when
+	    there was very little point in doing so.
+	  - Add assertions to all the functions.
+	  - Remove the notify_notification_{set,get}_user_data() functions. These
+	    are useless, since this is a GObject, and we get it for free.
+
 Thu Jan 19 22:07:41 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	A libnotify/internal.h:

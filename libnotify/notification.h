@@ -93,12 +93,6 @@ gboolean notify_notification_update(NotifyNotification *notification,
 void notify_notification_attach_to_widget(NotifyNotification* notification,
 										  GtkWidget *attach);
 
-gboolean notify_notification_set_user_data(NotifyNotification *notification,
-										   void *user_data,
-										   GFreeFunc free_func);
-
-gpointer notify_notification_get_user_data(NotifyNotification *notification);
-
 gboolean notify_notification_show(NotifyNotification *notification,
 								  GError **error);
 
@@ -108,40 +102,37 @@ gboolean notify_notification_show_and_forget(NotifyNotification *notification,
 void notify_notification_set_timeout(NotifyNotification *notification,
 									 gint timeout);
 
-gboolean notify_notification_set_category(NotifyNotification *notification,
-										  const char *category);
+void notify_notification_set_category(NotifyNotification *notification,
+									  const char *category);
 
-gboolean notify_notification_set_urgency(NotifyNotification *notification,
-										 NotifyUrgency l);
+void notify_notification_set_urgency(NotifyNotification *notification,
+									 NotifyUrgency l);
 
-gboolean notify_notification_set_icon_from_pixbuf(
+void notify_notification_set_icon_from_pixbuf(
 	NotifyNotification *notification, GdkPixbuf *icon);
 
-gboolean notify_notification_set_hint_int32(NotifyNotification *notification,
-											const gchar *key, gint value);
+void notify_notification_set_hint_int32(NotifyNotification *notification,
+										const gchar *key, gint value);
 
-gboolean notify_notification_set_hint_double(NotifyNotification *notification,
+void notify_notification_set_hint_double(NotifyNotification *notification,
+										 const gchar *key, gdouble value);
+
+void notify_notification_set_hint_string(NotifyNotification *notification,
+										 const gchar *key,
+										 const gchar *value);
+
+void notify_notification_set_hint_byte(NotifyNotification *notification,
+									   const gchar *key, guchar value);
+
+void notify_notification_set_hint_byte_array(NotifyNotification *notification,
 											 const gchar *key,
-											 gdouble value);
-
-gboolean notify_notification_set_hint_string(NotifyNotification *notification,
-											 const gchar *key,
-											 const gchar *value);
-
-gboolean notify_notification_set_hint_byte(NotifyNotification *notification,
-										   const gchar *key,
-										   guchar value);
-
-gboolean notify_notification_set_hint_byte_array(
-	NotifyNotification *notification, const gchar *key,
-	const guchar *value, gsize len);
+											 const guchar *value, gsize len);
 
 void notify_notification_clear_hints(NotifyNotification *notification);
 
-gboolean notify_notification_add_action(NotifyNotification *notification,
-										const char *action,
-										const char *label,
-										NotifyActionCallback callback);
+void notify_notification_add_action(NotifyNotification *notification,
+									const char *action, const char *label,
+									NotifyActionCallback callback);
 
 void notify_notification_clear_actions(NotifyNotification *notification);
 gboolean notify_notification_close(NotifyNotification *notification,
