@@ -7,15 +7,14 @@ lib_LTLIBRARIES = libnotify.la
 
 notifyinc_HEADERS = 		\
 	notify.h		\
-	notifynotification.h	\
-	notifycommon.h
+	notification.h
 
 noinst_HEADERS = \
 	notify-marshal.h
 
 libnotify_la_SOURCES = 		\
 	notify.c		\
-	notifynotification.c	\
+	notification.c	\
 	notify-marshal.c
 
 libnotify_la_LIBADD = \

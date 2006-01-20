@@ -24,8 +24,7 @@
 #include <glib.h>
 #include <time.h>
 
-#include "notifycommon.h"
-#include "notifynotification.h"
+#include <libnotify/notification.h>
 
 /**************************************************************************/
 /** @name libnotify Base API                                              */

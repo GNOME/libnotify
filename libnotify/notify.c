@@ -28,13 +28,14 @@
 # define DBUS_API_SUBJECT_TO_CHANGE 1
 #endif
 
-#include "notify.h"
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <libnotify/notify.h>
+#include <libnotify/internal.h>
 
 static gboolean _initted = FALSE;
 static gchar *_app_name = NULL;

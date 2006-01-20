@@ -1,3 +1,18 @@
+Thu Jan 19 22:07:41 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	A libnotify/internal.h:
+	A libnotify/notification.c:
+	A libnotify/notification.h:
+	D libnotify/notifycommon.h:
+	D libnotify/notifynotification.c:
+	D libnotify/notifynotification.h:
+	* libnotify/Makefile.am:
+	* libnotify/notify.c:
+	* libnotify/notify.h:
+	  - Do some rearranging of the files in libnotify, and include things
+	    properly so people can actually use the library without fudging with
+	    include paths.
+
 Thu Jan 19 21:56:29 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/Makefile.am:

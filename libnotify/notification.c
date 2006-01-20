@@ -23,9 +23,9 @@
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 
-#include "notify.h"
-#include "notifynotification.h"
-#include "notify-marshal.h"
+#include <libnotify/notify.h>
+#include <libnotify/notify-marshal.h>
+#include <libnotify/internal.h>
 
 static void notify_notification_class_init(NotifyNotificationClass *klass);
 static void notify_notification_init(NotifyNotification *sp);

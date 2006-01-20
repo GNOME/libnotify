@@ -26,9 +26,10 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
-#include "notifycommon.h"
-
 G_BEGIN_DECLS
+
+#define NOTIFY_TIMEOUT_DEFAULT -1
+#define NOTIFY_TIMEOUT_NEVER    0
 
 #define NOTIFY_TYPE_NOTIFICATION (notify_notification_get_type ())
 #define NOTIFY_NOTIFICATION(o) \
@@ -44,6 +45,7 @@ G_BEGIN_DECLS
 #define NOTIFY_NOTIFICATION_GET_CLASS(o) \
 	(G_TYPE_INSTANCE_GET_CLASS ((o), NOTIFY_TYPE_NOTIFICATION, \
 								NotifyNotificationClass))
+
 
 typedef struct _NotifyNotification        NotifyNotification;
 typedef struct _NotifyNotificationClass   NotifyNotificationClass;
@@ -62,6 +64,17 @@ struct _NotifyNotificationClass
 	/* Signals */
 	void (*closed)(NotifyNotification *notification);
 };
+
+/**
+ * Notification urgency levels.
+ */
+typedef enum
+{
+	NOTIFY_URGENCY_LOW,		  /**< Low urgency.      */
+	NOTIFY_URGENCY_NORMAL,	  /**< Normal urgency.   */
+	NOTIFY_URGENCY_CRITICAL,  /**< Critical urgency. */
+
+} NotifyUrgency;
 
 typedef void (*NotifyActionCallback)(NotifyNotification *, gchar *);
 
