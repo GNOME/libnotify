@@ -272,16 +272,6 @@ _idle_check_updates(void *user_data)
 }
 #endif
 
-GdkFilterReturn
-_catch(GdkXEvent *xevent, GdkEvent *event, gpointer data)
-{
-	static int i = 1;
-
-	printf("here, %i\n", i);
-	i++;
-	return GDK_FILTER_CONTINUE;
-}
-
 NotifyNotification *
 notify_notification_new(const gchar *summary, const gchar *body,
 						const gchar *icon, GtkWidget *attach)
