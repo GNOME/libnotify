@@ -24,7 +24,6 @@
 #include <dbus/dbus-glib.h>
 
 #include <libnotify/notify.h>
-#include <libnotify/notify-marshal.h>
 #include <libnotify/internal.h>
 
 static void notify_notification_class_init(NotifyNotificationClass *klass);
@@ -70,8 +69,7 @@ struct _NotifyNotificationPrivate
 	gint widget_old_y;
 
 	gboolean updates_pending;
-
-	DBusGProxy *proxy;
+	gboolean signals_registered;
 };
 
 enum
@@ -102,11 +100,6 @@ notify_notification_class_init(NotifyNotificationClass * klass)
 					 G_STRUCT_OFFSET(NotifyNotificationClass, closed),
 					 NULL, NULL,
 					 g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
-
-	dbus_g_object_register_marshaller(notify_marshal_VOID__UINT_STRING,
-									  G_TYPE_NONE,
-									  G_TYPE_UINT,
-									  G_TYPE_STRING, G_TYPE_INVALID);
 }
 
 static void
@@ -129,13 +122,7 @@ static void
 notify_notification_init(NotifyNotification *obj)
 {
 	obj->priv = g_new0(NotifyNotificationPrivate, 1);
-
-	obj->priv->id = 0;
-	obj->priv->summary = NULL;
-	obj->priv->body = NULL;
-	obj->priv->icon_name = NULL;
 	obj->priv->timeout = NOTIFY_EXPIRES_DEFAULT;
-	obj->priv->actions = NULL;
 	obj->priv->hints = g_hash_table_new_full(g_str_hash, g_str_equal,
 											 g_free,
 											 (GFreeFunc)_g_value_free);
@@ -143,15 +130,6 @@ notify_notification_init(NotifyNotification *obj)
 	obj->priv->action_map = g_hash_table_new_full(g_str_hash, g_str_equal,
 												  g_free,
 												  (GFreeFunc)destroy_pair);
-
-	obj->priv->attached_widget = NULL;
-
-	obj->priv->updates_pending = FALSE;
-
-	obj->priv->widget_old_x = 0;
-	obj->priv->widget_old_y = 0;
-
-	obj->priv->proxy = NULL;
 }
 
 static void
@@ -159,6 +137,7 @@ notify_notification_finalize(GObject *object)
 {
 	NotifyNotification *obj = NOTIFY_NOTIFICATION(object);
 	NotifyNotificationPrivate *priv = obj->priv;
+	DBusGProxy *proxy = get_g_proxy();
 
 	g_free(priv->summary);
 	g_free(priv->body);
@@ -179,13 +158,15 @@ notify_notification_finalize(GObject *object)
 	if (priv->attached_widget != NULL)
 		g_object_unref(G_OBJECT(priv->attached_widget));
 
-	dbus_g_proxy_disconnect_signal(priv->proxy, "NotificationClosed",
-								   G_CALLBACK(_close_signal_handler),
-								   object);
-
-	dbus_g_proxy_disconnect_signal(priv->proxy, "ActionInvoked",
-								   G_CALLBACK(_action_signal_handler),
-								   object);
+	if (priv->signals_registered)
+	{
+		dbus_g_proxy_disconnect_signal(proxy, "NotificationClosed",
+									   G_CALLBACK(_close_signal_handler),
+									   object);
+		dbus_g_proxy_disconnect_signal(proxy, "ActionInvoked",
+									   G_CALLBACK(_action_signal_handler),
+									   object);
+	}
 
 	g_free(obj->priv);
 
@@ -388,42 +369,26 @@ notify_notification_show(NotifyNotification *notification, GError **error)
 	NotifyNotificationPrivate *priv;
 	GError *tmp_error = NULL;
 	gchar **action_array;
+	DBusGProxy *proxy;
 
 	g_return_val_if_fail(notification != NULL, FALSE);
 	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
 
 	priv = notification->priv;
+	proxy = get_g_proxy();
 
-	if (priv->proxy == NULL)
+	if (!priv->signals_registered)
 	{
-		DBusGConnection *bus = dbus_g_bus_get(DBUS_BUS_SESSION, &tmp_error);
-
-		if (tmp_error != NULL)
-		{
-			g_propagate_error(error, tmp_error);
-			return FALSE;
-		}
-
-		priv->proxy = dbus_g_proxy_new_for_name(bus,
-												NOTIFY_DBUS_NAME,
-												NOTIFY_DBUS_CORE_OBJECT,
-												NOTIFY_DBUS_CORE_INTERFACE);
-
-		dbus_g_proxy_add_signal(priv->proxy, "NotificationClosed",
-								G_TYPE_UINT, G_TYPE_INVALID);
-		dbus_g_proxy_connect_signal(priv->proxy, "NotificationClosed",
+		dbus_g_proxy_connect_signal(proxy, "NotificationClosed",
 									G_CALLBACK(_close_signal_handler),
 									notification, NULL);
 
-		dbus_g_proxy_add_signal(priv->proxy, "ActionInvoked",
-								G_TYPE_UINT, G_TYPE_STRING,
-								G_TYPE_INVALID);
-		dbus_g_proxy_connect_signal(priv->proxy, "ActionInvoked",
+		dbus_g_proxy_connect_signal(proxy, "ActionInvoked",
 									G_CALLBACK(_action_signal_handler),
 									notification, NULL);
 
-		dbus_g_connection_unref(bus);
+		priv->signals_registered = TRUE;
 	}
 
 	/* If attached to a widget, modify x and y in hints */
@@ -432,20 +397,19 @@ notify_notification_show(NotifyNotification *notification, GError **error)
 	action_array = _gslist_to_string_array(priv->actions);
 
 	/* TODO: make this nonblocking */
-	dbus_g_proxy_call(
-		priv->proxy, "Notify", &tmp_error,
-		G_TYPE_STRING, notify_get_app_name(),
-		G_TYPE_UINT, priv->id,
-		G_TYPE_STRING, priv->icon_name != NULL ? priv->icon_name : "",
-		G_TYPE_STRING, priv->summary,
-		G_TYPE_STRING, priv->body,
-		G_TYPE_STRV, action_array,
-		dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
-							G_TYPE_VALUE), priv->hints,
-		G_TYPE_INT, priv->timeout,
-		G_TYPE_INVALID,
-		G_TYPE_UINT, &priv->id,
-		G_TYPE_INVALID);
+	dbus_g_proxy_call(proxy, "Notify", &tmp_error,
+					  G_TYPE_STRING, notify_get_app_name(),
+					  G_TYPE_UINT, priv->id,
+					  G_TYPE_STRING, priv->icon_name,
+					  G_TYPE_STRING, priv->summary,
+					  G_TYPE_STRING, priv->body,
+					  G_TYPE_STRV, action_array,
+					  dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
+										  G_TYPE_VALUE), priv->hints,
+					  G_TYPE_INT, priv->timeout,
+					  G_TYPE_INVALID,
+					  G_TYPE_UINT, &priv->id,
+					  G_TYPE_INVALID);
 
 	/* Don't free the elements because they are owned by priv->actions */
 	g_free(action_array);
@@ -538,7 +502,7 @@ _gvalue_array_append_byte_array(GValueArray *array, guchar *bytes, gsize len)
 		return FALSE;
 	}
 
-	g_value_init(value, dbus_g_type_get_collection("GArray", G_TYPE_UCHAR));
+	g_value_init(value, dbus_g_type_get_collection("GArray", G_TYPE_CHAR));
 	g_value_set_boxed_take_ownership(value, byte_array);
 	g_value_array_append(array, value);
 
@@ -572,35 +536,22 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 
 	image = gdk_pixbuf_get_pixels(icon);
 
-	image_struct = g_value_array_new(8);
-
-	if (image_struct == NULL)
-		goto fail;
+	image_struct = g_value_array_new(1);
 
 	_gvalue_array_append_int(image_struct, width);
-	_gvalue_array_append_int(image_struct, height);
-	_gvalue_array_append_int(image_struct, rowstride);
-	_gvalue_array_append_bool(image_struct, gdk_pixbuf_get_has_alpha(icon));
-	_gvalue_array_append_int(image_struct, bits_per_sample);
-	_gvalue_array_append_int(image_struct, n_channels);
-	_gvalue_array_append_byte_array(image_struct, image, image_len);
+//	_gvalue_array_append_int(image_struct, height);
+//	_gvalue_array_append_int(image_struct, rowstride);
+//	_gvalue_array_append_bool(image_struct, gdk_pixbuf_get_has_alpha(icon));
+//	_gvalue_array_append_int(image_struct, bits_per_sample);
+//	_gvalue_array_append_int(image_struct, n_channels);
+//	_gvalue_array_append_byte_array(image_struct, image, image_len);
 
 	value = g_new0(GValue, 1);
-
-	if (value == NULL)
-		goto fail;
-
 	g_value_init(value, G_TYPE_VALUE_ARRAY);
 	g_value_set_boxed(value, image_struct);
 
 	g_hash_table_insert(notification->priv->hints,
 						g_strdup("icon_data"), value);
-
-	return;
-
-fail:
-	if (image_struct != NULL)
-		g_value_array_free(image_struct);
 }
 
 void
@@ -771,24 +722,7 @@ notify_notification_close(NotifyNotification *notification,
 
 	priv = notification->priv;
 
-	if (priv->proxy == NULL)
-	{
-		DBusGConnection *bus = dbus_g_bus_get(DBUS_BUS_SESSION, &tmp_error);
-
-		if (tmp_error != NULL)
-		{
-			g_propagate_error(error, tmp_error);
-			return FALSE;
-		}
-
-		priv->proxy = dbus_g_proxy_new_for_name(bus,
-												NOTIFY_DBUS_NAME,
-												NOTIFY_DBUS_CORE_OBJECT,
-												NOTIFY_DBUS_CORE_INTERFACE);
-		dbus_g_connection_unref(bus);
-	}
-
-	dbus_g_proxy_call(priv->proxy, "CloseNotification", &tmp_error,
+	dbus_g_proxy_call(get_g_proxy(), "CloseNotification", &tmp_error,
 					  G_TYPE_UINT, priv->id, G_TYPE_INVALID,
 					  G_TYPE_INVALID);
 

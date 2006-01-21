@@ -1,3 +1,12 @@
+Sat Jan 21 00:37:03 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/internal.h:
+	* libnotify/notification.c:
+	* libnotify/notify.c:
+	* tests/test-image.c:
+	  - Use one D-BUS connection, one GProxy, total. This is better than the
+	    one per notification, and fixes a few bugs.
+
 Fri Jan 20 20:49:31 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.c:

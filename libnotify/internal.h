@@ -21,8 +21,22 @@
 #ifndef _LIBNOTIFY_INTERNAL_H_
 #define _LIBNOTIFY_INTERNAL_H_
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#ifndef DBUS_API_SUBJECT_TO_CHANGE
+# define DBUS_API_SUBJECT_TO_CHANGE 1
+#endif
+
+#include <dbus/dbus.h>
+#include <dbus/dbus-glib.h>
+
 #define NOTIFY_DBUS_NAME           "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_INTERFACE "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_OBJECT    "/org/freedesktop/Notifications"
+
+DBusGConnection *get_dbus_g_conn(void);
+DBusGProxy *get_g_proxy(void);
 
 #endif /* _LIBNOTIFY_INTERNAL_H_ */

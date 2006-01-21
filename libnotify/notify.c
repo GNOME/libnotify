@@ -19,27 +19,18 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
-
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
-#ifndef DBUS_API_SUBJECT_TO_CHANGE
-# define DBUS_API_SUBJECT_TO_CHANGE 1
-#endif
-
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <libnotify/notify.h>
 #include <libnotify/internal.h>
+#include <libnotify/notify-marshal.h>
 
 static gboolean _initted = FALSE;
 static gchar *_app_name = NULL;
 static DBusGProxy *_proxy = NULL;
+static DBusGConnection *_dbus_gconn = NULL;
 
 #ifdef __GNUC__
 #  define format_func __attribute__((format(printf, 1, 2)))
@@ -50,6 +41,9 @@ static DBusGProxy *_proxy = NULL;
 gboolean
 notify_init(const char *app_name)
 {
+	GError *error = NULL;
+	DBusGConnection *bus = NULL;
+
 	g_return_val_if_fail(app_name != NULL, FALSE);
 	g_return_val_if_fail(*app_name != '\0', FALSE);
 
@@ -59,6 +53,32 @@ notify_init(const char *app_name)
 	_app_name = g_strdup(app_name);
 
 	g_type_init();
+
+	bus = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
+
+	if (error != NULL)
+	{
+		g_message("Unable to get session bus: %s", error->message);
+		g_error_free(error);
+		return FALSE;
+	}
+
+	_proxy = dbus_g_proxy_new_for_name(bus,
+									   NOTIFY_DBUS_NAME,
+									   NOTIFY_DBUS_CORE_OBJECT,
+									   NOTIFY_DBUS_CORE_INTERFACE);
+	dbus_g_connection_unref(bus);
+
+	dbus_g_object_register_marshaller(notify_marshal_VOID__UINT_STRING,
+									  G_TYPE_NONE,
+									  G_TYPE_UINT,
+									  G_TYPE_STRING, G_TYPE_INVALID);
+
+	dbus_g_proxy_add_signal(_proxy, "NotificationClosed",
+							G_TYPE_UINT, G_TYPE_INVALID);
+	dbus_g_proxy_add_signal(_proxy, "ActionInvoked",
+							G_TYPE_UINT, G_TYPE_STRING,
+							G_TYPE_INVALID);
 
 #ifdef HAVE_ATEXIT
 	atexit(notify_uninit);
@@ -96,30 +116,15 @@ notify_is_initted(void)
 	return _initted;
 }
 
-static DBusGProxy *
-get_proxy(void)
+DBusGConnection *
+get_dbus_g_conn(void)
 {
-	DBusGConnection *bus;
-	GError *error = NULL;
+	return _dbus_gconn;
+}
 
-	if (_proxy != NULL)
-		return _proxy;
-
-	bus = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
-
-	if (error != NULL)
-	{
-		g_message("Unable to get session bus: %s", error->message);
-		g_error_free(error);
-		return NULL;
-	}
-
-	_proxy = dbus_g_proxy_new_for_name(bus,
-									   NOTIFY_DBUS_NAME,
-									   NOTIFY_DBUS_CORE_OBJECT,
-									   NOTIFY_DBUS_CORE_INTERFACE);
-	dbus_g_connection_unref(bus);
-
+DBusGProxy *
+get_g_proxy(void)
+{
 	return _proxy;
 }
 
@@ -129,7 +134,7 @@ notify_get_server_caps(void)
 	GError *error = NULL;
 	char **caps = NULL, **cap;
 	GList *result = NULL;
-	DBusGProxy *proxy = get_proxy();
+	DBusGProxy *proxy = get_g_proxy();
 
 	g_return_val_if_fail(proxy != NULL, NULL);
 
@@ -157,7 +162,7 @@ notify_get_server_info(char **ret_name, char **ret_vendor,
 					   char **ret_version, char **ret_spec_version)
 {
 	GError *error = NULL;
-	DBusGProxy *proxy = get_proxy();
+	DBusGProxy *proxy = get_g_proxy();
 	char *name, *vendor, *version, *spec_version;
 
 	g_return_val_if_fail(proxy != NULL, FALSE);

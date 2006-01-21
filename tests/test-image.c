@@ -56,19 +56,9 @@ main(int argc, char *argv[])
 	if (!notify_init("Images Test"))
 		exit(1);
 
+	/* Stock icon */
 	n = notify_notification_new("Icon Test", "Testing stock icon",
 								"stock_help", NULL);
-
-	notify_notification_set_hint_int32(n, "x", 300);
-	notify_notification_set_hint_int32(n, "y", 24);
-	notify_notification_set_timeout(n, NOTIFY_EXPIRES_DEFAULT);
-	helper = gtk_button_new();
-	icon = gtk_widget_render_icon(helper,
-	                              GTK_STOCK_DIALOG_QUESTION,
-	                              GTK_ICON_SIZE_DIALOG,
-	                              NULL);
-
-	notify_notification_set_icon_from_pixbuf(n, icon);
 
 	if (!notify_notification_show(n, NULL))
 	{
@@ -76,7 +66,7 @@ main(int argc, char *argv[])
 		return 1;
 	}
 
-	g_usleep(5000000); // 5 seconds
+	g_object_unref(G_OBJECT(n));
 
 	size = readlink("/proc/self/cwd", file, PATH_MAX - 1);
 	file[size] = '\0';
@@ -84,7 +74,8 @@ main(int argc, char *argv[])
 
 	printf("sending %s\n", uri);
 
-	notify_notification_update(n, "Alert!", "Testing URI icons", uri);
+	/* URIs */
+	n = notify_notification_new("Alert!", "Testing URI icons", uri, NULL);
 
 	if (!notify_notification_show(n, NULL))
 	{
@@ -92,10 +83,11 @@ main(int argc, char *argv[])
 		return 1;
 	}
 
-	g_usleep(5000000); // 5 seconds
+	g_object_unref(G_OBJECT(n));
 
-	notify_notification_update(n, "Raw image test",
-							   "Testing sending raw pixbufs", NULL);
+	/* Raw image */
+	n = notify_notification_new("Raw image test",
+								"Testing sending raw pixbufs", NULL, NULL);
 
 	/*
 	 * This is just a hack to get a stock icon's pixbuf in a realworld app
@@ -107,8 +99,10 @@ main(int argc, char *argv[])
 	                              GTK_STOCK_DIALOG_QUESTION,
 	                              GTK_ICON_SIZE_DIALOG,
 	                              NULL);
+	gtk_widget_destroy(helper);
 
 	notify_notification_set_icon_from_pixbuf(n, icon);
+	g_object_unref(G_OBJECT(icon));
 
 	if (!notify_notification_show(n, NULL))
 	{
@@ -116,11 +110,7 @@ main(int argc, char *argv[])
 		return 1;
 	}
 
-
-	gtk_widget_destroy(helper);
-	g_object_unref(G_OBJECT(icon));
-
-	g_usleep(5000000); // 5 seconds
+	g_object_unref(G_OBJECT(n));
 
 	return 0;
 }
