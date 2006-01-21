@@ -47,22 +47,6 @@ static DBusGProxy *_proxy = NULL;
 #  define format_func
 #endif
 
-#if 0
-static void format_func
-print_error(char *message, ...)
-{
-	char buf[1024];
-	va_list args;
-
-	va_start(args, message);
-	vsnprintf(buf, sizeof(buf), message, args);
-	va_end(args);
-
-	fprintf(stderr, "%s(%d): libnotify: %s",
-			(getenv("_") ? getenv("_") : ""), getpid(), buf);
-}
-#endif
-
 gboolean
 notify_init(const char *app_name)
 {
@@ -75,7 +59,6 @@ notify_init(const char *app_name)
 	_app_name = g_strdup(app_name);
 
 	g_type_init();
-	dbus_g_type_specialized_init();
 
 #ifdef HAVE_ATEXIT
 	atexit(notify_uninit);
@@ -95,14 +78,16 @@ notify_get_app_name(void)
 void
 notify_uninit(void)
 {
-
 	if (_app_name != NULL)
 	{
 		g_free(_app_name);
 		_app_name = NULL;
 	}
 
-	/* TODO: keep track of all notifications and destroy them here? */
+	/*
+	 * TODO: Keep track of all notifications and destroy them here?
+	 *       Definitely all notifications that don't expire.
+	 */
 }
 
 gboolean

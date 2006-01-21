@@ -1,3 +1,8 @@
+Fri Jan 20 20:49:31 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	  - Some small code cleanups.
+
 Fri Jan 20 02:19:29 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:
