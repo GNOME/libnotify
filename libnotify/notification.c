@@ -26,6 +26,10 @@
 #include <libnotify/notify.h>
 #include <libnotify/internal.h>
 
+#define CHECK_DBUS_VERSION(major, minor) \
+	(DBUS_MAJOR_VER > (major) || \
+	 (DBUS_MAJOR_VER == (major) && DBUS_MINOR_VER >= (minor)))
+
 static void notify_notification_class_init(NotifyNotificationClass *klass);
 static void notify_notification_init(NotifyNotification *sp);
 static void notify_notification_finalize(GObject *object);
@@ -453,6 +457,7 @@ notify_notification_set_urgency(NotifyNotification *notification,
 	notify_notification_set_hint_byte(notification, "urgency", (guchar)l);
 }
 
+#if CHECK_DBUS_VERSION(0, 60)
 static gboolean
 _gvalue_array_append_int(GValueArray *array, gint i)
 {
@@ -508,11 +513,13 @@ _gvalue_array_append_byte_array(GValueArray *array, guchar *bytes, gsize len)
 
 	return TRUE;
 }
+#endif /* D-BUS >= 0.60 */
 
 void
 notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 										 GdkPixbuf *icon)
 {
+#if CHECK_DBUS_VERSION(0, 60)
 	gint width;
 	gint height;
 	gint rowstride;
@@ -522,10 +529,12 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 	gsize image_len;
 	GValueArray *image_struct;
 	GValue *value;
+#endif
 
 	g_return_if_fail(notification != NULL);
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 
+#if CHECK_DBUS_VERSION(0, 60)
 	width           = gdk_pixbuf_get_width(icon);
 	height          = gdk_pixbuf_get_height(icon);
 	rowstride       = gdk_pixbuf_get_rowstride(icon);
@@ -539,12 +548,12 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 	image_struct = g_value_array_new(1);
 
 	_gvalue_array_append_int(image_struct, width);
-//	_gvalue_array_append_int(image_struct, height);
-//	_gvalue_array_append_int(image_struct, rowstride);
-//	_gvalue_array_append_bool(image_struct, gdk_pixbuf_get_has_alpha(icon));
-//	_gvalue_array_append_int(image_struct, bits_per_sample);
-//	_gvalue_array_append_int(image_struct, n_channels);
-//	_gvalue_array_append_byte_array(image_struct, image, image_len);
+	_gvalue_array_append_int(image_struct, height);
+	_gvalue_array_append_int(image_struct, rowstride);
+	_gvalue_array_append_bool(image_struct, gdk_pixbuf_get_has_alpha(icon));
+	_gvalue_array_append_int(image_struct, bits_per_sample);
+	_gvalue_array_append_int(image_struct, n_channels);
+	_gvalue_array_append_byte_array(image_struct, image, image_len);
 
 	value = g_new0(GValue, 1);
 	g_value_init(value, G_TYPE_VALUE_ARRAY);
@@ -552,6 +561,9 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 
 	g_hash_table_insert(notification->priv->hints,
 						g_strdup("icon_data"), value);
+#else /* D-BUS < 0.60 */
+	g_warning("Raw images and pixbufs require D-BUS >= 0.60");
+#endif
 }
 
 void
