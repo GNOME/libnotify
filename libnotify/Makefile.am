@@ -5,16 +5,17 @@ MARSHAL_FILE = notify-marshal
 
 lib_LTLIBRARIES = libnotify.la
 
-notifyinc_HEADERS = 		\
-	notify.h		\
+notifyinc_HEADERS = \
+	notify.h \
 	notification.h
 
 noinst_HEADERS = \
-	notify-marshal.h
+	notify-marshal.h \
+	internal.h
 
-libnotify_la_SOURCES = 		\
-	notify.c		\
-	notification.c	\
+libnotify_la_SOURCES = \
+	notify.c \
+	notification.c \
 	notify-marshal.c
 
 libnotify_la_LIBADD = \
@@ -43,4 +44,6 @@ CLEANFILES = \
 	notify-marshal.h
 
 INCLUDES = \
+	-I$(top_srcdir) \
+	-DG_LOG_DOMAIN=\"libnotify\" \
 	$(PACKAGE_CFLAGS)
