@@ -1,4 +1,40 @@
-libnotify 0.3.0
-===
+version 0.3.2:
+	* Added back notify_get_server_info() and notify_get_server_caps().
+	* Fixed to work with D-BUS 0.36 and higher. However, it's best to note
+	  that due to bugs in versions of the D-BUS GLib bindings before 0.60,
+	  raw image data cannot be sent in notifications. A warning will be
+	  outputted to the console.
+	* Added assertions to all of the API functions so that invalid data passed
+	  won't crash the calling program.
+	* Added automatic notification removal for non-expiring notifications and
+	  notifications with actions when the calling application closes.
+	* Fixed issues where the header files couldn't always be included in
+	  some programs.
+	* Fixed a lot of compiler errors and warnings.
+	* Fixed C99 usage.
+	* Added the ability to set user data on action callbacks on a per-action
+	  basis.
+	* Fixed notify-send to work without crashing.
+	* Fixed the library to send messages appropriate to the D-BUS
+	  specification.
+	* Cleaned up the API a lot.
+	* Renamed NOTIFY_TIMEOUT_* to NOTIFY_EXPIRES_*.
+	* Removed notify_notification_show_and_forget().
+	* Internal changes to remove the number of DBusGProxy connections, and
+	  make sure it's initialized before using any D-BUS GValue-related code.
+	  This fixes raw image sending.
 
-* First release of the new GObject based API and simpler wire protocol
+version 0.3.0:
+	* First release of the new GObject based API and simpler wire protocol
+
+version 0.2.3:
+	* Fix notify-send to work with icon parameters (bug #4308)
+
+version 0.2.2 (10-August-2005):
+	* Fixed many run-time issues with PPC and AMD64 (Martin Pitt)
+
+version 0.2.1 (28-July-2005):
+	* Fixed hint support for D-BUS 0.3x.
+
+version 0.2.0 (28-July-2005):
+	* Initial public release.

@@ -1,3 +1,9 @@
+Mon Jan 23 01:18:23 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* notification-spec.xml:
+	  - Simplified the protocol. Moved around a lot of functions and data.
+	  - Bumped to version 0.9.
+
 Fri Apr 01 09:11:38 PST 2005  Christian Hammond <chipx86@gnupdate.org>
 
 	* notification-spec.xml:
