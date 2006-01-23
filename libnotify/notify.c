@@ -31,6 +31,7 @@ static gboolean _initted = FALSE;
 static gchar *_app_name = NULL;
 static DBusGProxy *_proxy = NULL;
 static DBusGConnection *_dbus_gconn = NULL;
+static GList *_active_notifications = NULL;
 
 #ifdef __GNUC__
 #  define format_func __attribute__((format(printf, 1, 2)))
@@ -80,9 +81,7 @@ notify_init(const char *app_name)
 							G_TYPE_UINT, G_TYPE_STRING,
 							G_TYPE_INVALID);
 
-#ifdef HAVE_ATEXIT
-	atexit(notify_uninit);
-#endif /* HAVE_ATEXIT */
+	g_atexit(notify_uninit);
 
 	_initted = TRUE;
 
@@ -98,16 +97,24 @@ notify_get_app_name(void)
 void
 notify_uninit(void)
 {
+	GList *l;
+
 	if (_app_name != NULL)
 	{
 		g_free(_app_name);
 		_app_name = NULL;
 	}
 
-	/*
-	 * TODO: Keep track of all notifications and destroy them here?
-	 *       Definitely all notifications that don't expire.
-	 */
+	for (l = _active_notifications; l != NULL; l = l->next)
+	{
+		NotifyNotification *n = NOTIFY_NOTIFICATION(l->data);
+
+		if (_notify_notification_get_timeout(n) == 0 ||
+			_notify_notification_has_nondefault_actions(n))
+		{
+			notify_notification_close(n, NULL);
+		}
+	}
 }
 
 gboolean
@@ -117,13 +124,13 @@ notify_is_initted(void)
 }
 
 DBusGConnection *
-get_dbus_g_conn(void)
+_notify_get_dbus_g_conn(void)
 {
 	return _dbus_gconn;
 }
 
 DBusGProxy *
-get_g_proxy(void)
+_notify_get_g_proxy(void)
 {
 	return _proxy;
 }
@@ -134,7 +141,7 @@ notify_get_server_caps(void)
 	GError *error = NULL;
 	char **caps = NULL, **cap;
 	GList *result = NULL;
-	DBusGProxy *proxy = get_g_proxy();
+	DBusGProxy *proxy = _notify_get_g_proxy();
 
 	g_return_val_if_fail(proxy != NULL, NULL);
 
@@ -162,7 +169,7 @@ notify_get_server_info(char **ret_name, char **ret_vendor,
 					   char **ret_version, char **ret_spec_version)
 {
 	GError *error = NULL;
-	DBusGProxy *proxy = get_g_proxy();
+	DBusGProxy *proxy = _notify_get_g_proxy();
 	char *name, *vendor, *version, *spec_version;
 
 	g_return_val_if_fail(proxy != NULL, FALSE);
@@ -192,4 +199,16 @@ notify_get_server_info(char **ret_name, char **ret_vendor,
 		*ret_spec_version = spec_version;
 
 	return TRUE;
+}
+
+void
+_notify_cache_add_notification(NotifyNotification *n)
+{
+	_active_notifications = g_list_prepend(_active_notifications, n);
+}
+
+void
+_notify_cache_remove_notification(NotifyNotification *n)
+{
+	_active_notifications = g_list_remove(_active_notifications, n);
 }

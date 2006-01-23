@@ -72,6 +72,7 @@ struct _NotifyNotificationPrivate
 	gint widget_old_x;
 	gint widget_old_y;
 
+	gboolean has_nondefault_actions;
 	gboolean updates_pending;
 	gboolean signals_registered;
 };
@@ -141,7 +142,9 @@ notify_notification_finalize(GObject *object)
 {
 	NotifyNotification *obj = NOTIFY_NOTIFICATION(object);
 	NotifyNotificationPrivate *priv = obj->priv;
-	DBusGProxy *proxy = get_g_proxy();
+	DBusGProxy *proxy = _notify_get_g_proxy();
+
+	_notify_cache_remove_notification(obj);
 
 	g_free(priv->summary);
 	g_free(priv->body);
@@ -282,6 +285,8 @@ notify_notification_new(const gchar *summary, const gchar *body,
 		obj->priv->attached_widget = attach;
 	}
 
+	_notify_cache_add_notification(obj);
+
 	return obj;
 }
 
@@ -380,7 +385,7 @@ notify_notification_show(NotifyNotification *notification, GError **error)
 	g_return_val_if_fail(error == NULL || *error == NULL, FALSE);
 
 	priv = notification->priv;
-	proxy = get_g_proxy();
+	proxy = _notify_get_g_proxy();
 
 	if (!priv->signals_registered)
 	{
@@ -435,6 +440,15 @@ notify_notification_set_timeout(NotifyNotification *notification,
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 
 	notification->priv->timeout = timeout;
+}
+
+gint
+_notify_notification_get_timeout(const NotifyNotification *notification)
+{
+	g_return_val_if_fail(notification != NULL, -1);
+	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), -1);
+
+	return notification->priv->timeout;
 }
 
 void
@@ -692,6 +706,7 @@ notify_notification_clear_actions(NotifyNotification *notification)
 	}
 
 	notification->priv->actions = NULL;
+	notification->priv->has_nondefault_actions = FALSE;
 }
 
 void
@@ -719,6 +734,21 @@ notify_notification_add_action(NotifyNotification *notification,
 	pair->cb = callback;
 	pair->user_data = user_data;
 	g_hash_table_insert(priv->action_map, g_strdup(action), pair);
+
+	if (notification->priv->has_nondefault_actions &&
+		g_ascii_strcasecmp(action, "default"))
+	{
+		notification->priv->has_nondefault_actions = TRUE;
+	}
+}
+
+gboolean
+_notify_notification_has_nondefault_actions(const NotifyNotification *n)
+{
+	g_return_val_if_fail(n != NULL, FALSE);
+	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(n), FALSE);
+
+	return n->priv->has_nondefault_actions;
 }
 
 gboolean
@@ -734,7 +764,7 @@ notify_notification_close(NotifyNotification *notification,
 
 	priv = notification->priv;
 
-	dbus_g_proxy_call(get_g_proxy(), "CloseNotification", &tmp_error,
+	dbus_g_proxy_call(_notify_get_g_proxy(), "CloseNotification", &tmp_error,
 					  G_TYPE_UINT, priv->id, G_TYPE_INVALID,
 					  G_TYPE_INVALID);
 

@@ -41,6 +41,9 @@ main(int argc, char *argv[])
 	notify_init("Replace Test");
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	g_signal_connect(G_OBJECT(window), "delete_event",
+					 G_CALLBACK(gtk_main_quit), NULL);
+
 	button = gtk_button_new_with_label("click here to change notification");
 	gtk_container_add(GTK_CONTAINER(window), button);
 
