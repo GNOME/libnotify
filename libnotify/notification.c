@@ -88,7 +88,7 @@ static GObjectClass *parent_class = NULL;
 G_DEFINE_TYPE(NotifyNotification, notify_notification, G_TYPE_OBJECT);
 
 static void
-notify_notification_class_init(NotifyNotificationClass * klass)
+notify_notification_class_init(NotifyNotificationClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 

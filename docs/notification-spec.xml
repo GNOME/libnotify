@@ -227,12 +227,18 @@
        <xref linkend="protocol"/>). An implementation is free to ignore any
        requested by the client. As an example one possible rendering of
        actions would be as buttons in the notification popup.
-
+      </entry>
+      <entry>
        Actions are sent over as a list of pairs. Each even element in the
        list (starting at index 0) represents the identifier for the action.
        Each odd element in the list is the localized string that will be
        displayed to the user.
       </entry>
+      <entry>
+       The default action (usually invoked my clicking the notification)
+       should have a key named <literal>"default"</literal>. The name can
+       be anything, though implementations are free not to display it.
+      <entry>
      </row>
      <row>
       <entry>Hints</entry>
@@ -948,9 +954,10 @@
         <entry><parameter>actions</parameter></entry>
         <entry>ARRAY</entry>
         <entry>
-         Actions are sent over as a list of pairs.  Each even element in the list 
-         (starting at index 0) represents the identifier for the action.  Each odd
-         element in the list is the localized string that will be displayed to the user.
+         Actions are sent over as a list of pairs. Each even element in
+         the list (starting at index 0) represents the identifier for the
+         action. Each odd element in the list is the localized string
+         that will be displayed to the user.
         </entry>
        </row>
        <row>
@@ -1141,8 +1148,7 @@
        <function>org.freedesktop.Notifications.ActionInvoked</function>
       </funcdef>
       <paramdef>UINT32 <parameter>id</parameter></paramdef>
-<!--  <paramdef>BOOL <parameter>default_action</parameter></paramdef> -->
-      <paramdef>UINT32 <parameter>action_id</parameter></paramdef>
+      <paramdef>STRING <parameter>action_key</parameter></paramdef>
      </funcprototype>
     </funcsynopsis>
     <para>
@@ -1180,30 +1186,12 @@
          The ID of the notification emitting the ActionInvoked signal.
         </entry>
        </row>
-<!--
        <row>
-        <entry><parameter>default_action</parameter></entry>
-        <entry>BOOL</entry>
+        <entry><parameter>action_key</parameter></entry>
+        <entry>STRING</entry>
         <entry>
-         <constant>TRUE</constant> if the default action was invoked.
-         The default action is often a click on the notification. If this
-         is <constant>TRUE</constant>, the <parameter>action_id</parameter>
-         parameter is ignored.
-        </entry>
-       </row>
--->
-       <row>
-        <entry><parameter>action_id</parameter></entry>
-        <entry>UINT32</entry>
-        <entry>
-         The ID of the action invoked. A value of 0 means that the default
-         action was invoked, i.e., clicking the notification itself.
-         IDs greater than zero are the action IDs as defined by the
-         calling application.
-<!--
-         This is ignored if
-         <parameter>default_action</parameter> is <constant>TRUE</constant>.
--->
+         The key of the action invoked. These match the keys sent over
+         in the list of actions.
         </entry>
        </row>
       </tbody>
