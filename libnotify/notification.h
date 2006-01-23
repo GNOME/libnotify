@@ -138,7 +138,4 @@ void notify_notification_clear_actions(NotifyNotification *notification);
 gboolean notify_notification_close(NotifyNotification *notification,
 								   GError **error);
 
-NotifyNotification *notify_notification_ref(NotifyNotification *notification);
-void notify_notification_unref(NotifyNotification *notification);
-
 #endif /* NOTIFY_NOTIFICATION_H */
