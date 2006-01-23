@@ -1,4 +1,4 @@
-version 0.3.2:
+version 0.3.2 (23-January-2006):
 	* Added back notify_get_server_info() and notify_get_server_caps().
 	* Fixed to work with D-BUS 0.36 and higher. However, it's best to note
 	  that due to bugs in versions of the D-BUS GLib bindings before 0.60,
