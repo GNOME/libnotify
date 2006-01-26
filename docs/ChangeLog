@@ -1,3 +1,8 @@
+Wed Jan 25 23:45:11 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* notification-spec.xml:
+	  - Fixed to actually be valid docbook.
+
 Mon Jan 23 01:18:23 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* notification-spec.xml:

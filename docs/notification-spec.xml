@@ -220,54 +220,60 @@
      <row>
       <entry>Actions</entry>
       <entry>
-       The actions send a request message back to the notification client
-       when invoked. This functionality may not be implemented by the
-       notification server, conforming clients should check if it is available
-       before using it (see the GetCapabilities message in
-       <xref linkend="protocol"/>). An implementation is free to ignore any
-       requested by the client. As an example one possible rendering of
-       actions would be as buttons in the notification popup.
+       <para>
+        The actions send a request message back to the notification client
+        when invoked. This functionality may not be implemented by the
+        notification server, conforming clients should check if it is available
+        before using it (see the GetCapabilities message in
+        <xref linkend="protocol"/>). An implementation is free to ignore any
+        requested by the client. As an example one possible rendering of
+        actions would be as buttons in the notification popup.
+       </para>
+       <para>
+        Actions are sent over as a list of pairs. Each even element in the
+        list (starting at index 0) represents the identifier for the action.
+        Each odd element in the list is the localized string that will be
+        displayed to the user.
+       </para>
+       <para>
+        The default action (usually invoked my clicking the notification)
+        should have a key named <literal>"default"</literal>. The name can
+        be anything, though implementations are free not to display it.
+       </para>
       </entry>
-      <entry>
-       Actions are sent over as a list of pairs. Each even element in the
-       list (starting at index 0) represents the identifier for the action.
-       Each odd element in the list is the localized string that will be
-       displayed to the user.
-      </entry>
-      <entry>
-       The default action (usually invoked my clicking the notification)
-       should have a key named <literal>"default"</literal>. The name can
-       be anything, though implementations are free not to display it.
-      <entry>
      </row>
      <row>
       <entry>Hints</entry>
-      <entry><para>See <xref linkend="hints"/>.</para></entry>
-
-      <para>
-       Beyond the core protocol is the hints table. A couple of core
-       elements have been moved to hints mostly because in a huge number
-       of cases their default values would be sufficent. The elements moved
-       to hints are:
-      </para>
-      <segmentedlist>
-       <seglistitem>
-        <seg>Category ID</seg>
-        <seg>An optional ID representing the type of notification (the name
-             has been changed from Notification Type ID in pervious versions).
-             See <xref linkend="categories"/>.</seg>
-       </seglistitem>
-       <seglistitem>
-        <seg>Urgency Level</seg>
-        <seg>The urgency of the notification. See
-             <xref linkend="urgency-levels"/>. (Defaults to 1 - Normal)</seg>
-       </seglistitem>
-       <seglistitem>
-        <seg>Icon Data</seg>
-        <seg>Instead of overloading the icon field we now have an icon_data
-             field that is used when icon is blank.</seg>
-       </seglistitem>
-      </segmentedlist>
+      <entry>
+       <para>See <xref linkend="hints"/>.</para>
+       <para>
+        Beyond the core protocol is the hints table. A couple of core
+        elements have been moved to hints mostly because in a huge number
+        of cases their default values would be sufficent. The elements moved
+        to hints are:
+       </para>
+       <segmentedlist>
+        <title>Elements Moved to Hints</title>
+        <segtitle>Element</segtitle>
+        <segtitle>Description</segtitle>
+        <seglistitem>
+         <seg>Category ID</seg>
+         <seg>An optional ID representing the type of notification (the name
+              has been changed from Notification Type ID in pervious versions).
+              See <xref linkend="categories"/>.</seg>
+        </seglistitem>
+        <seglistitem>
+         <seg>Urgency Level</seg>
+         <seg>The urgency of the notification. See
+              <xref linkend="urgency-levels"/>. (Defaults to 1 - Normal)</seg>
+        </seglistitem>
+        <seglistitem>
+         <seg>Icon Data</seg>
+         <seg>Instead of overloading the icon field we now have an icon_data
+              field that is used when icon is blank.</seg>
+        </seglistitem>
+       </segmentedlist>
+      </entry>
      </row>
      <row>
       <entry>Expiration Timeout</entry>
@@ -720,8 +726,8 @@
       </entry>
      </row>
      <row>
-      <entry><literal>"desktop-entry"></literal></entry>b
-      <entry>Application Desktop ID</entry>
+      <entry><literal>"desktop-entry"></literal></entry>
+      <entry>string</entry>
       <entry>
        This specifies the name of the desktop filename representing the
        calling program. This should be the same as the prefix used for the
