@@ -1,5 +1,5 @@
 /**
- * @file libnotify/notifynotification.c Notification object
+ * @file libnotify/notification.c Notification object
  *
  * @Copyright (C) 2006 Christian Hammond
  * @Copyright (C) 2006 John Palmieri

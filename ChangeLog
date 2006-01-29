@@ -1,3 +1,10 @@
+Sun Jan 29 13:26:31 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* Doxyfile.in:
+	* libnotify/notification.c:
+	* libnotify/notification.h:
+	  - More Doxygen happiness. Still no NotifyNotification docs yet though.
+
 Sun Jan 29 13:17:43 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.h:
