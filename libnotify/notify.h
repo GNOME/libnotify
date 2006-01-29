@@ -74,10 +74,10 @@ GList *notify_get_server_caps(void);
  *
  * The strings returned must be freed.
  *
- * @param ret_name     The returned product name of the server.
- * @param ret_vendor   The returned vendor.
- * @param ret_version  The returned server version.
- * @param ret_spec_ver The returned specification version supported.
+ * @param ret_name         The returned product name of the server.
+ * @param ret_vendor       The returned vendor.
+ * @param ret_version      The returned server version.
+ * @param ret_spec_version The returned specification version supported.
  *
  * @return TRUE if the call succeeded, or FALSE if there were errors.
  */
