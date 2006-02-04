@@ -1,12 +1,3 @@
-if HAVE_GDK
-gdk_tests = \
-	test-xy-stress
-
-test_xy_stress_SOURCES = test-xy-stress.c
-else
-gdk_tests =
-endif
-
 noinst_PROGRAMS = \
 	test-replace \
 	test-replace-widget \
@@ -17,8 +8,9 @@ noinst_PROGRAMS = \
 	test-basic \
 	test-error \
 	test-markup \
+	test-urgency \
 	test-xy \
-	$(gdk_tests)
+	test-xy-stress
 
 common_ldflags = \
 	$(top_builddir)/libnotify/libnotify.la \
@@ -52,9 +44,13 @@ test_error_LDADD = $(common_ldflags)
 test_markup_SOURCES = test-markup.c
 test_markup_LDADD = $(common_ldflags)
 
+test_urgency_SOURCES = test-urgency.c
+test_urgency_LDADD = $(common_ldflags)
+
 test_xy_SOURCES = test-xy.c
 test_xy_LDADD = $(common_ldflags)
 
+test_xy_stress_SOURCES = test-xy-stress.c
 test_xy_stress_LDADD = $(common_ldflags)
 
 INCLUDES = $(PACKAGE_CFLAGS)	\

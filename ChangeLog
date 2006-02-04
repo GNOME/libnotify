@@ -1,3 +1,9 @@
+Sat Feb 04 01:47:00 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	A tests/test-urgency.c:
+	* tests/Makefile.am:
+	  - Add a test-urgency testcase.
+
 Sun Jan 29 13:26:31 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* Doxyfile.in:
