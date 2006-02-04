@@ -10,6 +10,7 @@ noinst_PROGRAMS = \
 	test-markup \
 	test-urgency \
 	test-xy \
+	test-xy-actions \
 	test-xy-stress
 
 common_ldflags = \
@@ -49,6 +50,9 @@ test_urgency_LDADD = $(common_ldflags)
 
 test_xy_SOURCES = test-xy.c
 test_xy_LDADD = $(common_ldflags)
+
+test_xy_actions_SOURCES = test-xy-actions.c
+test_xy_actions_LDADD = $(common_ldflags)
 
 test_xy_stress_SOURCES = test-xy-stress.c
 test_xy_stress_LDADD = $(common_ldflags)
