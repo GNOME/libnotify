@@ -1,3 +1,9 @@
+Sat Feb 04 02:04:13 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/test-urgency.c:
+	  - It's a good thing to actually set the urgency levels in the
+	    urgency test.
+
 Sat Feb 04 01:47:00 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	A tests/test-urgency.c:
