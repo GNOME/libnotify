@@ -354,9 +354,14 @@ _action_signal_handler(DBusGProxy *proxy, guint32 id, gchar *action,
 		notification->priv->action_map, action);
 
 	if (pair == NULL)
-		g_warning("Recieved unknown action %s", action);
+	{
+		if (g_ascii_strcasecmp(action, "default"))
+			g_warning("Received unknown action %s", action);
+	}
 	else
+	{
 		pair->cb(notification, action, pair->user_data);
+	}
 }
 
 static gchar **

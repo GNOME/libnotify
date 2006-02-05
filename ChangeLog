@@ -1,3 +1,8 @@
+Sat Feb 04 17:18:38 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	  - Don't complain about an unknown action when the action is "default"
+
 Sat Feb 04 13:29:22 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	A tests/test-xy-actions.c:
