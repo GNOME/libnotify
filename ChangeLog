@@ -1,3 +1,8 @@
+Sat Mar 18 14:47:53 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tools/notify-send.c:
+	  - Fix notify-send on PPC.
+
 Sat Feb 04 17:18:38 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:
