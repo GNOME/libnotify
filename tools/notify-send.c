@@ -51,20 +51,20 @@ main(int argc, const char **argv)
 		  NULL },
 		{ "expire-time", 't', POPT_ARG_INT | POPT_ARGFLAG_STRIP,
 		  &expire_timeout, 0,
-		  N_("Specifies the timeout in seconds at which to expire the "
+		  N_("Specifies the timeout in milliseconds at which to expire the "
 			 "notification."),
 		  NULL },
 		{ "icon",  'i', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &icons, 0,
 		  N_("Specifies an icon filename or stock icon to display."),
-		  N_("ICON1,ICON2,...") },
-		{ "type",  't', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &type, 0,
+		  N_("ICON") },
+		{ "type",  'T', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &type, 0,
 		  N_("Specifies the notification type."),
-		  N_("ICON1,ICON2,...") },
+		  N_("TYPE") },
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
-	g_type_init (); 
+	g_type_init();
 
 	opt_ctx = poptGetContext("notify-send", argc, argv, options, 0);
 	poptSetOtherOptionHelp(opt_ctx, "[OPTIONS]* <summary> [body]");

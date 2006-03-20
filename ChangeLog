@@ -1,3 +1,10 @@
+Mon Mar 20 14:12:15 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tools/notify-send.c:
+	  - Change the help for notify-send to indicate that --expire-timeout
+	    requires milliseconds, not seconds. This fixes bug #28.
+	  - Fixed the short flag for --type to be -T. This fixes bug #18.
+
 Sat Mar 18 14:47:53 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* tools/notify-send.c:
