@@ -1,3 +1,8 @@
+Fri Apr 21 14:38:04 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* AUTHORS:
+	  - Add some names to the patch writers list.
+
 Fri Apr 21 14:35:30 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/test-server-info.c:
