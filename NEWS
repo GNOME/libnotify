@@ -3,6 +3,7 @@ version 0.3.3:
 	  to add -v, --version, -h, and --hint options, and to rename
 	  -T, --type to -c, --category. This also fixes assertions when calling
 	  notify-send "". (Bug #41)
+	* Patch by jensgr to fix some C99 usage. (Bug #44)
 
 version 0.3.2 (23-January-2006):
 	* Added back notify_get_server_info() and notify_get_server_caps().

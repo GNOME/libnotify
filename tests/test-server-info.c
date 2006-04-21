@@ -26,9 +26,10 @@
 int
 main(int argc, char **argv)
 {
-	notify_init("TestCaps");
 	GList *l, *caps;
 	char *name, *vendor, *version, *spec_version;
+
+	notify_init("TestCaps");
 
 	if (!notify_get_server_info(&name, &vendor, &version, &spec_version))
 	{

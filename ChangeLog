@@ -1,3 +1,9 @@
+Fri Apr 21 14:35:30 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/test-server-info.c:
+	* NEWS:
+	  - Patch by jensgr to fix some C99 usage in the tests code.
+
 Fri Apr 21 14:21:47 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* tools/Makefile.am:
