@@ -179,7 +179,7 @@ main(int argc, char *argv[])
 
 	if (!retval)
 	{
-		g_warning("%s", error->message);
+		fprintf(stderr, "%s\n", error->message);
 		g_error_free(error);
 		exit(1);
 	}
@@ -195,7 +195,7 @@ main(int argc, char *argv[])
 
 	if (summary == NULL)
 	{
-		g_warning("%s", N_("No summary specified."));
+		fprintf(stderr, "%s\n", N_("No summary specified."));
 		exit(1);
 	}
 
@@ -205,7 +205,7 @@ main(int argc, char *argv[])
 
 		if (n_text[2] != NULL)
 		{
-			g_warning("%s", N_("Invalid number of options."));
+			fprintf(stderr, "%s\n", N_("Invalid number of options."));
 			exit(1);
 		}
 	}
@@ -244,8 +244,9 @@ main(int argc, char *argv[])
 
 			if (l != 3)
 			{
-				g_warning("%s", N_("Invalid hint syntax specified. "
-								   "Use TYPE:NAME:VALUE."));
+				fprintf(stderr, "%s\n",
+						N_("Invalid hint syntax specified. "
+						   "Use TYPE:NAME:VALUE."));
 				hint_error = TRUE;
 			}
 			else
@@ -255,7 +256,7 @@ main(int argc, char *argv[])
 
 				if (!retval)
 				{
-					g_warning("%s", error->message);
+					fprintf(stderr, "%s\n", error->message);
 					g_error_free(error);
 					hint_error = TRUE;
 				}

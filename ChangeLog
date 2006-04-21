@@ -1,3 +1,8 @@
+Fri Apr 21 15:35:40 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tools/notify-send.c:
+	  - Use fprintf instead of g_warning.
+
 Fri Apr 21 14:38:04 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* AUTHORS:
