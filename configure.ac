@@ -87,8 +87,6 @@ AC_EXEEXT
 
 AM_PROG_LIBTOOL
 
-AC_CHECK_LIB([popt], [poptGetArg], , AC_MSG_ERROR([Popt is required]))
-
 REQ_DBUS_VERSION=0.36
 pkg_modules="gtk+-2.0 >= 2.2.2 glib-2.0 >= 2.2.2, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])

@@ -18,82 +18,194 @@
  * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
  * MA  02111-1307  USA
  */
+#include <config.h>
+
 #include <libnotify/notify.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <popt.h>
 #include <glib.h>
+#include <glib/gprintf.h>
 
 #define N_(x) (x)
+#define GETTEXT_PACKAGE NULL
+
+static NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
+
+static gboolean
+g_option_arg_urgency_cb(const gchar *option_name,
+						const gchar *value,
+						gpointer data,
+						GError **error)
+{
+	if (value != NULL)
+	{
+		if (!strcasecmp(value, "low"))
+			urgency = NOTIFY_URGENCY_LOW;
+		else if (!strcasecmp(value, "normal"))
+			urgency = NOTIFY_URGENCY_NORMAL;
+		else if (!strcasecmp(value, "critical"))
+			urgency = NOTIFY_URGENCY_CRITICAL;
+		else
+		{
+			*error = g_error_new(G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+								 N_("Unknown urgency %s specified. "
+									"Known urgency levels: low, "
+									"normal, critical."),
+								 value);
+
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+static gboolean
+notify_notification_set_hint_variant(NotifyNotification *notification,
+									 const gchar *type, const gchar *key,
+									 const gchar *value, GError **error)
+{
+	static gboolean conv_error = FALSE;
+	if (!strcasecmp(type, "string"))
+	{
+		notify_notification_set_hint_string(notification, key, value);
+	}
+	else if (!strcasecmp(type, "int"))
+	{
+		if (!g_ascii_isdigit(*value))
+			conv_error = TRUE;
+		else
+		{
+			gint h_int = (gint)g_ascii_strtoull(value, NULL, 10);
+			notify_notification_set_hint_int32(notification, key, h_int);
+		}
+	}
+	else if (!strcasecmp(type, "double"))
+	{
+		if (!g_ascii_isdigit(*value))
+			conv_error = TRUE;
+		else
+		{
+			gdouble h_double = g_strtod(value, NULL);
+			notify_notification_set_hint_double(notification, key, h_double);
+		}
+	}
+	else if (!strcasecmp(type, "byte"))
+	{
+		gint h_byte = (gint)g_ascii_strtoull(value, NULL, 10);
+
+		if (h_byte < 0 || h_byte > 0xFF)
+			conv_error = TRUE;
+		else
+		{
+			notify_notification_set_hint_byte(notification, key,
+											  (guchar)h_byte);
+		}
+	}
+	else
+	{
+		*error = g_error_new(G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+							 N_("Invalid hint type \"%s\". Valid types "
+								"are int, double, string and byte."),
+							 type);
+		return FALSE;
+	}
+
+	if (conv_error)
+	{
+		*error = g_error_new(G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+							 N_("Value \"%s\" of hint \"%s\" could not be "
+								"parsed as type \"%s\"."),
+							 value, key, type);
+		return FALSE;
+	}
+
+	return TRUE;
+}
 
 int
-main(int argc, const char **argv)
+main(int argc, char *argv[])
 {
-	const gchar *summary = NULL;
-	const gchar *body = "";
-	const gchar *type = NULL;
-	char *urgency_str = NULL;
-	gchar *icon_str = NULL;
-	gchar *icons = NULL;
-	NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
-	long expire_timeout = NOTIFY_EXPIRES_DEFAULT;
-	int ch;
-	poptContext opt_ctx;
-	const char **args;
+	static const gchar *summary = NULL;
+	static const gchar *body = "";
+	static const gchar *type = NULL;
+	static gchar *icon_str = NULL;
+	static gchar *icons = NULL;
+	static gchar **n_text = NULL;
+	static gchar **hints = NULL;
+	static gboolean do_version = FALSE;
+	static gboolean hint_error = FALSE;
+	static glong expire_timeout = NOTIFY_EXPIRES_DEFAULT;
+	GOptionContext *opt_ctx;
 	NotifyNotification *notify;
+	GError *error = NULL;
+	gboolean retval;
 
-	struct poptOption options[] =
+	static const GOptionEntry entries[] =
 	{
-		{ "urgency", 'u', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &urgency_str,
-		  0, N_("Specifies the urgency level (low, normal, critical)."),
-		  NULL },
-		{ "expire-time", 't', POPT_ARG_INT | POPT_ARGFLAG_STRIP,
-		  &expire_timeout, 0,
+		{ "urgency", 'u', 0, G_OPTION_ARG_CALLBACK, g_option_arg_urgency_cb,
+		  N_("Specifies the urgency level (low, normal, critical)."),
+		  N_("LEVEL") },
+		{ "expire-time", 't', 0,G_OPTION_ARG_INT, &expire_timeout,
 		  N_("Specifies the timeout in milliseconds at which to expire the "
-			 "notification."),
-		  NULL },
-		{ "icon",  'i', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &icons, 0,
+			 "notification."), N_("TIME") },
+		{ "icon",  'i', 0, G_OPTION_ARG_FILENAME, &icons,
 		  N_("Specifies an icon filename or stock icon to display."),
-		  N_("ICON") },
-		{ "type",  'T', POPT_ARG_STRING | POPT_ARGFLAG_STRIP, &type, 0,
-		  N_("Specifies the notification type."),
-		  N_("TYPE") },
-		POPT_AUTOHELP
-		POPT_TABLEEND
+		  N_("ICON[,ICON...]") },
+		{ "category",  'c', 0, G_OPTION_ARG_FILENAME, &type,
+		  N_("Specifies the notification category."),
+		  N_("TYPE[,TYPE...]") },
+		{ "hint",  'h', 0, G_OPTION_ARG_FILENAME_ARRAY, &hints,
+		  N_("Specifies basic extra data to pass. Valid types are int, double, string and byte."),
+		  N_("TYPE:NAME:VALUE") },
+		{ "version",  'v', 0, G_OPTION_ARG_NONE, &do_version,
+		  N_("Version of the package."),
+		  NULL },
+		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &n_text, NULL,
+		  NULL },
+		{ NULL }
 	};
 
 	g_type_init();
 
-	opt_ctx = poptGetContext("notify-send", argc, argv, options, 0);
-	poptSetOtherOptionHelp(opt_ctx, "[OPTIONS]* <summary> [body]");
+	g_set_prgname(argv[0]);
 
-	while ((ch = poptGetNextOpt(opt_ctx)) >= 0)
-		;
+	opt_ctx = g_option_context_new(N_("<SUMMARY> [BODY] - "
+									  "create a notification"));
+	g_option_context_add_main_entries(opt_ctx, entries, GETTEXT_PACKAGE);
+	retval = g_option_context_parse(opt_ctx, &argc, &argv, &error);
+	g_option_context_free(opt_ctx);
 
-	if (ch < -1 || (args = poptGetArgs(opt_ctx)) == NULL)
+	if (!retval)
 	{
-		poptPrintUsage(opt_ctx, stderr, 0);
+		g_warning("%s", error->message);
+		g_error_free(error);
 		exit(1);
 	}
 
-	if (args[0] != NULL)
-		summary = args[0];
+	if (do_version)
+	{
+		g_printf("%s %s\n", g_get_prgname(), VERSION);
+		exit(0);
+	}
+
+	if (n_text != NULL && n_text[0] != NULL && *n_text[0] != '\0')
+		summary = n_text[0];
 
 	if (summary == NULL)
 	{
-		poptPrintUsage(opt_ctx, stderr, 0);
+		g_warning("%s", N_("No summary specified."));
 		exit(1);
 	}
 
-	if (args[1] != NULL)
+	if (n_text[1] != NULL)
 	{
-		body = args[1];
+		body = n_text[1];
 
-		if (args[2] != NULL)
+		if (n_text[2] != NULL)
 		{
-			poptPrintUsage(opt_ctx, stderr, 0);
+			g_warning("%s", N_("Invalid number of options."));
 			exit(1);
 		}
 	}
@@ -103,41 +215,64 @@ main(int argc, const char **argv)
 		char *c;
 
 		/* XXX */
-		if ((c = strchr(icons, ',')) != NULL)
+		if((c = strchr(icons, ',')) != NULL)
 			*c = '\0';
 
 		icon_str = icons;
-
-	}
-
-	if (urgency_str != NULL)
-	{
-		if (!strcasecmp(urgency_str, "low"))
-			urgency = NOTIFY_URGENCY_LOW;
-		else if (!strcasecmp(urgency_str, "normal"))
-			urgency = NOTIFY_URGENCY_NORMAL;
-		else if (!strcasecmp(urgency_str, "critical"))
-			urgency = NOTIFY_URGENCY_CRITICAL;
-		else
-		{
-			poptPrintHelp(opt_ctx, stderr, 0);
-			exit(1);
-		}
 	}
 
 	if (!notify_init("notify-send"))
 		exit(1);
 
-	notify  = notify_notification_new(summary, body, icon_str, NULL);
+	notify = notify_notification_new(summary, body, icon_str, NULL);
 	notify_notification_set_category(notify, type);
 	notify_notification_set_urgency(notify, urgency);
 	notify_notification_set_timeout(notify, expire_timeout);
 
-	notify_notification_show(notify, NULL);
+	// Set hints
+	if (hints != NULL)
+	{
+		gint i = 0;
+		gint l;
+		gchar *hint = NULL;
+		gchar **tokens = NULL;
+
+		while ((hint = hints[i++]))
+		{
+			tokens = g_strsplit(hint, ":", -1);
+			l = g_strv_length(tokens);
+
+			if (l != 3)
+			{
+				g_warning("%s", N_("Invalid hint syntax specified. "
+								   "Use TYPE:NAME:VALUE."));
+				hint_error = TRUE;
+			}
+			else
+			{
+				retval = notify_notification_set_hint_variant(
+					notify, tokens[0], tokens[1], tokens[2], &error);
+
+				if (!retval)
+				{
+					g_warning("%s", error->message);
+					g_error_free(error);
+					hint_error = TRUE;
+				}
+			}
+
+			g_strfreev(tokens);
+			if (hint_error)
+				break;
+		}
+	}
+
+	if (!hint_error)
+		notify_notification_show(notify, NULL);
+
 	g_object_unref(G_OBJECT(notify));
 
-	poptFreeContext(opt_ctx);
 	notify_uninit();
 
-	return 0;
+	exit(hint_error);
 }

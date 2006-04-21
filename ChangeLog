@@ -1,3 +1,14 @@
+Fri Apr 21 14:21:47 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tools/Makefile.am:
+	* tools/notify-send.c:
+	* NEWS:
+	* configure.ac:
+	  - Patch by M.S. to switch notify-send to use GOption instead of popt,
+	    to add -v, --version, -h, and --hint options, and to rename
+	    -T, --type to -c, --category. This also fixes assertions when calling
+	    notify-send "". This closes ticket #41.
+
 Mon Mar 20 14:12:15 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* tools/notify-send.c:
