@@ -3,7 +3,7 @@ dnl Process this file with autoconf to create configure.
 dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
-AC_INIT(libnotify, 0.3.2, chipx86@gnupdate.org)
+AC_INIT(libnotify, 0.4.0, chipx86@chipx86.com)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
 AC_COPYRIGHT([Copyright 2004-2006 Christian Hammond])
@@ -13,8 +13,8 @@ dnl ################################################################
 dnl # Version information
 dnl ################################################################
 LIBGALAGO_MAJOR_VERSION=0
-LIBGALAGO_MINOR_VERSION=3
-LIBGALAGO_MICRO_VERSION=2
+LIBGALAGO_MINOR_VERSION=4
+LIBGALAGO_MICRO_VERSION=0
 LIBGALAGO_DEVEL_VERSION=0
 
 LIBGALAGO_VERSION=$LIBGALAGO_MAJOR_VERSION.$LIBGALAGO_MINOR_VERSION.$LIBGALAGO_MICRO_VERSION
@@ -93,19 +93,6 @@ PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
 
-gdk_modules="gdk-2.0 gdk-pixbuf-2.0"
-PKG_CHECK_MODULES(GDK, [$gdk_modules], have_gdk=yes,
-[
-	have_gdk=no
-
-	AC_WARN("Some test apps will not be built")
-])
-
-AM_CONDITIONAL(HAVE_GDK, test "x$have_gdk" = "xyes")
-
-AC_SUBST(GDK_CFLAGS)
-AC_SUBST(GDK_LIBS)
-
 GLIB_GENMARSHAL=`pkg-config --variable=glib_genmarshal glib-2.0`
 AC_SUBST(GLIB_GENMARSHAL)
 
@@ -140,7 +127,6 @@ AC_CONFIG_FILES([
 Doxyfile
 Makefile
 libnotify.pc
-libnotify.spec
 libnotify/Makefile
 tests/Makefile
 tools/Makefile

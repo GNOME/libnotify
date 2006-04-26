@@ -25,6 +25,7 @@
 #include <time.h>
 
 #include <libnotify/notification.h>
+#include <libnotify/notify-enum-types.h>
 
 /**************************************************************************/
 /** @name libnotify Base API                                              */

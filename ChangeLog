@@ -1,3 +1,12 @@
+Tue Apr 25 23:52:42 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/Makefile.am:
+	* libnotify/notify.h:
+	* NEWS:
+	* configure.ac:
+	  - Add GTypes for the enums.
+	  - Bump to version 0.4.0.
+
 Fri Apr 21 15:35:40 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* tools/notify-send.c:
