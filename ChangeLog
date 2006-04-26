@@ -1,3 +1,8 @@
+Wed Apr 26 01:07:34 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/test-replace.c:
+	  - Set the second, replaced notification to have a default expiration.
+
 Tue Apr 25 23:52:42 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/Makefile.am:

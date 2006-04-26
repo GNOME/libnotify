@@ -29,6 +29,7 @@ int main() {
 
     notify_notification_update (n, "Second Summary", 
                                 "First mesage was replaced", NULL); 
+    notify_notification_set_timeout (n, NOTIFY_EXPIRES_DEFAULT);
 
     if (!notify_notification_show (n, &error)) {
         fprintf(stderr, "failed to send notification: %s\n", error->message);
