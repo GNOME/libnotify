@@ -57,6 +57,8 @@ test_xy_actions_LDADD = $(common_ldflags)
 test_xy_stress_SOURCES = test-xy-stress.c
 test_xy_stress_LDADD = $(common_ldflags)
 
+EXTRA_DIST = applet-critical.png
+
 INCLUDES = $(PACKAGE_CFLAGS)	\
 	$(GDK_CFLAGS)		\
 	-I$(top_srcdir)

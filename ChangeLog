@@ -1,3 +1,8 @@
+Wed Apr 26 01:15:20 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/Makefile.am:
+	  - Bundle applet-critical.png.
+
 Wed Apr 26 01:07:34 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/test-replace.c:
