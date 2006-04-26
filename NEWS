@@ -1,4 +1,4 @@
-version 0.4.0:
+version 0.4.0 (26-April-2006):
 	* Patch by M.S. to switch notify-send to use GOption instead of popt,
 	  to add -v, --version, -h, and --hint options, and to rename
 	  -T, --type to -c, --category. This also fixes assertions when calling
