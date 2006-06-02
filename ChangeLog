@@ -1,3 +1,12 @@
+Fri Jun 02 15:56:05 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* AUTHORS:
+	* configure.ac:
+	* libnotify.pc.in:
+	  - Improve libnotify.pc by pushing dependencies into Requires: instead of
+	    Cflags: and Libs:. This closes ticket #58.
+	  - Bump the version to 0.4.0.90.
+
 ========================= 0.4.0 =========================
 
 Wed Apr 26 01:15:20 PDT 2006  Christian Hammond <chipx86@chipx86.com>

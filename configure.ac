@@ -3,7 +3,7 @@ dnl Process this file with autoconf to create configure.
 dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
-AC_INIT(libnotify, 0.4.0, chipx86@chipx86.com)
+AC_INIT(libnotify, 0.4.0.90, chipx86@chipx86.com)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
 AC_COPYRIGHT([Copyright 2004-2006 Christian Hammond])
@@ -15,7 +15,7 @@ dnl ################################################################
 LIBGALAGO_MAJOR_VERSION=0
 LIBGALAGO_MINOR_VERSION=4
 LIBGALAGO_MICRO_VERSION=0
-LIBGALAGO_DEVEL_VERSION=0
+LIBGALAGO_DEVEL_VERSION=90
 
 LIBGALAGO_VERSION=$LIBGALAGO_MAJOR_VERSION.$LIBGALAGO_MINOR_VERSION.$LIBGALAGO_MICRO_VERSION
 
@@ -88,7 +88,8 @@ AC_EXEEXT
 AM_PROG_LIBTOOL
 
 REQ_DBUS_VERSION=0.36
-pkg_modules="gtk+-2.0 >= 2.2.2 glib-2.0 >= 2.2.2, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"
+pkg_modules="gtk+-2.0 >= 2.2.2, glib-2.0 >= 2.2.2, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"
+AC_SUBST(pkg_modules)
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)

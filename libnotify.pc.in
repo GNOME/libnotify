@@ -6,6 +6,7 @@ includedir=@includedir@
 Name: libnotify
 Description: Notifications Library
 Version: @VERSION@
-Libs: -L${libdir} -lnotify @PACKAGE_LIBS@
-Cflags: -I${includedir} @PACKAGE_CFLAGS@
+Requires: @pkg_modules@
+Libs: -L${libdir} -lnotify
+Cflags: -I${includedir}
 
