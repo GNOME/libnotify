@@ -115,6 +115,8 @@ notify_uninit(void)
 			notify_notification_close(n, NULL);
 		}
 	}
+
+	_initted = FALSE;
 }
 
 gboolean

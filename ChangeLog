@@ -1,3 +1,9 @@
+Sun Jun 04 16:12:05 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	  - Set _initted to FALSE in notify_uninit(), so that notify_is_initted()
+	    won't return TRUE.
+
 Fri Jun 02 15:56:05 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* AUTHORS:
