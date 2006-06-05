@@ -25,6 +25,7 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
+#include <gtk/gtkversion.h>
 
 G_BEGIN_DECLS
 
@@ -86,6 +87,11 @@ NotifyNotification *notify_notification_new(const gchar *summary,
 											const gchar *message,
 											const gchar *icon,
 											GtkWidget *attach);
+#if GTK_CHECK_VERSION(2, 9, 2)
+NotifyNotification *notify_notification_new_with_status_icon(
+	const gchar *summary, const gchar *message,
+	const gchar *icon, GtkStatusIcon *status_icon);
+#endif
 
 gboolean notify_notification_update(NotifyNotification *notification,
 									const gchar *summary,
@@ -94,6 +100,15 @@ gboolean notify_notification_update(NotifyNotification *notification,
 
 void notify_notification_attach_to_widget(NotifyNotification* notification,
 										  GtkWidget *attach);
+
+#if GTK_CHECK_VERSION(2, 9, 2)
+void notify_notification_attach_to_status_icon(NotifyNotification *notification,
+                                               GtkStatusIcon *status_icon);
+#endif
+
+void notify_notification_set_geometry_hints(NotifyNotification *notification,
+											GdkScreen *screen,
+											GdkRectangle *rect);
 
 gboolean notify_notification_show(NotifyNotification *notification,
 								  GError **error);
@@ -107,8 +122,8 @@ void notify_notification_set_category(NotifyNotification *notification,
 void notify_notification_set_urgency(NotifyNotification *notification,
 									 NotifyUrgency l);
 
-void notify_notification_set_icon_from_pixbuf(
-	NotifyNotification *notification, GdkPixbuf *icon);
+void notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
+											  GdkPixbuf *icon);
 
 void notify_notification_set_hint_int32(NotifyNotification *notification,
 										const gchar *key, gint value);

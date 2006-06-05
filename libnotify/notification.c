@@ -26,9 +26,22 @@
 #include <libnotify/notify.h>
 #include <libnotify/internal.h>
 
+#include <gtk/gtkversion.h>
+#if GTK_CHECK_VERSION(2, 9, 2)
+# define HAVE_STATUS_ICON
+# include <gtk/gtkstatusicon.h>
+#endif
+
 #define CHECK_DBUS_VERSION(major, minor) \
 	(DBUS_MAJOR_VER > (major) || \
 	 (DBUS_MAJOR_VER == (major) && DBUS_MINOR_VER >= (minor)))
+
+#if !defined(G_PARAM_STATIC_NAME) && !defined(G_PARAM_STATIC_NICK) && \
+    !defined(G_PARAM_STATIC_BLURB)
+# define G_PARAM_STATIC_NAME 0
+# define G_PARAM_STATIC_NICK 0
+# define G_PARAM_STATIC_BLURB 0
+#endif
 
 static void notify_notification_class_init(NotifyNotificationClass *klass);
 static void notify_notification_init(NotifyNotification *sp);
@@ -69,8 +82,9 @@ struct _NotifyNotificationPrivate
 	GHashTable *hints;
 
 	GtkWidget *attached_widget;
-	gint widget_old_x;
-	gint widget_old_y;
+#ifdef HAVE_STATUS_ICON
+	GtkStatusIcon *status_icon;
+#endif
 
 	gboolean has_nondefault_actions;
 	gboolean updates_pending;
@@ -83,10 +97,38 @@ enum
 	LAST_SIGNAL
 };
 
+enum
+{
+	PROP_0,
+	PROP_SUMMARY,
+	PROP_BODY,
+	PROP_ICON_NAME,
+	PROP_ATTACH_WIDGET,
+	PROP_STATUS_ICON
+};
+
+static void notify_notification_set_property(GObject *object, guint prop_id,
+											 const GValue *value,
+											 GParamSpec *pspec);
+static void notify_notification_get_property(GObject *object, guint prop_id,
+											 GValue *value, GParamSpec *pspec);
 static guint signals[LAST_SIGNAL] = { 0 };
 static GObjectClass *parent_class = NULL;
 
-G_DEFINE_TYPE(NotifyNotification, notify_notification, G_TYPE_OBJECT);
+G_DEFINE_TYPE(NotifyNotification, notify_notification, G_TYPE_OBJECT)
+
+static GObject *
+notify_notification_constructor(GType type,
+								guint n_construct_properties,
+								GObjectConstructParam *construct_params)
+{
+	GObject *object = parent_class->constructor(type, n_construct_properties,
+												construct_params);
+
+	_notify_cache_add_notification(NOTIFY_NOTIFICATION(object));
+
+	return object;
+}
 
 static void
 notify_notification_class_init(NotifyNotificationClass *klass)
@@ -95,6 +137,9 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 
 	parent_class = g_type_class_peek_parent(klass);
 
+	object_class->constructor = notify_notification_constructor;
+	object_class->get_property = notify_notification_get_property;
+	object_class->set_property = notify_notification_set_property;
 	object_class->finalize = notify_notification_finalize;
 
 	/* Create signals here: */
@@ -105,6 +150,157 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 					 G_STRUCT_OFFSET(NotifyNotificationClass, closed),
 					 NULL, NULL,
 					 g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+
+	g_object_class_install_property
+			(object_class,
+			PROP_SUMMARY,
+			g_param_spec_string("summary",
+								"Summary",
+								"Summary",
+								NULL,
+								G_PARAM_READWRITE |
+								G_PARAM_CONSTRUCT |
+								G_PARAM_STATIC_NAME |
+								G_PARAM_STATIC_NICK |
+								G_PARAM_STATIC_BLURB));
+
+	g_object_class_install_property
+			(object_class,
+			PROP_BODY,
+			g_param_spec_string("body",
+								"Message Body",
+								"Message body",
+								NULL,
+								G_PARAM_READWRITE |
+								G_PARAM_CONSTRUCT |
+								G_PARAM_STATIC_NAME |
+								G_PARAM_STATIC_NICK |
+								G_PARAM_STATIC_BLURB));
+
+	g_object_class_install_property
+			(object_class,
+			PROP_ICON_NAME,
+			g_param_spec_string("icon-name",
+								"Icon Name",
+								"Icon name",
+								NULL,
+								G_PARAM_READWRITE |
+								G_PARAM_CONSTRUCT |
+								G_PARAM_STATIC_NAME |
+								G_PARAM_STATIC_NICK |
+								G_PARAM_STATIC_BLURB));
+
+	g_object_class_install_property
+			(object_class,
+			PROP_ATTACH_WIDGET,
+			g_param_spec_object("attach-widget",
+								"Attach Widget",
+								"Attach Widget",
+								GTK_TYPE_WIDGET,
+								G_PARAM_READWRITE |
+								G_PARAM_CONSTRUCT |
+								G_PARAM_STATIC_NAME |
+								G_PARAM_STATIC_NICK |
+								G_PARAM_STATIC_BLURB));
+
+#ifdef HAVE_STATUS_ICON
+	g_object_class_install_property
+			(object_class,
+			PROP_STATUS_ICON,
+			g_param_spec_object("status-icon",
+								"Status Icon",
+								"Status Icon",
+								GTK_TYPE_STATUS_ICON,
+								G_PARAM_READWRITE |
+								G_PARAM_CONSTRUCT |
+								G_PARAM_STATIC_NAME |
+								G_PARAM_STATIC_NICK |
+								G_PARAM_STATIC_BLURB));
+#endif /* HAVE_STATUS_ICON */
+}
+
+static void
+notify_notification_set_property(GObject *object,
+                                 guint prop_id,
+                                 const GValue *value,
+                                 GParamSpec *pspec)
+{
+	NotifyNotification *notification = NOTIFY_NOTIFICATION(object);
+	NotifyNotificationPrivate *priv = notification->priv;
+
+	switch (prop_id)
+	{
+		case PROP_SUMMARY:
+			notify_notification_update(notification, g_value_get_string(value),
+									   priv->body, priv->icon_name);
+			break;
+
+		case PROP_BODY:
+			notify_notification_update(notification, priv->summary,
+									   g_value_get_string(value),
+									   priv->icon_name);
+			break;
+
+		case PROP_ICON_NAME:
+			notify_notification_update(notification, priv->summary,
+									   priv->body, g_value_get_string(value));
+			break;
+
+		case PROP_ATTACH_WIDGET:
+			notify_notification_attach_to_widget(notification,
+				g_value_get_object(value));
+			break;
+
+#ifdef HAVE_STATUS_ICON
+		case PROP_STATUS_ICON:
+			notify_notification_attach_to_status_icon(notification,
+				g_value_get_object(value));
+			break;
+#endif
+
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+			break;
+	}
+}
+
+static void
+notify_notification_get_property(GObject *object,
+                                 guint prop_id,
+                                 GValue *value,
+                                 GParamSpec *pspec)
+{
+	NotifyNotification *notification = NOTIFY_NOTIFICATION(object);
+	NotifyNotificationPrivate *priv = notification->priv;
+
+	switch (prop_id)
+	{
+		case PROP_SUMMARY:
+			g_value_set_string(value, priv->summary);
+			break;
+
+		case PROP_BODY:
+			g_value_set_string(value, priv->body);
+			break;
+
+		case PROP_ICON_NAME:
+			g_value_set_string(value, priv->icon_name);
+			break;
+
+		case PROP_ATTACH_WIDGET:
+			g_value_set_object(value, priv->attached_widget);
+			break;
+
+#ifdef HAVE_STATUS_ICON
+		case PROP_STATUS_ICON:
+			g_value_set_object(value, priv->status_icon);
+			break;
+#endif
+
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+			break;
+	}
 }
 
 static void
@@ -165,6 +361,12 @@ notify_notification_finalize(GObject *object)
 	if (priv->attached_widget != NULL)
 		g_object_unref(G_OBJECT(priv->attached_widget));
 
+#if HAVE_STATUS_ICON
+    if (priv->status_icon != NULL)
+        g_object_remove_weak_pointer(G_OBJECT(priv->status_icon),
+								     (gpointer)&priv->status_icon);
+#endif
+
 	if (priv->signals_registered)
 	{
 		dbus_g_proxy_disconnect_signal(proxy, "NotificationClosed",
@@ -180,61 +382,59 @@ notify_notification_finalize(GObject *object)
 	G_OBJECT_CLASS(parent_class)->finalize(object);
 }
 
-static gboolean
+static void
 _notify_notification_update_applet_hints(NotifyNotification *n)
 {
 	NotifyNotificationPrivate *priv = n->priv;
-	gboolean update_pending = FALSE;
+	GdkScreen *screen = NULL;
+	GdkRectangle rect;
 
+#ifdef HAVE_STATUS_ICON
+	if (priv->status_icon != NULL)
+	{
+		if (!gtk_status_icon_get_geometry(priv->status_icon, &screen,
+										  &rect, NULL))
+		{
+			return;
+		}
+	}
+	else
+#endif /* HAVE_STATUS_ICON */
 	if (priv->attached_widget != NULL)
 	{
-		gint x, y, h, w;
 		GtkWidget *widget = priv->attached_widget;
 		GtkRequisition requisition;
 
+		screen = gtk_widget_get_screen(widget);
 		gtk_widget_size_request(widget, &requisition);
-		w = requisition.width;
-		h = requisition.height;
+		rect.width = requisition.width;
+		rect.height = requisition.height;
 
-		gdk_window_get_origin(widget->window, &x, &y);
+		gdk_window_get_origin(widget->window, &rect.x, &rect.y);
 
 		if (GTK_WIDGET_NO_WINDOW(widget))
 		{
-			x += widget->allocation.x;
-			y += widget->allocation.y;
+			rect.x += widget->allocation.x;
+			rect.y += widget->allocation.y;
 		}
 
-		x += widget->allocation.width / 2;
-		y += widget->allocation.height / 2;
-
-		if (x != priv->widget_old_x)
-		{
-			notify_notification_set_hint_int32(n, "x", x);
-			priv->widget_old_x = x;
-
-			update_pending = TRUE;
-		}
-
-		if (y != priv->widget_old_y)
-		{
-			notify_notification_set_hint_int32(n, "y", y);
-			priv->widget_old_y = y;
-
-			update_pending = TRUE;
-		}
+		rect.x += widget->allocation.width / 2;
+		rect.y += widget->allocation.height / 2;
 	}
+	else
+		return;
 
-	return update_pending;
+	notify_notification_set_geometry_hints(n, screen, &rect);
 }
 
 #if 0
-
-/* This is left here just incase we revisit autoupdating
-   One thought would be to check for updates every time the icon
-   is redrawn but we still have to deal with the race conditions
-   that could occure between the server and the client so we will
-   leave this alone for now.
-*/
+/*
+ * This is left here just incase we revisit autoupdating
+ * One thought would be to check for updates every time the icon
+ * is redrawn but we still have to deal with the race conditions
+ * that could occure between the server and the client so we will
+ * leave this alone for now.
+ */
 static gboolean
 _idle_check_updates(void *user_data)
 {
@@ -264,31 +464,33 @@ NotifyNotification *
 notify_notification_new(const gchar *summary, const gchar *body,
 						const gchar *icon, GtkWidget *attach)
 {
-	NotifyNotification *obj;
-
-	g_return_val_if_fail(summary != NULL && *summary != '\0',     NULL);
 	g_return_val_if_fail(attach == NULL || GTK_IS_WIDGET(attach), NULL);
 
-	obj = NOTIFY_NOTIFICATION(g_object_new(NOTIFY_TYPE_NOTIFICATION, NULL));
-
-	obj->priv->summary = g_strdup(summary);
-
-	if (body != NULL && *body != '\0')
-		obj->priv->body = g_strdup(body);
-
-	if (icon != NULL && *icon != '\0')
-		obj->priv->icon_name = g_strdup(icon);
-
-	if (attach != NULL)
-	{
-		g_object_ref(G_OBJECT(attach));
-		obj->priv->attached_widget = attach;
-	}
-
-	_notify_cache_add_notification(obj);
-
-	return obj;
+	return g_object_new(NOTIFY_TYPE_NOTIFICATION,
+						"summary", summary,
+						"body", body,
+						"icon-name",  icon,
+						"attach-widget", attach,
+						NULL);
 }
+
+#ifdef HAVE_STATUS_ICON
+NotifyNotification *
+notify_notification_new_with_status_icon(const gchar *summary,
+                                         const gchar *message,
+                                         const gchar *icon,
+                                         GtkStatusIcon *status_icon)
+{
+	g_return_val_if_fail(status_icon == NULL || GTK_IS_STATUS_ICON(status_icon), NULL);
+
+	return g_object_new(NOTIFY_TYPE_NOTIFICATION,
+						"summary", summary,
+						"body", message,
+						"icon-name",  icon,
+						"status-icon", status_icon,
+						NULL);
+}
+#endif /* HAVE_STATUS_ICON */
 
 gboolean
 notify_notification_update(NotifyNotification *notification,
@@ -299,17 +501,28 @@ notify_notification_update(NotifyNotification *notification,
 	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
 	g_return_val_if_fail(summary != NULL && *summary != '\0',  FALSE);
 
-	g_free(notification->priv->summary);
-	g_free(notification->priv->body);
-	g_free(notification->priv->icon_name);
+	if (notification->priv->summary != summary)
+	{
+		g_free(notification->priv->summary);
+		notification->priv->summary = g_strdup(summary);
+		g_object_notify(G_OBJECT(notification), "summary");
+	}
 
-	notification->priv->summary = g_strdup(summary);
+	if (notification->priv->body != body)
+	{
+		g_free(notification->priv->body);
+		notification->priv->body =
+			(body != NULL && *body != '\0' ? g_strdup(body) : NULL);
+		g_object_notify(G_OBJECT(notification), "body");
+	}
 
-	if (body != NULL && *body != '\0')
-		notification->priv->body = g_strdup(body);
-
-	if (icon != NULL && *icon != '\0')
-		notification->priv->icon_name = g_strdup(icon);
+	if (notification->priv->icon_name != icon)
+	{
+		g_free(notification->priv->icon_name);
+		notification->priv->icon_name =
+			(icon != NULL && *icon != '\0' ? g_strdup(icon) : NULL);
+		g_object_notify(G_OBJECT(notification), "icon-name");
+	}
 
 	notification->priv->updates_pending = TRUE;
 
@@ -320,14 +533,70 @@ void
 notify_notification_attach_to_widget(NotifyNotification *notification,
 									 GtkWidget *attach)
 {
-	g_return_if_fail(notification != NULL);
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+
+	if (notification->priv->attached_widget == attach)
+		return;
 
 	if (notification->priv->attached_widget != NULL)
 		g_object_unref(notification->priv->attached_widget);
 
 	notification->priv->attached_widget =
 		(attach != NULL ? g_object_ref(attach) : NULL);
+
+	g_object_notify(G_OBJECT(notification), "attach-widget");
+}
+
+#ifdef HAVE_STATUS_ICON
+void
+notify_notification_attach_to_status_icon(NotifyNotification *notification,
+										  GtkStatusIcon *status_icon)
+{
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+	g_return_if_fail(status_icon == NULL || GTK_IS_STATUS_ICON(status_icon));
+
+	if (notification->priv->status_icon == status_icon)
+		return;
+
+	if (priv->status_icon != NULL)
+	{
+		g_object_remove_weak_pointer(G_OBJECT(priv->status_icon),
+									 (gpointer)&priv->status_icon);
+	}
+
+	priv->status_icon = status_icon;
+
+	if (priv->status_icon != NULL)
+	{
+		g_object_add_weak_pointer(G_OBJECT(priv->status_icon),
+								  (gpointer)&priv->status_icon);
+	}
+
+	g_object_notify(G_OBJECT(notification), "attach-icon");
+}
+#endif /* HAVE_STATUS_ICON */
+
+void
+notify_notification_set_geometry_hints(NotifyNotification *notification,
+									   GdkScreen *screen,
+									   GdkRectangle *rect)
+{
+	char *display_name;
+
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+	g_return_if_fail(screen != NULL);
+	g_return_if_fail(GDK_IS_SCREEN(screen));
+	g_return_if_fail(rect != NULL);
+
+	notify_notification_set_hint_int32(notification, "x", rect->x);
+	notify_notification_set_hint_int32(notification, "y", rect->y);
+	notify_notification_set_hint_int32(notification, "width", rect->width);
+	notify_notification_set_hint_int32(notification, "height", rect->height);
+
+	display_name = gdk_screen_make_display_name(screen);
+	notify_notification_set_hint_string(notification, "xdisplay", display_name);
+	g_free(display_name);
 }
 
 static void
@@ -405,7 +674,7 @@ notify_notification_show(NotifyNotification *notification, GError **error)
 		priv->signals_registered = TRUE;
 	}
 
-	/* If attached to a widget, modify x and y in hints */
+	/* If attached to a widget or status icon, modify x and y in hints */
 	_notify_notification_update_applet_hints(notification);
 
 	action_array = _gslist_to_string_array(priv->actions);

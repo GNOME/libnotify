@@ -1,3 +1,12 @@
+Sun Jun 04 17:44:27 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	* libnotify/notification.h:
+	  - Patch by chpe to add support for using the new GtkStatusIcon in
+	    GTK+ 2.9.x. These functions are #ifdef'd to only be provided in
+	    supported versions of GTK. The patch also added support for GObject
+		properties on the NotifyNotification objects. This closes ticket #60.
+
 Sun Jun 04 16:12:05 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.c:
