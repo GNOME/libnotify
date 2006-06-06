@@ -43,8 +43,33 @@ This is an opaque structure representing a notification. This should
 not be used directly. Use the accessor functions below.
 </para>
 
-@parent: The parent object.
-@priv: Private data.
+
+<!-- ##### SIGNAL NotifyNotification::closed ##### -->
+<para>
+
+</para>
+
+@notifynotification: the object which received the signal.
+
+<!-- ##### ARG NotifyNotification:attach-widget ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG NotifyNotification:body ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG NotifyNotification:icon-name ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG NotifyNotification:summary ##### -->
+<para>
+
+</para>
 
 <!-- ##### ENUM NotifyUrgency ##### -->
 <para>

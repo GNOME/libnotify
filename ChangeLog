@@ -1,3 +1,9 @@
+Tue Jun 06 12:44:48 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* docs/reference/tmpl/notification.sgml:
+	* libnotify/notification.h:
+	  - Small random fixes.
+
 Tue Jun 06 01:45:46 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* docs/reference/libnotify-docs.sgml:

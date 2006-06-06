@@ -54,7 +54,7 @@ typedef struct _NotifyNotificationPrivate NotifyNotificationPrivate;
 
 struct _NotifyNotification
 {
-	GObject parent;
+	GObject parent_object;
 	NotifyNotificationPrivate *priv;
 };
 
@@ -66,14 +66,14 @@ struct _NotifyNotificationClass
 	void (*closed)(NotifyNotification *notification);
 };
 
-/**
+/*
  * Notification urgency levels.
  */
 typedef enum
 {
-	NOTIFY_URGENCY_LOW,		  /**< Low urgency.      */
-	NOTIFY_URGENCY_NORMAL,	  /**< Normal urgency.   */
-	NOTIFY_URGENCY_CRITICAL,  /**< Critical urgency. */
+	NOTIFY_URGENCY_LOW,
+	NOTIFY_URGENCY_NORMAL,
+	NOTIFY_URGENCY_CRITICAL,
 
 } NotifyUrgency;
 
@@ -153,5 +153,7 @@ void notify_notification_add_action(NotifyNotification *notification,
 void notify_notification_clear_actions(NotifyNotification *notification);
 gboolean notify_notification_close(NotifyNotification *notification,
 								   GError **error);
+
+G_END_DECLS
 
 #endif /* NOTIFY_NOTIFICATION_H */
