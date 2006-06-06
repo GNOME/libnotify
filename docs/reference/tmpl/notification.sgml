@@ -133,7 +133,8 @@ NotifyNotification
 
 @notification: 
 @screen: 
-@rect: 
+@x: 
+@y: 
 
 
 <!-- ##### FUNCTION notify_notification_show ##### -->

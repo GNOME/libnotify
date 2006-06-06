@@ -387,44 +387,45 @@ _notify_notification_update_applet_hints(NotifyNotification *n)
 {
 	NotifyNotificationPrivate *priv = n->priv;
 	GdkScreen *screen = NULL;
-	GdkRectangle rect;
+	gint x, y;
 
 #ifdef HAVE_STATUS_ICON
 	if (priv->status_icon != NULL)
 	{
+		GdkRectangle rect;
+
 		if (!gtk_status_icon_get_geometry(priv->status_icon, &screen,
 										  &rect, NULL))
 		{
 			return;
 		}
+
+		x = rect.x + rect.width / 2;
+		y = rect.y + rect.height / 2;
 	}
 	else
 #endif /* HAVE_STATUS_ICON */
 	if (priv->attached_widget != NULL)
 	{
 		GtkWidget *widget = priv->attached_widget;
-		GtkRequisition requisition;
 
 		screen = gtk_widget_get_screen(widget);
-		gtk_widget_size_request(widget, &requisition);
-		rect.width = requisition.width;
-		rect.height = requisition.height;
 
-		gdk_window_get_origin(widget->window, &rect.x, &rect.y);
+		gdk_window_get_origin(widget->window, &x, &y);
 
 		if (GTK_WIDGET_NO_WINDOW(widget))
 		{
-			rect.x += widget->allocation.x;
-			rect.y += widget->allocation.y;
+			x += widget->allocation.x;
+			y += widget->allocation.y;
 		}
 
-		rect.x += widget->allocation.width / 2;
-		rect.y += widget->allocation.height / 2;
+		x += widget->allocation.width / 2;
+		y += widget->allocation.height / 2;
 	}
 	else
 		return;
 
-	notify_notification_set_geometry_hints(n, screen, &rect);
+	notify_notification_set_geometry_hints(n, screen, x, y);
 }
 
 #if 0
@@ -640,7 +641,8 @@ notify_notification_attach_to_status_icon(NotifyNotification *notification,
 void
 notify_notification_set_geometry_hints(NotifyNotification *notification,
 									   GdkScreen *screen,
-									   GdkRectangle *rect)
+									   gint x,
+									   gint y)
 {
 	char *display_name;
 
@@ -648,10 +650,9 @@ notify_notification_set_geometry_hints(NotifyNotification *notification,
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 	g_return_if_fail(screen != NULL);
 	g_return_if_fail(GDK_IS_SCREEN(screen));
-	g_return_if_fail(rect != NULL);
 
-	notify_notification_set_hint_int32(notification, "x", rect->x);
-	notify_notification_set_hint_int32(notification, "y", rect->y);
+	notify_notification_set_hint_int32(notification, "x", x);
+	notify_notification_set_hint_int32(notification, "y", y);
 
 	display_name = gdk_screen_make_display_name(screen);
 	notify_notification_set_hint_string(notification, "xdisplay", display_name);

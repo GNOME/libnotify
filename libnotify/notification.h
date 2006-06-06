@@ -108,7 +108,8 @@ void notify_notification_attach_to_status_icon(NotifyNotification *notification,
 
 void notify_notification_set_geometry_hints(NotifyNotification *notification,
 											GdkScreen *screen,
-											GdkRectangle *rect);
+											gint x,
+											gint y);
 
 gboolean notify_notification_show(NotifyNotification *notification,
 								  GError **error);

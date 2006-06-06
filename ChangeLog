@@ -1,3 +1,12 @@
+Tue Jun 06 00:27:50 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* docs/reference/tmpl/notification.sgml:
+	* libnotify/notification.c:
+	* libnotify/notification.h:
+	  - Update notify_notification_set_geometry_hints() to take a x, y
+	    instead of a GdkRectangle. We don't need the width and height
+	    information.
+
 Tue Jun 06 00:14:00 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	A docs/reference/libnotify-docs.sgml:
