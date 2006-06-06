@@ -1,3 +1,9 @@
+Tue Jun 06 01:45:46 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* docs/reference/libnotify-docs.sgml:
+	* docs/reference/tmpl/libnotify-docs.sgml:
+	  - Fix up some references to files.
+
 Tue Jun 06 01:29:20 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* docs/reference/libnotify-sections.txt:

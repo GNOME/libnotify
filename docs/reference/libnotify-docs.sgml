@@ -8,7 +8,7 @@
 
   <chapter>
     <title>[Insert title here]</title>
-    <xi:include href="xml/notification.xml"/>
     <xi:include href="xml/notify.xml"/>
+    <xi:include href="xml/notification.xml"/>
   </chapter>
 </book>
