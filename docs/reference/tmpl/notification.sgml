@@ -71,7 +71,7 @@ An action callback function.
 <!-- ##### MACRO NOTIFY_ACTION_CALLBACK ##### -->
 <para>
 A convenience macro for casting a function to a #NotifyActionCallback. This
-is much like #G_CALLBACK().
+is much like G_CALLBACK().
 </para>
 
 @func: The function to cast.

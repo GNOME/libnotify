@@ -3,11 +3,11 @@
                "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <book id="index" xmlns:xi="http://www.w3.org/2003/XInclude">
   <bookinfo>
-    <title>[Insert name here] Reference Manual</title>
+    <title>Libnotify Reference Manual</title>
   </bookinfo>
 
   <chapter>
-    <title>[Insert title here]</title>
+    <title>Libnotify</title>
     <xi:include href="xml/notify.xml"/>
     <xi:include href="xml/notification.xml"/>
   </chapter>
