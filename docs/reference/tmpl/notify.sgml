@@ -1,0 +1,71 @@
+<!-- ##### SECTION Title ##### -->
+notify
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### FUNCTION notify_init ##### -->
+<para>
+
+</para>
+
+@app_name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION notify_uninit ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION notify_is_initted ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION notify_get_app_name ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION notify_get_server_caps ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION notify_get_server_info ##### -->
+<para>
+
+</para>
+
+@ret_name: 
+@ret_vendor: 
+@ret_version: 
+@ret_spec_version: 
+@Returns: 
+
+

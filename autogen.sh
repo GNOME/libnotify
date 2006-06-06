@@ -31,12 +31,21 @@ echo "Generating configuration files for $PACKAGE, please wait..."
 	DIE=1
 }
 
+(gtkdocize --version) < /dev/null > /dev/null 2>&1 || {
+	echo
+	echo "You must have gtkdocize installed to compile $PACKAGE."
+	echo "Download the appropriate package for your distribution,"
+	echo "or get the source tarball at ftp://ftp.gnome.org/pub/gnome/sources/gtk-doc"
+}
+
 [ $DIE -eq 1 ] && exit 1;
 
 echo "  libtoolize --copy --force"
 libtoolize --copy --force
 echo "  aclocal $ACLOCAL_FLAGS"
 aclocal $ACLOCAL_FLAGS
+echo "  gtkdocize"
+gtkdocize
 echo "  autoheader"
 autoheader
 echo "  automake --add-missing"

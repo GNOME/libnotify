@@ -84,18 +84,18 @@ typedef void (*NotifyActionCallback)(NotifyNotification *, gchar *, gpointer);
 GType notify_notification_get_type();
 
 NotifyNotification *notify_notification_new(const gchar *summary,
-											const gchar *message,
+											const gchar *body,
 											const gchar *icon,
 											GtkWidget *attach);
 #if GTK_CHECK_VERSION(2, 9, 2)
 NotifyNotification *notify_notification_new_with_status_icon(
-	const gchar *summary, const gchar *message,
+	const gchar *summary, const gchar *body,
 	const gchar *icon, GtkStatusIcon *status_icon);
 #endif
 
 gboolean notify_notification_update(NotifyNotification *notification,
 									const gchar *summary,
-									const gchar *message,
+									const gchar *body,
 									const gchar *icon);
 
 void notify_notification_attach_to_widget(NotifyNotification* notification,

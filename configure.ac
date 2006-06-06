@@ -20,12 +20,7 @@ LIBGALAGO_DEVEL_VERSION=90
 LIBGALAGO_VERSION=$LIBGALAGO_MAJOR_VERSION.$LIBGALAGO_MINOR_VERSION.$LIBGALAGO_MICRO_VERSION
 
 if test "x$LIBGALAGO_DEVEL_VERSION" != "x0"; then
-	if test "x$LIBGALAGO_MICRO_VERSION" = "x0"; then
-		LIBGALAGO_MICRO_VERSION=$LIBGALAGO_DEVEL_VERSION
-		LIBGALAGO_VERSION=$LIBGALAGO_MAJOR_VERSION.$LIBGALAGO_MINOR_VERSION.$LIBGALAGO_DEVEL_VERSION
-	else
-		LIBGALAGO_VERSION=$LIBGALAGO_VERSION.$LIBGALAGO_DEVEL_VERSION
-	fi
+	LIBGALAGO_VERSION=$LIBGALAGO_VERSION.$LIBGALAGO_DEVEL_VERSION
 fi
 
 AC_DEFINE_UNQUOTED(LIBGALAGO_MAJOR_VERSION, $LIBGALAGO_MAJOR_VERSION,
@@ -114,6 +109,13 @@ AC_DEFINE_UNQUOTED(DBUS_MICRO_VER, $DBUS_MICRO_VER, [D-BUS micro version.])
 
 AC_DEFINE_UNQUOTED(DBUS_API_SUBJECT_TO_CHANGE, ,DBUS API is subject to change)
 
+
+dnl ################################################################
+dnl # Set up gtk-doc
+dnl ################################################################
+GTK_DOC_CHECK([1.4])
+
+
 dnl # Use wall if we have GCC
 if test "x$GCC" = "xyes"; then
 	CFLAGS="$CFLAGS -Wall"
@@ -125,8 +127,9 @@ dnl ################################################################
 dnl # Output the Makefiles
 dnl ################################################################
 AC_CONFIG_FILES([
-Doxyfile
 Makefile
+docs/Makefile
+docs/reference/Makefile
 libnotify.pc
 libnotify/Makefile
 tests/Makefile
@@ -142,4 +145,3 @@ echo
 echo "Now type make to compile"
 echo "Then su to root and type: make install"
 echo
-

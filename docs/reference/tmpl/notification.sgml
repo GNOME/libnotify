@@ -1,0 +1,274 @@
+<!-- ##### SECTION Title ##### -->
+NotifyNotification
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO NOTIFY_EXPIRES_DEFAULT ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO NOTIFY_EXPIRES_NEVER ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT NotifyNotificationPrivate ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT NotifyNotification ##### -->
+<para>
+
+</para>
+
+@parent: 
+@priv: 
+
+<!-- ##### ENUM NotifyUrgency ##### -->
+<para>
+
+</para>
+
+@NOTIFY_URGENCY_LOW: 
+@NOTIFY_URGENCY_NORMAL: 
+@NOTIFY_URGENCY_CRITICAL: 
+
+<!-- ##### USER_FUNCTION NotifyActionCallback ##### -->
+<para>
+
+</para>
+
+@Param1: 
+@Param2: 
+@Param3: 
+
+
+<!-- ##### MACRO NOTIFY_ACTION_CALLBACK ##### -->
+<para>
+
+</para>
+
+@func: 
+
+
+<!-- ##### FUNCTION notify_notification_new ##### -->
+<para>
+
+</para>
+
+@summary: 
+@body: 
+@icon: 
+@attach: 
+@Returns: 
+
+
+<!-- ##### FUNCTION notify_notification_new_with_status_icon ##### -->
+<para>
+
+</para>
+
+@summary: 
+@body: 
+@icon: 
+@status_icon: 
+@Returns: 
+
+
+<!-- ##### FUNCTION notify_notification_update ##### -->
+<para>
+
+</para>
+
+@notification: 
+@summary: 
+@body: 
+@icon: 
+@Returns: 
+
+
+<!-- ##### FUNCTION notify_notification_attach_to_widget ##### -->
+<para>
+
+</para>
+
+@notification: 
+@attach: 
+
+
+<!-- ##### FUNCTION notify_notification_attach_to_status_icon ##### -->
+<para>
+
+</para>
+
+@notification: 
+@status_icon: 
+
+
+<!-- ##### FUNCTION notify_notification_set_geometry_hints ##### -->
+<para>
+
+</para>
+
+@notification: 
+@screen: 
+@rect: 
+
+
+<!-- ##### FUNCTION notify_notification_show ##### -->
+<para>
+
+</para>
+
+@notification: 
+@error: 
+@Returns: 
+
+
+<!-- ##### FUNCTION notify_notification_set_timeout ##### -->
+<para>
+
+</para>
+
+@notification: 
+@timeout: 
+
+
+<!-- ##### FUNCTION notify_notification_set_category ##### -->
+<para>
+
+</para>
+
+@notification: 
+@category: 
+
+
+<!-- ##### FUNCTION notify_notification_set_urgency ##### -->
+<para>
+
+</para>
+
+@notification: 
+@l: 
+
+
+<!-- ##### FUNCTION notify_notification_set_icon_from_pixbuf ##### -->
+<para>
+
+</para>
+
+@notification: 
+@icon: 
+
+
+<!-- ##### FUNCTION notify_notification_set_hint_int32 ##### -->
+<para>
+
+</para>
+
+@notification: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION notify_notification_set_hint_double ##### -->
+<para>
+
+</para>
+
+@notification: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION notify_notification_set_hint_string ##### -->
+<para>
+
+</para>
+
+@notification: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION notify_notification_set_hint_byte ##### -->
+<para>
+
+</para>
+
+@notification: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION notify_notification_set_hint_byte_array ##### -->
+<para>
+
+</para>
+
+@notification: 
+@key: 
+@value: 
+@len: 
+
+
+<!-- ##### FUNCTION notify_notification_clear_hints ##### -->
+<para>
+
+</para>
+
+@notification: 
+
+
+<!-- ##### FUNCTION notify_notification_add_action ##### -->
+<para>
+
+</para>
+
+@notification: 
+@action: 
+@label: 
+@callback: 
+@user_data: 
+@free_func: 
+
+
+<!-- ##### FUNCTION notify_notification_clear_actions ##### -->
+<para>
+
+</para>
+
+@notification: 
+
+
+<!-- ##### FUNCTION notify_notification_close ##### -->
+<para>
+
+</para>
+
+@notification: 
+@error: 
+@Returns: 
+
+

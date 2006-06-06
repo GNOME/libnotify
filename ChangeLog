@@ -1,3 +1,24 @@
+Tue Jun 06 00:14:00 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	A docs/reference/libnotify-docs.sgml:
+	A docs/reference/libnotify-overrides.txt:
+	A docs/reference/libnotify-sections.txt:
+	A docs/reference/tmpl:
+	A docs/reference/tmpl/libnotify-docs.sgml:
+	A docs/reference/tmpl/libnotify-unused.sgml:
+	A docs/reference/tmpl/notification.sgml:
+	A docs/reference/tmpl/notify.sgml:
+	A docs/reference/Makefile.am:
+	A docs/Makefile.am:
+	* libnotify/notification.c:
+	* libnotify/notification.h:
+	* libnotify/notify.c:
+	D Doxyfile.in:
+	* Makefile.am:
+	* autogen.sh:
+	* configure.ac:
+	  - Add some gtk-doc documentation.
+
 Sun Jun 04 17:44:27 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:

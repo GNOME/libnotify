@@ -460,6 +460,18 @@ _idle_check_updates(void *user_data)
 }
 #endif
 
+/**
+ * notify_notification_new:
+ * @summary: The required summary text.
+ * @body: The optional body text.
+ * @icon: The optional icon theme icon name or filename.
+ * @attach: The optional widget to attach to.
+ *
+ * Creates a new #NotifyNotification. The summary text is required, but
+ * all other parameters are optional.
+ *
+ * Returns: The new #NotifyNotification.
+ */
 NotifyNotification *
 notify_notification_new(const gchar *summary, const gchar *body,
 						const gchar *icon, GtkWidget *attach)
@@ -475,13 +487,29 @@ notify_notification_new(const gchar *summary, const gchar *body,
 }
 
 #ifdef HAVE_STATUS_ICON
+/**
+ * notify_notification_new_with_status_icon:
+ * @summary: The required summary text.
+ * @body: The optional body text.
+ * @icon: The optional icon theme icon name or filename.
+ * @status_icon: The required #GtkStatusIcon.
+ *
+ * Creates a new #NotifyNotification and attaches to a #GtkStatusIcon.
+ * The summary text and @status_icon is required, but all other parameters
+ * are optional.
+ *
+ * Returns: The new #NotifyNotification.
+ *
+ * Since: 0.4.1
+ */
 NotifyNotification *
 notify_notification_new_with_status_icon(const gchar *summary,
                                          const gchar *message,
                                          const gchar *icon,
                                          GtkStatusIcon *status_icon)
 {
-	g_return_val_if_fail(status_icon == NULL || GTK_IS_STATUS_ICON(status_icon), NULL);
+	g_return_val_if_fail(status_icon == NULL, NULL);
+	g_return_val_if_fail(GTK_IS_STATUS_ICON(status_icon), NULL);
 
 	return g_object_new(NOTIFY_TYPE_NOTIFICATION,
 						"summary", summary,
@@ -492,6 +520,19 @@ notify_notification_new_with_status_icon(const gchar *summary,
 }
 #endif /* HAVE_STATUS_ICON */
 
+/**
+ * notify_notification_update:
+ * @notification: The notification to update.
+ * @summary: The new required summary text.
+ * @body: The optional body text.
+ * @icon: The optional icon theme icon name or filename.
+ *
+ * Updates the notification text and icon. This won't send the update out
+ * and display it on the screen. For that, you will need to call
+ * notify_notification_show().
+ *
+ * Returns: %TRUE, unless an invalid parameter was passed.
+ */
 gboolean
 notify_notification_update(NotifyNotification *notification,
 						   const gchar *summary, const gchar *body,
@@ -529,6 +570,15 @@ notify_notification_update(NotifyNotification *notification,
 	return TRUE;
 }
 
+/**
+ * notify_notification_attach_to_widget:
+ * @notification: The notification.
+ * @attach: The widget to attach to, or %NULL.
+ *
+ * Attaches the notification to a widget. This will set hints on the
+ * notification requesting that the notification point to the widget's
+ * location. If @attach is %NULL, the widget will be unset.
+ */
 void
 notify_notification_attach_to_widget(NotifyNotification *notification,
 									 GtkWidget *attach)
@@ -548,6 +598,17 @@ notify_notification_attach_to_widget(NotifyNotification *notification,
 }
 
 #ifdef HAVE_STATUS_ICON
+/**
+ * notify_notification_attach_to_status_icon:
+ * @notification: The notification.
+ * @status_icon: The #GtkStatusIcon to attach to, or %NULL.
+ *
+ * Attaches the notification to a #GtkStatusIcon. This will set hints on the
+ * notification requesting that the notification point to the status icon's
+ * location. If @status_icon is %NULL, the status icon will be unset.
+ *
+ * Since: 0.4.1
+ */
 void
 notify_notification_attach_to_status_icon(NotifyNotification *notification,
 										  GtkStatusIcon *status_icon)
@@ -591,8 +652,6 @@ notify_notification_set_geometry_hints(NotifyNotification *notification,
 
 	notify_notification_set_hint_int32(notification, "x", rect->x);
 	notify_notification_set_hint_int32(notification, "y", rect->y);
-	notify_notification_set_hint_int32(notification, "width", rect->width);
-	notify_notification_set_hint_int32(notification, "height", rect->height);
 
 	display_name = gdk_screen_make_display_name(screen);
 	notify_notification_set_hint_string(notification, "xdisplay", display_name);

@@ -39,6 +39,14 @@ static GList *_active_notifications = NULL;
 #  define format_func
 #endif
 
+/**
+ * notify_init:
+ * @app_name: The name of the application initializing libnotify.
+ *
+ * Initialized libnotify. This must be called before any other functions.
+ *
+ * Returns: %TRUE if successful, or %FALSE on error.
+ */
 gboolean
 notify_init(const char *app_name)
 {
@@ -88,12 +96,27 @@ notify_init(const char *app_name)
 	return TRUE;
 }
 
+/**
+ * notify_get_app_name:
+ *
+ * Gets the application name registered.
+ *
+ * Returns: The registered application name, passed to notify_init().
+ */
 const gchar *
 notify_get_app_name(void)
 {
 	return _app_name;
 }
 
+/**
+ * notify_uninit:
+ *
+ * Uninitialized libnotify.
+ *
+ * This should be called when the program no longer needs libnotify for
+ * the rest of its lifecycle, typically just before exitting.
+ */
 void
 notify_uninit(void)
 {
@@ -119,6 +142,13 @@ notify_uninit(void)
 	_initted = FALSE;
 }
 
+/**
+ * notify_is_initted:
+ *
+ * Gets whether or not libnotify is initialized.
+ *
+ * Returns: %TRUE if libnotify is initialized, or %FALSE otherwise.
+ */
 gboolean
 notify_is_initted(void)
 {
@@ -137,6 +167,13 @@ _notify_get_g_proxy(void)
 	return _proxy;
 }
 
+/**
+ * notify_get_server_caps:
+ *
+ * Queries the server for its capabilities and returns them in a #GList.
+ *
+ * Returns: A #GList of server capability strings.
+ */
 GList *
 notify_get_server_caps(void)
 {
@@ -166,6 +203,21 @@ notify_get_server_caps(void)
 	return result;
 }
 
+/**
+ * notify_get_server_info:
+ * @ret_name: The resulting server name.
+ * @ret_vendor: The resulting server vendor.
+ * @ret_version: The resulting server version.
+ * @ret_spec_version: The resulting version of the specification the server is
+ *                    compliant with.
+ *
+ * Queries the server for its information, specifically, the name, vendor,
+ * server version, and the version of the notifications specification that it
+ * is compliant with.
+ *
+ * Returns: %TRUE if successful, and the variables passed will be set. %FALSE
+ *          on failure.
+ */
 gboolean
 notify_get_server_info(char **ret_name, char **ret_vendor,
 					   char **ret_version, char **ret_spec_version)

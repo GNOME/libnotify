@@ -1,4 +1,4 @@
-SUBDIRS = libnotify tools tests
+SUBDIRS = libnotify docs tools tests
 
 pcdata_DATA = libnotify.pc
 pcdatadir = $(libdir)/pkgconfig
@@ -22,3 +22,5 @@ libtool: $(LIBTOOL_DEPS)
 doxygen:
 	@echo "Running doxygen..."
 	@doxygen Doxyfile
+
+DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
