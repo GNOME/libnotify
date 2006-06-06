@@ -121,7 +121,7 @@ void notify_notification_set_category(NotifyNotification *notification,
 									  const char *category);
 
 void notify_notification_set_urgency(NotifyNotification *notification,
-									 NotifyUrgency l);
+									 NotifyUrgency urgency);
 
 void notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 											  GdkPixbuf *icon);

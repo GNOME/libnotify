@@ -2,11 +2,16 @@
 NotifyNotification
 
 <!-- ##### SECTION Short_Description ##### -->
-
+A passive pop-up notification.
 
 <!-- ##### SECTION Long_Description ##### -->
 <para>
-
+#NotifyNotification represents a passive pop-up notification. It can
+contain summary text, body text, and an icon, as well as hints specifying
+how the notification should be presented. The notification is rendered
+by a notification daemon, and may present the notification in any number
+of ways. As such, there is a clear separation of content and presentation,
+and this API enforces that.
 </para>
 
 <!-- ##### SECTION See_Also ##### -->
@@ -19,57 +24,57 @@ NotifyNotification
 
 <!-- ##### MACRO NOTIFY_EXPIRES_DEFAULT ##### -->
 <para>
-
+The default expiration time on a notification.
 </para>
 
 
 
 <!-- ##### MACRO NOTIFY_EXPIRES_NEVER ##### -->
 <para>
-
+The notification never expires. It stays open until closed by the calling API
+or the user.
 </para>
 
-
-
-<!-- ##### STRUCT NotifyNotificationPrivate ##### -->
-<para>
-
-</para>
 
 
 <!-- ##### STRUCT NotifyNotification ##### -->
 <para>
-
+This is an opaque structure representing a notification. This should
+not be used directly. Use the accessor functions below.
 </para>
 
-@parent: 
-@priv: 
+@parent: The parent object.
+@priv: Private data.
 
 <!-- ##### ENUM NotifyUrgency ##### -->
 <para>
-
+The urgency level of the notification.
 </para>
 
 @NOTIFY_URGENCY_LOW: 
+	Low urgency. Used for unimportant notifications.
 @NOTIFY_URGENCY_NORMAL: 
+	Normal urgency. Used for most standard notifications.
 @NOTIFY_URGENCY_CRITICAL: 
+	Critical urgency. Used for very important notifications.
 
 <!-- ##### USER_FUNCTION NotifyActionCallback ##### -->
 <para>
-
+An action callback function.
 </para>
 
-@Param1: 
-@Param2: 
-@Param3: 
+@Param1: The notification.
+@Param2: The action ID.
+@Param3: User data.
 
 
 <!-- ##### MACRO NOTIFY_ACTION_CALLBACK ##### -->
 <para>
-
+A convenience macro for casting a function to a #NotifyActionCallback. This
+is much like #G_CALLBACK().
 </para>
 
-@func: 
+@func: The function to cast.
 
 
 <!-- ##### FUNCTION notify_notification_new ##### -->
@@ -171,7 +176,7 @@ NotifyNotification
 </para>
 
 @notification: 
-@l: 
+@urgency: 
 
 
 <!-- ##### FUNCTION notify_notification_set_icon_from_pixbuf ##### -->

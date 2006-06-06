@@ -142,7 +142,12 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 	object_class->set_property = notify_notification_set_property;
 	object_class->finalize = notify_notification_finalize;
 
-	/* Create signals here: */
+	/**
+	 * NotifyNotification::closed:
+	 * @notification: The object which received the signal.
+	 *
+	 * Emitted when the notification is closed.
+	 */
 	signals[SIGNAL_CLOSED] =
 		g_signal_new("closed",
 					 G_TYPE_FROM_CLASS(object_class),
@@ -151,71 +156,59 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 					 NULL, NULL,
 					 g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
-	g_object_class_install_property
-			(object_class,
-			PROP_SUMMARY,
-			g_param_spec_string("summary",
-								"Summary",
-								"Summary",
-								NULL,
-								G_PARAM_READWRITE |
-								G_PARAM_CONSTRUCT |
-								G_PARAM_STATIC_NAME |
-								G_PARAM_STATIC_NICK |
-								G_PARAM_STATIC_BLURB));
+	g_object_class_install_property(object_class, PROP_SUMMARY,
+		g_param_spec_string("summary", "Summary",
+							"The summary text",
+							NULL,
+							G_PARAM_READWRITE |
+							G_PARAM_CONSTRUCT |
+							G_PARAM_STATIC_NAME |
+							G_PARAM_STATIC_NICK |
+							G_PARAM_STATIC_BLURB));
 
-	g_object_class_install_property
-			(object_class,
-			PROP_BODY,
-			g_param_spec_string("body",
-								"Message Body",
-								"Message body",
-								NULL,
-								G_PARAM_READWRITE |
-								G_PARAM_CONSTRUCT |
-								G_PARAM_STATIC_NAME |
-								G_PARAM_STATIC_NICK |
-								G_PARAM_STATIC_BLURB));
+	g_object_class_install_property(object_class, PROP_BODY,
+		g_param_spec_string("body", "Message Body",
+							"The message body text",
+							NULL,
+							G_PARAM_READWRITE |
+							G_PARAM_CONSTRUCT |
+							G_PARAM_STATIC_NAME |
+							G_PARAM_STATIC_NICK |
+							G_PARAM_STATIC_BLURB));
 
-	g_object_class_install_property
-			(object_class,
-			PROP_ICON_NAME,
-			g_param_spec_string("icon-name",
-								"Icon Name",
-								"Icon name",
-								NULL,
-								G_PARAM_READWRITE |
-								G_PARAM_CONSTRUCT |
-								G_PARAM_STATIC_NAME |
-								G_PARAM_STATIC_NICK |
-								G_PARAM_STATIC_BLURB));
+	g_object_class_install_property(object_class, PROP_ICON_NAME,
+		g_param_spec_string("icon-name",
+							"Icon Name",
+							"The icon filename or icon theme-compliant name",
+							NULL,
+							G_PARAM_READWRITE |
+							G_PARAM_CONSTRUCT |
+							G_PARAM_STATIC_NAME |
+							G_PARAM_STATIC_NICK |
+							G_PARAM_STATIC_BLURB));
 
-	g_object_class_install_property
-			(object_class,
-			PROP_ATTACH_WIDGET,
-			g_param_spec_object("attach-widget",
-								"Attach Widget",
-								"Attach Widget",
-								GTK_TYPE_WIDGET,
-								G_PARAM_READWRITE |
-								G_PARAM_CONSTRUCT |
-								G_PARAM_STATIC_NAME |
-								G_PARAM_STATIC_NICK |
-								G_PARAM_STATIC_BLURB));
+	g_object_class_install_property(object_class, PROP_ATTACH_WIDGET,
+		g_param_spec_object("attach-widget",
+							"Attach Widget",
+							"The widget to attach the notification to",
+							GTK_TYPE_WIDGET,
+							G_PARAM_READWRITE |
+							G_PARAM_CONSTRUCT |
+							G_PARAM_STATIC_NAME |
+							G_PARAM_STATIC_NICK |
+							G_PARAM_STATIC_BLURB));
 
 #ifdef HAVE_STATUS_ICON
-	g_object_class_install_property
-			(object_class,
-			PROP_STATUS_ICON,
-			g_param_spec_object("status-icon",
-								"Status Icon",
-								"Status Icon",
-								GTK_TYPE_STATUS_ICON,
-								G_PARAM_READWRITE |
-								G_PARAM_CONSTRUCT |
-								G_PARAM_STATIC_NAME |
-								G_PARAM_STATIC_NICK |
-								G_PARAM_STATIC_BLURB));
+	g_object_class_install_property(object_class, PROP_STATUS_ICON,
+		g_param_spec_object("status-icon",
+							"Status Icon",
+							"The status icon to attach the notification to",
+							GTK_TYPE_STATUS_ICON,
+							G_PARAM_READWRITE |
+							G_PARAM_CONSTRUCT |
+							G_PARAM_STATIC_NAME |
+							G_PARAM_STATIC_NICK |
+							G_PARAM_STATIC_BLURB));
 #endif /* HAVE_STATUS_ICON */
 }
 
@@ -638,6 +631,19 @@ notify_notification_attach_to_status_icon(NotifyNotification *notification,
 }
 #endif /* HAVE_STATUS_ICON */
 
+/**
+ * notify_notification_set_geometry_hints:
+ * @notification: The notification.
+ * @screen: The #GdkScreen the notification should appear on.
+ * @x: The X coordinate to point to.
+ * @y: The Y coordinate to point to.
+ *
+ * Sets the geometry hints on the notification. This sets the screen
+ * the notification should appear on and the X, Y coordinates it should
+ * point to, if the particular notification supports X, Y hints.
+ *
+ * Since: 0.4.1
+ */
 void
 notify_notification_set_geometry_hints(NotifyNotification *notification,
 									   GdkScreen *screen,
@@ -706,6 +712,16 @@ _gslist_to_string_array(GSList *list)
 	return (gchar **)g_array_free(a, FALSE);
 }
 
+/**
+ * notify_notification_show:
+ * @notification: The notification.
+ * @error: The returned error information.
+ *
+ * Tells the notification server to display the notification on the screen.
+ *
+ * Returns: %TRUE if successful. On error, this will return %FALSE and set
+ *          @error.
+ */
 gboolean
 notify_notification_show(NotifyNotification *notification, GError **error)
 {
@@ -766,6 +782,15 @@ notify_notification_show(NotifyNotification *notification, GError **error)
 	return TRUE;
 }
 
+/**
+ * notify_notification_set_timeout:
+ * @notification: The notification.
+ * @timeout: The timeout in milliseconds.
+ *
+ * Sets the timeout of the notification. To set the default time, pass
+ * %NOTIFY_EXPIRES_DEFAULT as @timeout. To set the notification to never
+ * expire, pass %NOTIFY_EXPIRES_NEVER.
+ */
 void
 notify_notification_set_timeout(NotifyNotification *notification,
 								gint timeout)
@@ -785,6 +810,14 @@ _notify_notification_get_timeout(const NotifyNotification *notification)
 	return notification->priv->timeout;
 }
 
+/**
+ * notify_notification_set_category:
+ * @notification: The notification.
+ * @category: The category.
+ *
+ * Sets the category of this notification. This can be used by the
+ * notification server to filter or display the data in a certain way.
+ */
 void
 notify_notification_set_category(NotifyNotification *notification,
 								 const char *category)
@@ -795,14 +828,23 @@ notify_notification_set_category(NotifyNotification *notification,
 	notify_notification_set_hint_string(notification, "category", category);
 }
 
+/**
+ * notify_notification_set_urgency:
+ * @notification: The notification.
+ * @urgency: The urgency level.
+ *
+ * Sets the urgency level of this notification.
+ *
+ * See: #NotifyUrgency
+ */
 void
 notify_notification_set_urgency(NotifyNotification *notification,
-								NotifyUrgency l)
+								NotifyUrgency urgency)
 {
 	g_return_if_fail(notification != NULL);
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 
-	notify_notification_set_hint_byte(notification, "urgency", (guchar)l);
+	notify_notification_set_hint_byte(notification, "urgency", (guchar)urgency);
 }
 
 #if CHECK_DBUS_VERSION(0, 60)
@@ -863,6 +905,16 @@ _gvalue_array_append_byte_array(GValueArray *array, guchar *bytes, gsize len)
 }
 #endif /* D-BUS >= 0.60 */
 
+/**
+ * notify_notification_set_icon_from_pixbuf:
+ * @notification: The notification.
+ * @icon: The icon.
+ *
+ * Sets the icon in the notification from a #GdkPixbuf.
+ *
+ * This will only work when libnotify is compiled against D-BUS 0.60 or
+ * higher.
+ */
 void
 notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 										 GdkPixbuf *icon)
@@ -914,6 +966,14 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 #endif
 }
 
+/**
+ * notify_notification_set_hint_int32:
+ * @notification: The notification.
+ * @key: The hint.
+ * @value: The hint's value.
+ *
+ * Sets a hint with a 32-bit integer value.
+ */
 void
 notify_notification_set_hint_int32(NotifyNotification *notification,
 								   const gchar *key, gint value)
@@ -931,6 +991,14 @@ notify_notification_set_hint_int32(NotifyNotification *notification,
 						g_strdup(key), hint_value);
 }
 
+/**
+ * notify_notification_set_hint_double:
+ * @notification: The notification.
+ * @key: The hint.
+ * @value: The hint's value.
+ *
+ * Sets a hint with a double value.
+ */
 void
 notify_notification_set_hint_double(NotifyNotification *notification,
 									const gchar *key, gdouble value)
@@ -948,6 +1016,14 @@ notify_notification_set_hint_double(NotifyNotification *notification,
 						g_strdup(key), hint_value);
 }
 
+/**
+ * notify_notification_set_hint_byte:
+ * @notification: The notification.
+ * @key: The hint.
+ * @value: The hint's value.
+ *
+ * Sets a hint with a byte value.
+ */
 void
 notify_notification_set_hint_byte(NotifyNotification *notification,
 								  const gchar *key, guchar value)
@@ -965,6 +1041,16 @@ notify_notification_set_hint_byte(NotifyNotification *notification,
 	g_hash_table_insert(notification->priv->hints, g_strdup(key), hint_value);
 }
 
+/**
+ * notify_notification_set_hint_byte_array:
+ * @notification: The notification.
+ * @key: The hint.
+ * @value: The hint's value.
+ * @len: The length of the byte array.
+ *
+ * Sets a hint with a byte array value. The length of @value must be passed
+ * as @len.
+ */
 void
 notify_notification_set_hint_byte_array(NotifyNotification *notification,
 										const gchar *key,
@@ -991,6 +1077,14 @@ notify_notification_set_hint_byte_array(NotifyNotification *notification,
 						g_strdup(key), hint_value);
 }
 
+/**
+ * notify_notification_set_hint_string:
+ * @notification: The notification.
+ * @key: The hint.
+ * @value: The hint's value.
+ *
+ * Sets a hint with a string value.
+ */
 void
 notify_notification_set_hint_string(NotifyNotification *notification,
 									const gchar *key, const gchar *value)
@@ -1014,6 +1108,12 @@ _remove_all(void)
 	return TRUE;
 }
 
+/**
+ * notify_notification_clear_hints:
+ * @notification: The notification.
+ *
+ * Clears all hints from the notification.
+ */
 void
 notify_notification_clear_hints(NotifyNotification *notification)
 {
@@ -1024,6 +1124,12 @@ notify_notification_clear_hints(NotifyNotification *notification)
 								(GHRFunc)_remove_all, NULL);
 }
 
+/**
+ * notify_notification_clear_actions:
+ * @notification: The notification.
+ *
+ * Clears all actions from the notification.
+ */
 void
 notify_notification_clear_actions(NotifyNotification *notification)
 {
@@ -1043,6 +1149,20 @@ notify_notification_clear_actions(NotifyNotification *notification)
 	notification->priv->has_nondefault_actions = FALSE;
 }
 
+/**
+ * notify_notification_add_action:
+ * @notification: The notification.
+ * @action: The action ID.
+ * @label: The human-readable action label.
+ * @callback: The action's callback function.
+ * @user_data: Optional custom data to pass to @callback.
+ * @free_func: An optional function to free @user_data when the notification
+ *             is destroyed.
+ *
+ * Adds an action to a notification. When the action is invoked, the
+ * specified callback function will be called, along with the value passed
+ * to @user_data.
+ */
 void
 notify_notification_add_action(NotifyNotification *notification,
 							   const char *action,
@@ -1085,6 +1205,16 @@ _notify_notification_has_nondefault_actions(const NotifyNotification *n)
 	return n->priv->has_nondefault_actions;
 }
 
+/**
+ * notify_notification_close:
+ * @notification: The notification.
+ * @error: The returned error information.
+ *
+ * Tells the notification server to hide the notification on the screen.
+ *
+ * Returns: %TRUE if successful. On error, this will return %FALSE and set
+ *          @error.
+ */
 gboolean
 notify_notification_close(NotifyNotification *notification,
 						  GError **error)

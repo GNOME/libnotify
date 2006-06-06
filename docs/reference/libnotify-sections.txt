@@ -2,7 +2,6 @@
 <FILE>notification</FILE>
 NOTIFY_EXPIRES_DEFAULT
 NOTIFY_EXPIRES_NEVER
-NotifyNotificationPrivate
 <TITLE>NotifyNotification</TITLE>
 NotifyNotification
 NotifyUrgency
