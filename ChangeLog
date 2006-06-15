@@ -1,3 +1,8 @@
+Thu Jun 15 02:14:14 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	  - Fix a build error on gtk 2.9.2+. This fixes bug #65.
+
 Tue Jun 06 12:44:48 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* docs/reference/tmpl/notification.sgml:

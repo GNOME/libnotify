@@ -354,7 +354,7 @@ notify_notification_finalize(GObject *object)
 	if (priv->attached_widget != NULL)
 		g_object_unref(G_OBJECT(priv->attached_widget));
 
-#if HAVE_STATUS_ICON
+#ifdef HAVE_STATUS_ICON
     if (priv->status_icon != NULL)
         g_object_remove_weak_pointer(G_OBJECT(priv->status_icon),
 								     (gpointer)&priv->status_icon);
@@ -607,10 +607,14 @@ void
 notify_notification_attach_to_status_icon(NotifyNotification *notification,
 										  GtkStatusIcon *status_icon)
 {
+	NotifyNotificationPrivate *priv;
+
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 	g_return_if_fail(status_icon == NULL || GTK_IS_STATUS_ICON(status_icon));
 
-	if (notification->priv->status_icon == status_icon)
+	priv = notification->priv;
+
+	if (priv->status_icon == status_icon)
 		return;
 
 	if (priv->status_icon != NULL)
