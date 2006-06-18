@@ -27,10 +27,7 @@
 #include <libnotify/notification.h>
 #include <libnotify/notify-enum-types.h>
 
-/**************************************************************************/
-/** @name libnotify Base API                                              */
-/**************************************************************************/
-/*@{*/
+G_BEGIN_DECLS
 
 /**
  * Initializes the notifications library.
@@ -87,6 +84,6 @@ gboolean notify_get_server_info(char **ret_name,
 								char **ret_version,
 								char **ret_spec_version);
 
-/*@}*/
+G_END_DECLS
 
 #endif /* _LIBNOTIFY_NOTIFY_H_ */

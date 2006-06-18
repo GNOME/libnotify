@@ -1,3 +1,11 @@
+Sat Jun 17 19:17:05 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/internal.h:
+	* libnotify/notify.h:
+	* configure.ac:
+	  - Add G_BEGIN_DECLS and G_END_DECLS to notify.h, so that libnotify can
+	    be used in C++ applications properly.
+
 ========================= 0.4.1 =========================
 
 Sat Jun 17 18:17:28 PDT 2006  Christian Hammond <chipx86@chipx86.com>

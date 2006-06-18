@@ -36,6 +36,8 @@
 #define NOTIFY_DBUS_CORE_INTERFACE "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_OBJECT    "/org/freedesktop/Notifications"
 
+G_BEGIN_DECLS
+
 DBusGConnection *_notify_get_dbus_g_conn(void);
 DBusGProxy *_notify_get_g_proxy(void);
 
@@ -44,5 +46,7 @@ void _notify_cache_remove_notification(NotifyNotification *n);
 gint _notify_notification_get_timeout(const NotifyNotification *n);
 gboolean _notify_notification_has_nondefault_actions(
 	const NotifyNotification *n);
+
+G_END_DECLS
 
 #endif /* _LIBNOTIFY_INTERNAL_H_ */
