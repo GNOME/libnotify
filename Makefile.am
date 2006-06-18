@@ -6,14 +6,9 @@ pcdatadir = $(libdir)/pkgconfig
 EXTRA_DIST = \
 	AUTHORS NEWS INSTALL COPYING README \
 	ChangeLog \
-	Doxyfile.in \
 	autogen.sh \
 	configure.ac \
-	libnotify.pc.in \
-	libnotify.spec.in
-
-dist-hook: libnotify.spec
-	cp libnotify.spec $(distdir)
+	libnotify.pc.in
 
 $(OBJECTS): libtool
 libtool: $(LIBTOOL_DEPS)

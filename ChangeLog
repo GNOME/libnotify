@@ -1,3 +1,15 @@
+========================= 0.4.1 =========================
+
+Sat Jun 17 18:17:28 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* Makefile.am:
+	* NEWS:
+	D libnotify.spec.in:
+	* configure.ac:
+	  - Fix make distcheck and remove the old RPM spec file.
+	  - Update the news.
+	  - Bump the version to 0.4.1.
+
 Thu Jun 15 02:14:14 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:

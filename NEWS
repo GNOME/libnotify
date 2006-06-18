@@ -1,6 +1,7 @@
 version 0.4.1:
 	* Added support for attaching to a GtkStatusIcon. Patch by chpe. (Bug #60)
 	* Added GObject properties to NotifyNotification. Patch by chpe. (Bug #60)
+	* Added API documentation, accessible through devhelp.
 	* Fixed up libnotify.pc to support dependencies correctly. (Bug #58)
 	* Fixed notify_uninit() to properly set _initted to FALSE after being
 	  called. (Bug #56)
