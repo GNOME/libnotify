@@ -83,7 +83,9 @@ AC_EXEEXT
 AM_PROG_LIBTOOL
 
 REQ_DBUS_VERSION=0.36
-pkg_modules="gtk+-2.0 >= 2.2.2, glib-2.0 >= 2.2.2, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"
+REQ_GTK_VERSION=2.6
+REQ_GLIB_VERSION=2.6
+pkg_modules="gtk+-2.0 >= $REQ_GTK_VERSION, glib-2.0 >= $REQ_GLIB_VERSION, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"
 AC_SUBST(pkg_modules)
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)

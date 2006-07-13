@@ -1,3 +1,9 @@
+Thu Jul 13 00:44:29 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* configure.ac:
+	  - Patch by compnerd to check for glib 2.6+ during configure, as that
+	    is now required. This closes ticket #69.
+
 Thu Jul 13 00:41:16 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:
