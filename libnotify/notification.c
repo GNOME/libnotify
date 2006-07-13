@@ -901,7 +901,7 @@ _gvalue_array_append_byte_array(GValueArray *array, guchar *bytes, gsize len)
 		return FALSE;
 	}
 
-	g_value_init(value, dbus_g_type_get_collection("GArray", G_TYPE_CHAR));
+	g_value_init(value, DBUS_TYPE_G_UCHAR_ARRAY);
 	g_value_set_boxed_take_ownership(value, byte_array);
 	g_value_array_append(array, value);
 
@@ -961,7 +961,7 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 
 	value = g_new0(GValue, 1);
 	g_value_init(value, G_TYPE_VALUE_ARRAY);
-	g_value_set_boxed(value, image_struct);
+	g_value_set_boxed_take_ownership(value, image_struct);
 
 	g_hash_table_insert(notification->priv->hints,
 						g_strdup("icon_data"), value);

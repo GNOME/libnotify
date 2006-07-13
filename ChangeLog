@@ -1,3 +1,13 @@
+Thu Jul 13 00:41:16 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	* AUTHORS:
+	* configure.ac:
+	  - Patch by mderezynski to send an array of UCHARs as expected by
+	    notification-daemon rather than an array of CHARs. This closes
+	    ticket #68.
+	  - Bump to version 0.4.2.90.
+
 ========================= 0.4.2 =========================
 
 Sat Jun 17 19:17:05 PDT 2006  Christian Hammond <chipx86@chipx86.com>
