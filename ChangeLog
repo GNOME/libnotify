@@ -1,3 +1,11 @@
+Sat Jul 29 03:02:18 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	  - Patch by Ed Catmur to reset a notification's ID if
+	    notify_notification_show() is called on a notification that had
+	    already been closed. This causes the notification to receive a new
+	    ID. This closes ticket #78.
+
 Thu Jul 13 00:44:29 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* configure.ac:
