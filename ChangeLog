@@ -1,3 +1,9 @@
+Mon Jul 31 19:40:10 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	  - Emit the property change notification for "status-icon" and not
+	    "attach-icon". This closes bug #81.
+
 Sat Jul 29 03:02:18 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:

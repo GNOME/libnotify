@@ -631,7 +631,7 @@ notify_notification_attach_to_status_icon(NotifyNotification *notification,
 								  (gpointer)&priv->status_icon);
 	}
 
-	g_object_notify(G_OBJECT(notification), "attach-icon");
+	g_object_notify(G_OBJECT(notification), "status-icon");
 }
 #endif /* HAVE_STATUS_ICON */
 
