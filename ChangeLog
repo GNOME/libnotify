@@ -1,3 +1,11 @@
+Sun Sep 03 23:44:01 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	* NEWS:
+	  - Patch by berndth to stop using g_atexit, as this can fail in the
+	    case of a dynamically loaded module. Applications should now call
+	    notify_uninit() on exit or on plugin unload. This closes bug #86.
+
 Mon Jul 31 19:40:10 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:

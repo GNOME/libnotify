@@ -89,8 +89,6 @@ notify_init(const char *app_name)
 							G_TYPE_UINT, G_TYPE_STRING,
 							G_TYPE_INVALID);
 
-	g_atexit(notify_uninit);
-
 	_initted = TRUE;
 
 	return TRUE;

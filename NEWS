@@ -1,3 +1,17 @@
+version 0.4.3:
+	* Fixed the raw image data support to send the correct array type.
+	  Patch by mderezynski. (Bug #68)
+	* Fixed configure.ac to check for the required version of glib (2.6).
+	  Patch by compnerd. (Bug #69)
+	* Fixed invalid notification IDs when notify_notification_show() is called
+	  on a notification that had already been closed or had expired. Now,
+	  the notification will receive a new ID. Patch by Ed Catmur. (Bug #78)
+	* Fixed the property change notification used when setting a GtkStatusIocn.
+	  It was emitting "attach-icon" but should have been emitted "status-icon".
+	  (Bug #81)
+	* notify_uninit is no longer called automatically at exit. Applications
+	  and libraries should do this manually. Patch by berndth. (Bug #86)
+
 version 0.4.2 (17-June-2006):
 	* Add G_BEGIN_DECLS and G_END_DECLS to notify.h, so that libnotify can
 	  be used in C++ applications properly.
