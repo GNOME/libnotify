@@ -9,6 +9,8 @@ version 0.4.3:
 	* Fixed the property change notification used when setting a GtkStatusIocn.
 	  It was emitting "attach-icon" but should have been emitted "status-icon".
 	  (Bug #81)
+	* Fixed an invalid assertion in notify_notification_new_with_status_icon.
+	  Patch by lucasr. (Bug #85)
 	* notify_uninit is no longer called automatically at exit. Applications
 	  and libraries should do this manually. Patch by berndth. (Bug #86)
 

@@ -502,7 +502,7 @@ notify_notification_new_with_status_icon(const gchar *summary,
                                          const gchar *icon,
                                          GtkStatusIcon *status_icon)
 {
-	g_return_val_if_fail(status_icon == NULL, NULL);
+	g_return_val_if_fail(status_icon != NULL, NULL);
 	g_return_val_if_fail(GTK_IS_STATUS_ICON(status_icon), NULL);
 
 	return g_object_new(NOTIFY_TYPE_NOTIFICATION,

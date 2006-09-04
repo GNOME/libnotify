@@ -1,3 +1,10 @@
+Sun Sep 03 23:48:29 PDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	* NEWS:
+	  - Patch by lucasr to fix an invalid assertion in
+	    notify_notification_new_with_status_icon. This closes bug #85.
+
 Sun Sep 03 23:44:01 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.c:
