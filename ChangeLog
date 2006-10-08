@@ -1,3 +1,12 @@
+========================= 0.4.3 =========================
+
+Sun Oct 08 13:21:20 EDT 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* configure.ac:
+	* NEWS:
+	  - Bump the version to 0.4.3.
+	  - Add the release datestamp.
+
 Sun Sep 03 23:48:29 PDT 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:

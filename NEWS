@@ -1,4 +1,4 @@
-version 0.4.3:
+version 0.4.3 (8-October-2006):
 	* Fixed the raw image data support to send the correct array type.
 	  Patch by mderezynski. (Bug #68)
 	* Fixed configure.ac to check for the required version of glib (2.6).
