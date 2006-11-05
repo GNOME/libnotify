@@ -1,3 +1,9 @@
+Sun Nov 05 11:50:44 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	  - Patch by jylefort to only reset a notification's ID to 0 if it
+	    was the notification closed. This fixes bug #94.
+
 ========================= 0.4.3 =========================
 
 Sun Oct 08 13:21:20 EDT 2006  Christian Hammond <chipx86@chipx86.com>
