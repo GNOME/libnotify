@@ -1,3 +1,9 @@
+Sun Nov 05 11:54:10 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* configure.ac:
+	* NEWS:
+	  - Bump to version 0.4.3.90.
+
 Sun Nov 05 11:50:44 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:

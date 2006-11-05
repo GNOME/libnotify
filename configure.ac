@@ -3,7 +3,7 @@ dnl Process this file with autoconf to create configure.
 dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
-AC_INIT(libnotify, 0.4.3, chipx86@chipx86.com)
+AC_INIT(libnotify, 0.4.3.90, chipx86@chipx86.com)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
 AC_COPYRIGHT([Copyright 2004-2006 Christian Hammond])
@@ -15,7 +15,7 @@ dnl ################################################################
 LIBGALAGO_MAJOR_VERSION=0
 LIBGALAGO_MINOR_VERSION=4
 LIBGALAGO_MICRO_VERSION=3
-LIBGALAGO_DEVEL_VERSION=0
+LIBGALAGO_DEVEL_VERSION=90
 
 LIBGALAGO_VERSION=$LIBGALAGO_MAJOR_VERSION.$LIBGALAGO_MINOR_VERSION.$LIBGALAGO_MICRO_VERSION
 

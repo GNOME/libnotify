@@ -1,3 +1,7 @@
+version 0.4.4:
+	* Fixed a bug where a notification's ID could be reset when a different
+	  notification was closed. Patch by jylefort. (Bug #94)
+
 version 0.4.3 (8-October-2006):
 	* Fixed the raw image data support to send the correct array type.
 	  Patch by mderezynski. (Bug #68)
