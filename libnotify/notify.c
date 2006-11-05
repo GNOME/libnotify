@@ -120,6 +120,9 @@ notify_uninit(void)
 {
 	GList *l;
 
+	if (!_initted)
+		return;
+
 	if (_app_name != NULL)
 	{
 		g_free(_app_name);
@@ -136,6 +139,8 @@ notify_uninit(void)
 			notify_notification_close(n, NULL);
 		}
 	}
+
+	g_object_unref(_proxy);
 
 	_initted = FALSE;
 }

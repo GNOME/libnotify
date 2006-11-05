@@ -1,3 +1,10 @@
+Sun Nov 05 12:06:01 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notify.c:
+	  - Patch by Giacomo Lozito to fix a problem where the dbus proxy was
+	    not being freed on notify_uninit, which led to problems when libnotify
+	    was used in a loadable module. This fixes bug #92.
+
 Sun Nov 05 11:54:10 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* configure.ac:
