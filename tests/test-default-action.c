@@ -37,6 +37,7 @@ static GMainLoop *loop;
 
 static void callback(NotifyNotification *n, const char *action, void *user_data)
 {
+	printf("callback\n");
 	assert (action != NULL);
         assert (strcmp ("default", action) == 0);
 

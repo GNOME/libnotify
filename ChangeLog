@@ -1,3 +1,11 @@
+Mon Nov 13 23:42:07 PST 2006  Christian Hammond <chipx86@chipx86.com>
+
+	* tests/Makefile.am:
+	A tests/test-size-changes.c:
+	* tests/test-default-action.c:
+	  - Added a test program that displays three notifications and then
+	    changes the amount of text in one of them.
+
 Sun Nov 05 12:06:01 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.c:

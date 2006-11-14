@@ -8,6 +8,7 @@ noinst_PROGRAMS = \
 	test-basic \
 	test-error \
 	test-markup \
+	test-size-changes \
 	test-urgency \
 	test-xy \
 	test-xy-actions \
@@ -26,6 +27,9 @@ test_replace_widget_LDADD  = $(common_ldflags)
 
 test_server_info_SOURCES = test-server-info.c
 test_server_info_LDADD   = $(common_ldflags)
+
+test_size_changes_SOURCES = test-size-changes.c
+test_size_changes_LDADD   = $(common_ldflags)
 
 test_default_action_SOURCES = test-default-action.c
 test_default_action_LDADD  = $(common_ldflags)
