@@ -3,6 +3,12 @@ version 0.4.4:
 	  notification was closed. Patch by jylefort. (Bug #94)
 	* Fixed a crash when the D-BUS proxy was not being freed on notify_uninit,
 	  which was problematic when used in a loadable module. (Bug #92)
+	* Fixed a crash when a signal handler for the notification's closed signal
+	  caused the notification to be destroyed. (Bug #116)
+	* Fixed memory leaks when creating notifications. (Bug #112)
+	* Fixed potential memory leaks where the function passed to
+	  notify_notification_add_action to free the user data was not being
+	  called. (Bug #119)
 
 version 0.4.3 (8-October-2006):
 	* Fixed the raw image data support to send the correct array type.
