@@ -856,60 +856,42 @@ notify_notification_set_urgency(NotifyNotification *notification,
 }
 
 #if CHECK_DBUS_VERSION(0, 60)
-static gboolean
+static void
 _gvalue_array_append_int(GValueArray *array, gint i)
 {
-	GValue *value = g_new0(GValue, 1);
+	GValue value = {0};
 
-	if (value == NULL)
-		return FALSE;
-
-	g_value_init(value, G_TYPE_INT);
-	g_value_set_int(value, i);
-	g_value_array_append(array, value);
-
-	return TRUE;
+	g_value_init(&value, G_TYPE_INT);
+	g_value_set_int(&value, i);
+	g_value_array_append(array, &value);
+	g_value_unset(&value);
 }
 
-static gboolean
+static void
 _gvalue_array_append_bool(GValueArray *array, gboolean b)
 {
-	GValue *value = g_new0(GValue, 1);
+	GValue value = {0};
 
-	if (value == NULL)
-		return FALSE;
-
-	g_value_init(value, G_TYPE_BOOLEAN);
-	g_value_set_boolean(value, b);
-	g_value_array_append(array, value);
-
-	return TRUE;
+	g_value_init(&value, G_TYPE_BOOLEAN);
+	g_value_set_boolean(&value, b);
+	g_value_array_append(array, &value);
+	g_value_unset(&value);
 }
 
-static gboolean
+static void
 _gvalue_array_append_byte_array(GValueArray *array, guchar *bytes, gsize len)
 {
 	GArray *byte_array;
-	GValue *value;
+	GValue value = {0};
 
 	byte_array = g_array_sized_new(FALSE, FALSE, sizeof(guchar), len);
-
-	if (byte_array == NULL)
-		return FALSE;
-
+	g_assert(byte_array != NULL);
 	byte_array = g_array_append_vals(byte_array, bytes, len);
 
-	if ((value = g_new0(GValue, 1)) == NULL)
-	{
-		g_array_free(byte_array, TRUE);
-		return FALSE;
-	}
-
-	g_value_init(value, DBUS_TYPE_G_UCHAR_ARRAY);
-	g_value_set_boxed_take_ownership(value, byte_array);
-	g_value_array_append(array, value);
-
-	return TRUE;
+	g_value_init(&value, DBUS_TYPE_G_UCHAR_ARRAY);
+	g_value_set_boxed_take_ownership(&value, byte_array);
+	g_value_array_append(array, &value);
+	g_value_unset(&value);
 }
 #endif /* D-BUS >= 0.60 */
 

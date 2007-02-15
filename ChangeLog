@@ -1,3 +1,10 @@
+Thu Feb 15 02:06:11 PST 2007  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	  - Fix some memory leaks when appending data to a message. Scary,
+	    horrible, traumatizing memory leaks. Actually it's pretty bad,
+	    though, so new release coming up soon. This fixes bug #112.
+
 Thu Feb 15 01:58:52 PST 2007  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/test-image.c:
