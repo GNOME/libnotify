@@ -58,7 +58,7 @@ main(int argc, char *argv[])
 
 	/* Stock icon */
 	n = notify_notification_new("Icon Test", "Testing stock icon",
-								"stock_samples", NULL);
+								"appointment-new", NULL);
 
 	if (!notify_notification_show(n, NULL))
 	{
