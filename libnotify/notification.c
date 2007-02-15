@@ -675,9 +675,10 @@ _close_signal_handler(DBusGProxy *proxy, guint32 id,
 {
 	if (id == notification->priv->id)
 	{
+		g_object_ref(G_OBJECT(notification));
 		g_signal_emit(notification, signals[SIGNAL_CLOSED], 0);
-
 		notification->priv->id = 0;
+		g_object_unref(G_OBJECT(notification));
 	}
 }
 

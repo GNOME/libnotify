@@ -1,3 +1,12 @@
+Thu Feb 15 02:44:16 PST 2007  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	  - Prevent a crash when the handler for a notification's closed signal
+	    removes the last reference to the notification. We attempted to set
+	    the ID of the notification after emitting this signal, but the
+	    notification was destroyed already. So, keep a reference while doing
+	    all this. This fixes bug #116.
+
 Thu Feb 15 02:29:01 PST 2007  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notify.c:
