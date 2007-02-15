@@ -1,3 +1,10 @@
+Thu Feb 15 00:52:56 PST 2007  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	  - Fix a bug in notify_notification_add_action where the function
+	    to free the user data was never called, causing memory leaks.
+	    This fixes bug #119.
+
 Mon Nov 13 23:42:07 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* tests/Makefile.am:

@@ -1195,6 +1195,7 @@ notify_notification_add_action(NotifyNotification *notification,
 	pair = g_new0(CallbackPair, 1);
 	pair->cb = callback;
 	pair->user_data = user_data;
+	pair->free_func = free_func;
 	g_hash_table_insert(priv->action_map, g_strdup(action), pair);
 
 	if (notification->priv->has_nondefault_actions &&
