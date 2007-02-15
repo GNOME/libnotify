@@ -33,12 +33,6 @@ static DBusGProxy *_proxy = NULL;
 static DBusGConnection *_dbus_gconn = NULL;
 static GList *_active_notifications = NULL;
 
-#ifdef __GNUC__
-#  define format_func __attribute__((format(printf, 1, 2)))
-#else /* no format string checking with this compiler */
-#  define format_func
-#endif
-
 /**
  * notify_init:
  * @app_name: The name of the application initializing libnotify.
