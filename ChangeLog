@@ -1,3 +1,11 @@
+========================= 0.4.4 =========================
+
+Tue Feb 27 21:11:36 PST 2007  Christian Hammond <chipx86@chipx86.com>
+
+	* NEWS:
+	* configure.ac:
+	  - Bump to version 0.4.4.
+
 Thu Feb 15 03:10:39 PST 2007  Christian Hammond <chipx86@chipx86.com>
 
 	* NEWS:

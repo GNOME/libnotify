@@ -1,4 +1,4 @@
-version 0.4.4:
+version 0.4.4 (27-February-2007):
 	* Fixed a bug where a notification's ID could be reset when a different
 	  notification was closed. Patch by jylefort. (Bug #94)
 	* Fixed a crash when the D-BUS proxy was not being freed on notify_uninit,
