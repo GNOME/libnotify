@@ -1,3 +1,8 @@
+Sun Apr 29 02:45:20 PDT 2007  Christian Hammond <chipx86@chipx86.com>
+
+	* configure.ac:
+	  - Bump to version 0.4.4.90.
+
 Sun Apr 29 00:39:32 PDT 2007  Christian Hammond <chipx86@chipx86.com>
 
 	* docs/reference/tmpl/notification.sgml:
