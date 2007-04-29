@@ -1,3 +1,10 @@
+Sun Apr 29 00:39:32 PDT 2007  Christian Hammond <chipx86@chipx86.com>
+
+	* docs/reference/tmpl/notification.sgml:
+	* libnotify/notification.c:
+	  - Patch by Lucas Rocha to add GObject property accessors for
+	    notification IDs.
+
 ========================= 0.4.4 =========================
 
 Tue Feb 27 21:11:36 PST 2007  Christian Hammond <chipx86@chipx86.com>

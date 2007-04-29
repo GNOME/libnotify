@@ -1,3 +1,7 @@
+version 0.4.5:
+	* Added GObject property accessors for notification IDs. Patch by Lucas
+	  Rocha.
+
 version 0.4.4 (27-February-2007):
 	* Fixed a bug where a notification's ID could be reset when a different
 	  notification was closed. Patch by jylefort. (Bug #94)

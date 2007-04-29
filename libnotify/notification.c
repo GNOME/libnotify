@@ -100,6 +100,7 @@ enum
 enum
 {
 	PROP_0,
+	PROP_ID,
 	PROP_SUMMARY,
 	PROP_BODY,
 	PROP_ICON_NAME,
@@ -155,6 +156,18 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 					 G_STRUCT_OFFSET(NotifyNotificationClass, closed),
 					 NULL, NULL,
 					 g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+
+	g_object_class_install_property(object_class, PROP_ID,
+		g_param_spec_int("id", "ID",
+		                 "The notification ID",
+		                 0,
+		                 G_MAXINT32,
+		                 0,
+		                 G_PARAM_READWRITE |
+		                 G_PARAM_CONSTRUCT |
+		                 G_PARAM_STATIC_NAME |
+		                 G_PARAM_STATIC_NICK |
+		                 G_PARAM_STATIC_BLURB));
 
 	g_object_class_install_property(object_class, PROP_SUMMARY,
 		g_param_spec_string("summary", "Summary",
@@ -223,6 +236,10 @@ notify_notification_set_property(GObject *object,
 
 	switch (prop_id)
 	{
+		case PROP_ID:
+			priv->id = g_value_get_int(value);
+			break;
+
 		case PROP_SUMMARY:
 			notify_notification_update(notification, g_value_get_string(value),
 									   priv->body, priv->icon_name);
@@ -268,6 +285,10 @@ notify_notification_get_property(GObject *object,
 
 	switch (prop_id)
 	{
+		case PROP_ID:
+			g_value_set_int(value, priv->id);
+			break;
+
 		case PROP_SUMMARY:
 			g_value_set_string(value, priv->summary);
 			break;

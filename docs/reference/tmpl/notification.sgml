@@ -66,6 +66,11 @@ not be used directly. Use the accessor functions below.
 
 </para>
 
+<!-- ##### ARG NotifyNotification:id ##### -->
+<para>
+
+</para>
+
 <!-- ##### ARG NotifyNotification:status-icon ##### -->
 <para>
 
