@@ -1,3 +1,9 @@
+Sat Aug 25 18:25:02 PDT 2007  Christian Hammond <chipx86@chipx86.com>
+
+	* notification-spec.xml:
+	  - Add a spec_version return value for GetServerInformation.
+	  - Bump to version 1.0. It's about time, and things are pretty solid now.
+
 Wed Jan 25 23:45:11 PST 2006  Christian Hammond <chipx86@chipx86.com>
 
 	* notification-spec.xml:

@@ -3,8 +3,8 @@
 <article id="index">
  <articleinfo>
   <title>Desktop Notifications Specification</title>
-  <releaseinfo>Version 0.9</releaseinfo>
-  <date>15 January 2006</date>
+  <releaseinfo>Version 1.0</releaseinfo>
+  <date>25 August 2007</date>
   <authorgroup>
    <author>
     <firstname>Mike</firstname>
@@ -26,6 +26,15 @@
    </author>
   </authorgroup>
   <revhistory>
+   <revision>
+    <revnumber>1.0</revnumber>
+    <date>25 August 2007</date>
+    <authorinitials>cdh</authorinitials>
+    <revremark>
+	 Added spec_version to the GetServerInformation return values.
+	 Mark this specification as a 1.0.
+    </revremark>
+   </revision>
    <revision>
     <revnumber>0.9</revnumber>
     <date>15 January 2006</date>
@@ -1049,6 +1058,7 @@
       <paramdef>out STRING <parameter>name</parameter></paramdef>
       <paramdef>out STRING <parameter>vendor</parameter></paramdef>
       <paramdef>out STRING <parameter>version</parameter></paramdef>
+      <paramdef>out STRING <parameter>spec_version</parameter></paramdef>
      </funcprototype>
     </funcsynopsis>
     <para>
@@ -1083,6 +1093,11 @@
         <entry><parameter>version</parameter></entry>
         <entry>STRING</entry>
         <entry>The server's version number.</entry>
+       </row>
+       <row>
+        <entry><parameter>spec_version</parameter></entry>
+        <entry>STRING</entry>
+        <entry>The specification version the server is compliant with.</entry>
        </row>
       </tbody>
      </tgroup>
