@@ -1,3 +1,9 @@
+Sat Aug 25 18:08:01 PDT 2007  Christian Hammond <chipx86@chipx86.com>
+
+	* tools/notify-send.c:
+	  - Relicense notify-send under the LGPL in order to keep licensing
+	    simple and to allow reuse in more projects. Fixes bug #124.
+
 Sun Apr 29 02:45:20 PDT 2007  Christian Hammond <chipx86@chipx86.com>
 
 	* configure.ac:
