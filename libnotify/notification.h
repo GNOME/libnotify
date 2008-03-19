@@ -63,7 +63,7 @@ struct _NotifyNotificationClass
 	GObjectClass parent_class;
 
 	/* Signals */
-	void (*closed)(NotifyNotification *notification);
+	void (*closed)(NotifyNotification *notification, gint reason);
 };
 
 /*

@@ -46,7 +46,7 @@
 static void notify_notification_class_init(NotifyNotificationClass *klass);
 static void notify_notification_init(NotifyNotification *sp);
 static void notify_notification_finalize(GObject *object);
-static void _close_signal_handler(DBusGProxy *proxy, guint32 id,
+static void _close_signal_handler(DBusGProxy *proxy, guint32 id, guint32 reason,
 								  NotifyNotification *notification);
 
 static void _action_signal_handler(DBusGProxy *proxy, guint32 id,
@@ -155,7 +155,7 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 					 G_SIGNAL_RUN_FIRST,
 					 G_STRUCT_OFFSET(NotifyNotificationClass, closed),
 					 NULL, NULL,
-					 g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+					 g_cclosure_marshal_VOID__UINT, G_TYPE_NONE, 1, G_TYPE_INT);
 
 	g_object_class_install_property(object_class, PROP_ID,
 		g_param_spec_int("id", "ID",
@@ -691,13 +691,13 @@ notify_notification_set_geometry_hints(NotifyNotification *notification,
 }
 
 static void
-_close_signal_handler(DBusGProxy *proxy, guint32 id,
+_close_signal_handler(DBusGProxy *proxy, guint32 id, guint32 reason,
 					  NotifyNotification *notification)
 {
 	if (id == notification->priv->id)
 	{
 		g_object_ref(G_OBJECT(notification));
-		g_signal_emit(notification, signals[SIGNAL_CLOSED], 0);
+		g_signal_emit(notification, signals[SIGNAL_CLOSED], 0, reason);
 		notification->priv->id = 0;
 		g_object_unref(G_OBJECT(notification));
 	}

@@ -1,6 +1,8 @@
 version 0.4.5:
 	* Added GObject property accessors for notification IDs. Patch by Lucas
 	  Rocha.
+	* Added support for sending the closed reason in the "closed" signal
+	  handler. (Ticket #139)
 
 version 0.4.4 (27-February-2007):
 	* Fixed a bug where a notification's ID could be reset when a different

@@ -72,13 +72,19 @@ notify_init(const char *app_name)
 									   NOTIFY_DBUS_CORE_INTERFACE);
 	dbus_g_connection_unref(bus);
 
+	dbus_g_object_register_marshaller(notify_marshal_VOID__UINT_UINT,
+									  G_TYPE_NONE,
+									  G_TYPE_UINT,
+									  G_TYPE_UINT, G_TYPE_INVALID);
+
 	dbus_g_object_register_marshaller(notify_marshal_VOID__UINT_STRING,
 									  G_TYPE_NONE,
 									  G_TYPE_UINT,
 									  G_TYPE_STRING, G_TYPE_INVALID);
 
 	dbus_g_proxy_add_signal(_proxy, "NotificationClosed",
-							G_TYPE_UINT, G_TYPE_INVALID);
+							G_TYPE_UINT, G_TYPE_UINT, 
+							G_TYPE_INVALID);
 	dbus_g_proxy_add_signal(_proxy, "ActionInvoked",
 							G_TYPE_UINT, G_TYPE_STRING,
 							G_TYPE_INVALID);
