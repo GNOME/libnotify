@@ -62,7 +62,7 @@ struct _NotifyNotificationClass
 	GObjectClass parent_class;
 
 	/* Signals */
-	void (*closed)(NotifyNotification *notification, gint reason);
+	void (*closed)(NotifyNotification *notification);
 };
 
 /*
@@ -154,6 +154,9 @@ void notify_notification_add_action(NotifyNotification *notification,
 void notify_notification_clear_actions(NotifyNotification *notification);
 gboolean notify_notification_close(NotifyNotification *notification,
 								   GError **error);
+
+gint notify_notification_get_closed_reason(
+	const NotifyNotification *notification);
 
 G_END_DECLS
 

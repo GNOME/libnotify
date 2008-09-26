@@ -90,6 +90,8 @@ struct _NotifyNotificationPrivate
 	gboolean has_nondefault_actions;
 	gboolean updates_pending;
 	gboolean signals_registered;
+
+	gint closed_reason;
 };
 
 enum
@@ -106,7 +108,8 @@ enum
 	PROP_BODY,
 	PROP_ICON_NAME,
 	PROP_ATTACH_WIDGET,
-	PROP_STATUS_ICON
+	PROP_STATUS_ICON,
+	PROP_CLOSED_REASON
 };
 
 static void notify_notification_set_property(GObject *object, guint prop_id,
@@ -224,6 +227,17 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 							G_PARAM_STATIC_NICK |
 							G_PARAM_STATIC_BLURB));
 #endif /* HAVE_STATUS_ICON */
+
+	g_object_class_install_property(object_class, PROP_CLOSED_REASON,
+		g_param_spec_int("closed-reason", "Closed Reason",
+		                 "The reason code for why the notification was closed",
+		                 -1,
+		                 G_MAXINT32,
+		                 -1,
+		                 G_PARAM_READABLE |
+		                 G_PARAM_STATIC_NAME |
+		                 G_PARAM_STATIC_NICK |
+		                 G_PARAM_STATIC_BLURB));
 }
 
 static void
@@ -312,6 +326,10 @@ notify_notification_get_property(GObject *object,
 			break;
 #endif
 
+		case PROP_CLOSED_REASON:
+			g_value_set_int(value, priv->closed_reason);
+			break;
+
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
 			break;
@@ -339,6 +357,7 @@ notify_notification_init(NotifyNotification *obj)
 {
 	obj->priv = g_new0(NotifyNotificationPrivate, 1);
 	obj->priv->timeout = NOTIFY_EXPIRES_DEFAULT;
+	obj->priv->closed_reason = -1;
 	obj->priv->hints = g_hash_table_new_full(g_str_hash, g_str_equal,
 											 g_free,
 											 (GFreeFunc)_g_value_free);
@@ -717,7 +736,8 @@ _close_signal_handler(DBusGProxy *proxy, guint32 id, guint32 reason,
 	if (id == notification->priv->id)
 	{
 		g_object_ref(G_OBJECT(notification));
-		g_signal_emit(notification, signals[SIGNAL_CLOSED], 0, reason);
+		notification->priv->closed_reason = reason;
+		g_signal_emit(notification, signals[SIGNAL_CLOSED], 0);
 		notification->priv->id = 0;
 		g_object_unref(G_OBJECT(notification));
 	}
@@ -1298,4 +1318,22 @@ notify_notification_close(NotifyNotification *notification,
 	}
 
 	return TRUE;
+}
+
+/**
+ * notify_notification_get_closed_reason:
+ * @notification: The notification.
+ *
+ * Returns the closed reason code for the notification. This is valid only
+ * after the "closed" signal is emitted.
+ *
+ * Returns: The closed reason code.
+ */
+gint
+notify_notification_get_closed_reason(const NotifyNotification *notification)
+{
+	g_return_val_if_fail(notification != NULL, -1);
+	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), -1);
+
+	return notification->priv->closed_reason;
 }

@@ -1,3 +1,13 @@
+Thu Sep 25 18:45:41 PDT 2008  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.c:
+	* libnotify/notification.h:
+	  - Prevent a backwards-compatibility breakage introduced where the
+	    "reason" code was added to the "closed" signal. This meant that
+	    existing signal handlers that passed extra data would break. We now
+	    require that you call notify_notification_get_closed_reason() to get
+	    this data.
+
 Thu Sep 25 18:05:38 PDT 2008  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.h:
