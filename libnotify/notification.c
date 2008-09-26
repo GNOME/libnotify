@@ -159,7 +159,7 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 					 G_SIGNAL_RUN_FIRST,
 					 G_STRUCT_OFFSET(NotifyNotificationClass, closed),
 					 NULL, NULL,
-					 g_cclosure_marshal_VOID__UINT, G_TYPE_NONE, 1, G_TYPE_INT);
+					 g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
 	g_object_class_install_property(object_class, PROP_ID,
 		g_param_spec_int("id", "ID",
