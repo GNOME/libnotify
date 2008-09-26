@@ -1,3 +1,10 @@
+Thu Sep 25 18:05:38 PDT 2008  Christian Hammond <chipx86@chipx86.com>
+
+	* libnotify/notification.h:
+	* NEWS:
+	  - Fixed a breakage where we were including gtkversion.h directly.
+	    Reported by Richard Hughes.
+
 Tue Mar 18 21:51:32 PDT 2008  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:

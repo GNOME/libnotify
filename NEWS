@@ -3,6 +3,7 @@ version 0.4.5:
 	  Rocha.
 	* Added support for sending the closed reason in the "closed" signal
 	  handler. (Ticket #139)
+	* Fixed a breakage where we were including gtkversion.h directly.
 
 version 0.4.4 (27-February-2007):
 	* Fixed a bug where a notification's ID could be reset when a different
