@@ -127,6 +127,8 @@ void notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 
 void notify_notification_set_hint_int32(NotifyNotification *notification,
 										const gchar *key, gint value);
+void notify_notification_set_hint_uint32(NotifyNotification *notification,
+										const gchar *key, guint value);
 
 void notify_notification_set_hint_double(NotifyNotification *notification,
 										 const gchar *key, gdouble value);

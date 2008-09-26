@@ -31,6 +31,7 @@
 # define HAVE_STATUS_ICON
 # include <gtk/gtkstatusicon.h>
 #endif
+#include <gdk/gdkx.h>
 
 #define CHECK_DBUS_VERSION(major, minor) \
 	(DBUS_MAJOR_VER > (major) || \
@@ -396,6 +397,13 @@ notify_notification_finalize(GObject *object)
 	G_OBJECT_CLASS(parent_class)->finalize(object);
 }
 
+static GtkWidget *
+get_internal_tray_icon (GtkStatusIcon *status) 
+{
+	/* This function is a temporary hack */
+	return GTK_WIDGET (*((GtkWidget**)(status->priv)));	
+}
+
 static void
 _notify_notification_update_applet_hints(NotifyNotification *n)
 {
@@ -407,6 +415,18 @@ _notify_notification_update_applet_hints(NotifyNotification *n)
 	if (priv->status_icon != NULL)
 	{
 		GdkRectangle rect;
+		GtkWidget *internal_tray = get_internal_tray_icon (priv->status_icon);
+		GdkWindow *window;
+
+		// TODO: this is sort of a hack, but we need a window ID to send along
+		gtk_widget_realize (internal_tray);
+		window = internal_tray->window;
+
+		if (window != NULL)
+		{
+			guint32 xid = GDK_WINDOW_XID (window);
+			notify_notification_set_hint_uint32(n, "window-xid", xid);
+		}
 
 		if (!gtk_status_icon_get_geometry(priv->status_icon, &screen,
 										  &rect, NULL))
@@ -999,6 +1019,32 @@ notify_notification_set_hint_int32(NotifyNotification *notification,
 	hint_value = g_new0(GValue, 1);
 	g_value_init(hint_value, G_TYPE_INT);
 	g_value_set_int(hint_value, value);
+	g_hash_table_insert(notification->priv->hints,
+						g_strdup(key), hint_value);
+}
+
+
+/**
+ * notify_notification_set_hint_uint32:
+ * @notification: The notification.
+ * @key: The hint.
+ * @value: The hint's value.
+ *
+ * Sets a hint with an unsigned 32-bit integer value.
+ */
+void
+notify_notification_set_hint_uint32(NotifyNotification *notification,
+                                    const gchar *key, guint value)
+{
+	GValue *hint_value;
+
+	g_return_if_fail(notification != NULL);
+	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
+	g_return_if_fail(key != NULL && *key != '\0');
+
+	hint_value = g_new0(GValue, 1);
+	g_value_init(hint_value, G_TYPE_UINT);
+	g_value_set_uint(hint_value, value);
 	g_hash_table_insert(notification->priv->hints,
 						g_strdup(key), hint_value);
 }
