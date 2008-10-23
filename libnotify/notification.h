@@ -76,7 +76,9 @@ typedef enum
 
 } NotifyUrgency;
 
-typedef void (*NotifyActionCallback)(NotifyNotification *, gchar *, gpointer);
+typedef void (*NotifyActionCallback)(NotifyNotification *notification,
+									 gchar *action,
+									 gpointer user_data);
 
 #define NOTIFY_ACTION_CALLBACK(func) ((NotifyActionCallback)(func))
 
