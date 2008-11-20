@@ -1,3 +1,13 @@
+========================= 0.4.5 =========================
+
+Thu Nov 20 03:16:53 PST 2008  Christian Hammond <chipx86@chipx86.com>
+
+	* docs/reference/tmpl/notification.sgml:
+	* ChangeLog:
+	* configure.ac:
+	* NEWS:
+	  - Bump to version 0.4.5.
+
 Thu Sep 25 18:45:41 PDT 2008  Christian Hammond <chipx86@chipx86.com>
 
 	* libnotify/notification.c:

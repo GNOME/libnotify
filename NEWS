@@ -1,4 +1,4 @@
-version 0.4.5:
+version 0.4.5 (20-November-2008):
 	* Added GObject property accessors for notification IDs. Patch by Lucas
 	  Rocha.
 	* Added support for sending the closed reason in the "closed" signal

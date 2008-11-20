@@ -3,10 +3,10 @@ dnl Process this file with autoconf to create configure.
 dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
-AC_INIT(libnotify, 0.4.4.90, chipx86@chipx86.com)
+AC_INIT(libnotify, 0.4.5, chipx86@chipx86.com)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
-AC_COPYRIGHT([Copyright 2004-2006 Christian Hammond])
+AC_COPYRIGHT([Copyright 2004-2008 Christian Hammond])
 
 
 dnl ################################################################
@@ -14,8 +14,8 @@ dnl # Version information
 dnl ################################################################
 LIBGALAGO_MAJOR_VERSION=0
 LIBGALAGO_MINOR_VERSION=4
-LIBGALAGO_MICRO_VERSION=4
-LIBGALAGO_DEVEL_VERSION=90
+LIBGALAGO_MICRO_VERSION=5
+LIBGALAGO_DEVEL_VERSION=0
 
 LIBGALAGO_VERSION=$LIBGALAGO_MAJOR_VERSION.$LIBGALAGO_MINOR_VERSION.$LIBGALAGO_MICRO_VERSION
 
@@ -43,7 +43,7 @@ dnl #
 dnl # CURRENT : REVISION : AGE
 dnl #
 LT_CURRENT=2
-LT_REVISION=2
+LT_REVISION=3
 LT_AGE=1
 
 LT_RELEASE=$LIBGALAGO_MAJOR_VERSION.$LIBGALAGO_MINOR_VERSION.$LIBGALAGO_MICRO_VERSION
@@ -82,7 +82,7 @@ AC_EXEEXT
 
 AM_PROG_LIBTOOL
 
-REQ_DBUS_VERSION=0.36
+REQ_DBUS_VERSION=0.76
 REQ_GTK_VERSION=2.6
 REQ_GLIB_VERSION=2.6
 pkg_modules="gtk+-2.0 >= $REQ_GTK_VERSION, glib-2.0 >= $REQ_GLIB_VERSION, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"

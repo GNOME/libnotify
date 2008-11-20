@@ -61,6 +61,11 @@ not be used directly. Use the accessor functions below.
 
 </para>
 
+<!-- ##### ARG NotifyNotification:closed-reason ##### -->
+<para>
+
+</para>
+
 <!-- ##### ARG NotifyNotification:icon-name ##### -->
 <para>
 
@@ -98,6 +103,10 @@ The urgency level of the notification.
 An action callback function.
 </para>
 
+@notification: 
+@action: 
+@user_data: 
+<!-- # Unused Parameters # -->
 @Param1: The notification.
 @Param2: The action ID.
 @Param3: User data.
