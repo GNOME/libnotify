@@ -1,67 +1,22 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
 
-DIE=0
+srcdir=`dirname $0`
+test -z "$srcdir" && srcdir=.
 
-PACKAGE=libnotify
+PKG_NAME="libnotify"
+REQUIRED_AUTOMAKE_VERSION=1.9
 
-echo "Generating configuration files for $PACKAGE, please wait..."
-
-(autoconf --version) < /dev/null > /dev/null 2>&1 || {
-	echo
-	echo "You must have autoconf installed to compile $PACKAGE."
-	echo "Download the appropriate package for your distribution,"
-	echo "or get the source tarball at ftp://ftp.gnu.org/pub/gnu/"
-	DIE=1
+(test -f $srcdir/configure.ac \
+  && test -d $srcdir/libnotify) || {
+    echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
+    echo " top-level $PKG_NAME directory"
+    exit 1
 }
 
-(libtool --version) < /dev/null > /dev/null 2>&1 || {
-	echo
-	echo "You must have libtool installed to compile $PACKAGE."
-	echo "Download the appropriate package for your distribution,"
-	echo "or get the source tarball at ftp://ftp.gnu.org/pub/gnu/"
-	DIE=1
+which gnome-autogen.sh || {
+    echo "You need to install gnome-common."
+    exit 1
 }
 
-(automake --version) < /dev/null > /dev/null 2>&1 || {
-	echo
-	echo "You must have automake installed to compile $PACKAGE."
-	echo "Download the appropriate package for your distribution,"
-	echo "or get the source tarball at ftp://ftp.gnu.org/pub/gnu/"
-	DIE=1
-}
-
-(gtkdocize --version) < /dev/null > /dev/null 2>&1 || {
-	echo
-	echo "You must have gtkdocize installed to compile $PACKAGE."
-	echo "Download the appropriate package for your distribution,"
-	echo "or get the source tarball at ftp://ftp.gnome.org/pub/gnome/sources/gtk-doc"
-}
-
-[ $DIE -eq 1 ] && exit 1;
-
-echo "  libtoolize --copy --force"
-libtoolize --copy --force
-echo "  aclocal $ACLOCAL_FLAGS"
-aclocal $ACLOCAL_FLAGS
-echo "  gtkdocize"
-gtkdocize
-echo "  autoheader"
-autoheader
-echo "  automake --add-missing"
-automake --add-missing
-echo "  autoconf"
-autoconf
-
-if [ -x config.status -a -z "$*" ]; then
-	./config.status --recheck
-else
-	if test -z "$*"; then
-		echo "I am going to run ./configure with no arguments - if you wish"
-		echo "to pass any to it, please specify them on the $0  command line."
-		echo "If you do not wish to run ./configure, press  Ctrl-C now."
-		trap 'echo "configure aborted" ; exit 0' 1 2 15
-		sleep 1
-	fi
-	./configure "$@";
-fi
+. gnome-autogen.sh
