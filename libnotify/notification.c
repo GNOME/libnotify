@@ -1263,8 +1263,8 @@ notify_notification_add_action(NotifyNotification *notification,
 	pair->free_func = free_func;
 	g_hash_table_insert(priv->action_map, g_strdup(action), pair);
 
-	if (notification->priv->has_nondefault_actions &&
-		g_ascii_strcasecmp(action, "default"))
+	if (!notification->priv->has_nondefault_actions &&
+	    g_ascii_strcasecmp(action, "default") != 0)
 	{
 		notification->priv->has_nondefault_actions = TRUE;
 	}
