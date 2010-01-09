@@ -45,8 +45,7 @@ NotifyNotification *n;
 int
 main(int argc, char *argv[])
 {
-	char file[PATH_MAX];
-	int size;
+	char *file;
 	char *uri;
 	GdkPixbuf *icon;
 	GtkWidget *helper;
@@ -68,10 +67,10 @@ main(int argc, char *argv[])
 
 	g_object_unref(G_OBJECT(n));
 
-	size = readlink("/proc/self/cwd", file, PATH_MAX - 1);
-	file[size] = '\0';
+	file = g_get_current_dir();
 	uri = g_strdup_printf("file://%s/%s", file, "applet-critical.png");
 
+	g_free(file);
 	printf("sending %s\n", uri);
 
 	/* URIs */
