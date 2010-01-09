@@ -1,4 +1,5 @@
-/**
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file libnotify/notification.c Notification object
  *
  * @Copyright (C) 2006 Christian Hammond
@@ -26,10 +27,9 @@
 #include <libnotify/notify.h>
 #include <libnotify/internal.h>
 
-#include <gtk/gtkversion.h>
+#include <gtk/gtk.h>
 #if GTK_CHECK_VERSION(2, 9, 2)
 # define HAVE_STATUS_ICON
-# include <gtk/gtkstatusicon.h>
 #endif
 #include <gdk/gdkx.h>
 
