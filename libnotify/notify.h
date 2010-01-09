@@ -1,4 +1,5 @@
-/**
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file libnotify/notify.h Notifications library
  *
  * @Copyright (C) 2004-2006 Christian Hammond
@@ -80,9 +81,9 @@ GList *notify_get_server_caps(void);
  * @return TRUE if the call succeeded, or FALSE if there were errors.
  */
 gboolean notify_get_server_info(char **ret_name,
-								char **ret_vendor,
-								char **ret_version,
-								char **ret_spec_version);
+				char **ret_vendor,
+				char **ret_version,
+				char **ret_spec_version);
 
 G_END_DECLS
 

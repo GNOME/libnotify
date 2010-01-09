@@ -1,4 +1,5 @@
-/**
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file libnotify/notify.c Notifications library
  *
  * @Copyright (C) 2004-2006 Christian Hammond <chipx86@chipx86.com>
@@ -67,27 +68,27 @@ notify_init(const char *app_name)
 	}
 
 	_proxy = dbus_g_proxy_new_for_name(bus,
-									   NOTIFY_DBUS_NAME,
-									   NOTIFY_DBUS_CORE_OBJECT,
-									   NOTIFY_DBUS_CORE_INTERFACE);
+					   NOTIFY_DBUS_NAME,
+					   NOTIFY_DBUS_CORE_OBJECT,
+					   NOTIFY_DBUS_CORE_INTERFACE);
 	dbus_g_connection_unref(bus);
 
 	dbus_g_object_register_marshaller(notify_marshal_VOID__UINT_UINT,
-									  G_TYPE_NONE,
-									  G_TYPE_UINT,
-									  G_TYPE_UINT, G_TYPE_INVALID);
+					  G_TYPE_NONE,
+					  G_TYPE_UINT,
+					  G_TYPE_UINT, G_TYPE_INVALID);
 
 	dbus_g_object_register_marshaller(notify_marshal_VOID__UINT_STRING,
-									  G_TYPE_NONE,
-									  G_TYPE_UINT,
-									  G_TYPE_STRING, G_TYPE_INVALID);
+					  G_TYPE_NONE,
+					  G_TYPE_UINT,
+					  G_TYPE_STRING, G_TYPE_INVALID);
 
 	dbus_g_proxy_add_signal(_proxy, "NotificationClosed",
-							G_TYPE_UINT, G_TYPE_UINT, 
-							G_TYPE_INVALID);
+				G_TYPE_UINT, G_TYPE_UINT,
+				G_TYPE_INVALID);
 	dbus_g_proxy_add_signal(_proxy, "ActionInvoked",
-							G_TYPE_UINT, G_TYPE_STRING,
-							G_TYPE_INVALID);
+				G_TYPE_UINT, G_TYPE_STRING,
+				G_TYPE_INVALID);
 
 	_initted = TRUE;
 
@@ -188,8 +189,8 @@ notify_get_server_caps(void)
 	g_return_val_if_fail(proxy != NULL, NULL);
 
 	if (!dbus_g_proxy_call(proxy, "GetCapabilities", &error,
-						   G_TYPE_INVALID,
-						   G_TYPE_STRV, &caps, G_TYPE_INVALID))
+			       G_TYPE_INVALID,
+			       G_TYPE_STRV, &caps, G_TYPE_INVALID))
 	{
 		g_message("GetCapabilities call failed: %s", error->message);
 		g_error_free(error);
@@ -222,8 +223,10 @@ notify_get_server_caps(void)
  *          on failure.
  */
 gboolean
-notify_get_server_info(char **ret_name, char **ret_vendor,
-					   char **ret_version, char **ret_spec_version)
+notify_get_server_info(char **ret_name,
+		       char **ret_vendor,
+		       char **ret_version,
+		       char **ret_spec_version)
 {
 	GError *error = NULL;
 	DBusGProxy *proxy = _notify_get_g_proxy();
@@ -232,12 +235,12 @@ notify_get_server_info(char **ret_name, char **ret_vendor,
 	g_return_val_if_fail(proxy != NULL, FALSE);
 
 	if (!dbus_g_proxy_call(proxy, "GetServerInformation", &error,
-						   G_TYPE_INVALID,
-						   G_TYPE_STRING, &name,
-						   G_TYPE_STRING, &vendor,
-						   G_TYPE_STRING, &version,
-						   G_TYPE_STRING, &spec_version,
-						   G_TYPE_INVALID))
+			       G_TYPE_INVALID,
+			       G_TYPE_STRING, &name,
+			       G_TYPE_STRING, &vendor,
+			       G_TYPE_STRING, &version,
+			       G_TYPE_STRING, &spec_version,
+			       G_TYPE_INVALID))
 	{
 		g_message("GetServerInformation call failed: %s", error->message);
 		return FALSE;

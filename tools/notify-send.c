@@ -1,4 +1,5 @@
-/**
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file notify-send.c A tool for sending notifications.
  *
  * Copyright (C) 2004 Christian Hammond.
@@ -34,9 +35,9 @@ static NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
 
 static gboolean
 g_option_arg_urgency_cb(const gchar *option_name,
-						const gchar *value,
-						gpointer data,
-						GError **error)
+			const gchar *value,
+			gpointer data,
+			GError **error)
 {
 	if (value != NULL)
 	{
@@ -49,10 +50,10 @@ g_option_arg_urgency_cb(const gchar *option_name,
 		else
 		{
 			*error = g_error_new(G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
-								 N_("Unknown urgency %s specified. "
-									"Known urgency levels: low, "
-									"normal, critical."),
-								 value);
+					     N_("Unknown urgency %s specified. "
+						"Known urgency levels: low, "
+						"normal, critical."),
+					     value);
 
 			return FALSE;
 		}
@@ -63,8 +64,10 @@ g_option_arg_urgency_cb(const gchar *option_name,
 
 static gboolean
 notify_notification_set_hint_variant(NotifyNotification *notification,
-									 const gchar *type, const gchar *key,
-									 const gchar *value, GError **error)
+				     const gchar *type,
+				     const gchar *key,
+				     const gchar *value,
+				     GError **error)
 {
 	static gboolean conv_error = FALSE;
 	if (!strcasecmp(type, "string"))
@@ -100,24 +103,26 @@ notify_notification_set_hint_variant(NotifyNotification *notification,
 		else
 		{
 			notify_notification_set_hint_byte(notification, key,
-											  (guchar)h_byte);
+							  (guchar)h_byte);
 		}
 	}
 	else
 	{
-		*error = g_error_new(G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
-							 N_("Invalid hint type \"%s\". Valid types "
-								"are int, double, string and byte."),
-							 type);
+		*error = g_error_new(G_OPTION_ERROR,
+				     G_OPTION_ERROR_BAD_VALUE,
+				     N_("Invalid hint type \"%s\". Valid types "
+					"are int, double, string and byte."),
+				     type);
 		return FALSE;
 	}
 
 	if (conv_error)
 	{
-		*error = g_error_new(G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
-							 N_("Value \"%s\" of hint \"%s\" could not be "
-								"parsed as type \"%s\"."),
-							 value, key, type);
+		*error = g_error_new(G_OPTION_ERROR,
+				     G_OPTION_ERROR_BAD_VALUE,
+				     N_("Value \"%s\" of hint \"%s\" could not be "
+					"parsed as type \"%s\"."),
+				     value, key, type);
 		return FALSE;
 	}
 
@@ -172,7 +177,7 @@ main(int argc, char *argv[])
 	g_set_prgname(argv[0]);
 
 	opt_ctx = g_option_context_new(N_("<SUMMARY> [BODY] - "
-									  "create a notification"));
+					  "create a notification"));
 	g_option_context_add_main_entries(opt_ctx, entries, GETTEXT_PACKAGE);
 	retval = g_option_context_parse(opt_ctx, &argc, &argv, &error);
 	g_option_context_free(opt_ctx);
@@ -245,14 +250,13 @@ main(int argc, char *argv[])
 			if (l != 3)
 			{
 				fprintf(stderr, "%s\n",
-						N_("Invalid hint syntax specified. "
-						   "Use TYPE:NAME:VALUE."));
+					N_("Invalid hint syntax specified. "
+					   "Use TYPE:NAME:VALUE."));
 				hint_error = TRUE;
 			}
 			else
 			{
-				retval = notify_notification_set_hint_variant(
-					notify, tokens[0], tokens[1], tokens[2], &error);
+				retval = notify_notification_set_hint_variant(notify, tokens[0], tokens[1], tokens[2], &error);
 
 				if (!retval)
 				{

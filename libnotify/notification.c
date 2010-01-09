@@ -48,11 +48,11 @@ static void notify_notification_class_init(NotifyNotificationClass *klass);
 static void notify_notification_init(NotifyNotification *sp);
 static void notify_notification_finalize(GObject *object);
 static void _close_signal_handler(DBusGProxy *proxy, guint32 id, guint32 reason,
-								  NotifyNotification *notification);
+				  NotifyNotification *notification);
 
 static void _action_signal_handler(DBusGProxy *proxy, guint32 id,
-								   gchar *action,
-								   NotifyNotification *notification);
+				   gchar *action,
+				   NotifyNotification *notification);
 
 typedef struct
 {
@@ -113,10 +113,10 @@ enum
 };
 
 static void notify_notification_set_property(GObject *object, guint prop_id,
-											 const GValue *value,
-											 GParamSpec *pspec);
+					     const GValue *value,
+					     GParamSpec *pspec);
 static void notify_notification_get_property(GObject *object, guint prop_id,
-											 GValue *value, GParamSpec *pspec);
+					     GValue *value, GParamSpec *pspec);
 static guint signals[LAST_SIGNAL] = { 0 };
 static GObjectClass *parent_class = NULL;
 
@@ -124,11 +124,11 @@ G_DEFINE_TYPE(NotifyNotification, notify_notification, G_TYPE_OBJECT)
 
 static GObject *
 notify_notification_constructor(GType type,
-								guint n_construct_properties,
-								GObjectConstructParam *construct_params)
+				guint n_construct_properties,
+				GObjectConstructParam *construct_params)
 {
 	GObject *object = parent_class->constructor(type, n_construct_properties,
-												construct_params);
+						    construct_params);
 
 	_notify_cache_add_notification(NOTIFY_NOTIFICATION(object));
 
@@ -155,11 +155,11 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 	 */
 	signals[SIGNAL_CLOSED] =
 		g_signal_new("closed",
-					 G_TYPE_FROM_CLASS(object_class),
-					 G_SIGNAL_RUN_FIRST,
-					 G_STRUCT_OFFSET(NotifyNotificationClass, closed),
-					 NULL, NULL,
-					 g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+			     G_TYPE_FROM_CLASS(object_class),
+			     G_SIGNAL_RUN_FIRST,
+			     G_STRUCT_OFFSET(NotifyNotificationClass, closed),
+			     NULL, NULL,
+			     g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
 	g_object_class_install_property(object_class, PROP_ID,
 		g_param_spec_int("id", "ID",
@@ -175,57 +175,57 @@ notify_notification_class_init(NotifyNotificationClass *klass)
 
 	g_object_class_install_property(object_class, PROP_SUMMARY,
 		g_param_spec_string("summary", "Summary",
-							"The summary text",
-							NULL,
-							G_PARAM_READWRITE |
-							G_PARAM_CONSTRUCT |
-							G_PARAM_STATIC_NAME |
-							G_PARAM_STATIC_NICK |
-							G_PARAM_STATIC_BLURB));
+				    "The summary text",
+				    NULL,
+				    G_PARAM_READWRITE |
+				    G_PARAM_CONSTRUCT |
+				    G_PARAM_STATIC_NAME |
+				    G_PARAM_STATIC_NICK |
+				    G_PARAM_STATIC_BLURB));
 
 	g_object_class_install_property(object_class, PROP_BODY,
 		g_param_spec_string("body", "Message Body",
-							"The message body text",
-							NULL,
-							G_PARAM_READWRITE |
-							G_PARAM_CONSTRUCT |
-							G_PARAM_STATIC_NAME |
-							G_PARAM_STATIC_NICK |
-							G_PARAM_STATIC_BLURB));
+				    "The message body text",
+				    NULL,
+				    G_PARAM_READWRITE |
+				    G_PARAM_CONSTRUCT |
+				    G_PARAM_STATIC_NAME |
+				    G_PARAM_STATIC_NICK |
+				    G_PARAM_STATIC_BLURB));
 
 	g_object_class_install_property(object_class, PROP_ICON_NAME,
 		g_param_spec_string("icon-name",
-							"Icon Name",
-							"The icon filename or icon theme-compliant name",
-							NULL,
-							G_PARAM_READWRITE |
-							G_PARAM_CONSTRUCT |
-							G_PARAM_STATIC_NAME |
-							G_PARAM_STATIC_NICK |
-							G_PARAM_STATIC_BLURB));
+				    "Icon Name",
+				    "The icon filename or icon theme-compliant name",
+				    NULL,
+				    G_PARAM_READWRITE |
+				    G_PARAM_CONSTRUCT |
+				    G_PARAM_STATIC_NAME |
+				    G_PARAM_STATIC_NICK |
+				    G_PARAM_STATIC_BLURB));
 
 	g_object_class_install_property(object_class, PROP_ATTACH_WIDGET,
 		g_param_spec_object("attach-widget",
-							"Attach Widget",
-							"The widget to attach the notification to",
-							GTK_TYPE_WIDGET,
-							G_PARAM_READWRITE |
-							G_PARAM_CONSTRUCT |
-							G_PARAM_STATIC_NAME |
-							G_PARAM_STATIC_NICK |
-							G_PARAM_STATIC_BLURB));
+				    "Attach Widget",
+				    "The widget to attach the notification to",
+				    GTK_TYPE_WIDGET,
+				    G_PARAM_READWRITE |
+				    G_PARAM_CONSTRUCT |
+				    G_PARAM_STATIC_NAME |
+				    G_PARAM_STATIC_NICK |
+				    G_PARAM_STATIC_BLURB));
 
 #ifdef HAVE_STATUS_ICON
 	g_object_class_install_property(object_class, PROP_STATUS_ICON,
 		g_param_spec_object("status-icon",
-							"Status Icon",
-							"The status icon to attach the notification to",
-							GTK_TYPE_STATUS_ICON,
-							G_PARAM_READWRITE |
-							G_PARAM_CONSTRUCT |
-							G_PARAM_STATIC_NAME |
-							G_PARAM_STATIC_NICK |
-							G_PARAM_STATIC_BLURB));
+				    "Status Icon",
+				    "The status icon to attach the notification to",
+				    GTK_TYPE_STATUS_ICON,
+				    G_PARAM_READWRITE |
+				    G_PARAM_CONSTRUCT |
+				    G_PARAM_STATIC_NAME |
+				    G_PARAM_STATIC_NICK |
+				    G_PARAM_STATIC_BLURB));
 #endif /* HAVE_STATUS_ICON */
 
 	g_object_class_install_property(object_class, PROP_CLOSED_REASON,
@@ -257,18 +257,18 @@ notify_notification_set_property(GObject *object,
 
 		case PROP_SUMMARY:
 			notify_notification_update(notification, g_value_get_string(value),
-									   priv->body, priv->icon_name);
+						   priv->body, priv->icon_name);
 			break;
 
 		case PROP_BODY:
 			notify_notification_update(notification, priv->summary,
-									   g_value_get_string(value),
-									   priv->icon_name);
+						   g_value_get_string(value),
+						   priv->icon_name);
 			break;
 
 		case PROP_ICON_NAME:
 			notify_notification_update(notification, priv->summary,
-									   priv->body, g_value_get_string(value));
+						   priv->body, g_value_get_string(value));
 			break;
 
 		case PROP_ATTACH_WIDGET:
@@ -359,12 +359,12 @@ notify_notification_init(NotifyNotification *obj)
 	obj->priv->timeout = NOTIFY_EXPIRES_DEFAULT;
 	obj->priv->closed_reason = -1;
 	obj->priv->hints = g_hash_table_new_full(g_str_hash, g_str_equal,
-											 g_free,
-											 (GFreeFunc)_g_value_free);
+						 g_free,
+						 (GFreeFunc)_g_value_free);
 
 	obj->priv->action_map = g_hash_table_new_full(g_str_hash, g_str_equal,
-												  g_free,
-												  (GFreeFunc)destroy_pair);
+						      g_free,
+						      (GFreeFunc)destroy_pair);
 }
 
 static void
@@ -398,17 +398,17 @@ notify_notification_finalize(GObject *object)
 #ifdef HAVE_STATUS_ICON
     if (priv->status_icon != NULL)
         g_object_remove_weak_pointer(G_OBJECT(priv->status_icon),
-								     (gpointer)&priv->status_icon);
+				     (gpointer)&priv->status_icon);
 #endif
 
 	if (priv->signals_registered)
 	{
 		dbus_g_proxy_disconnect_signal(proxy, "NotificationClosed",
-									   G_CALLBACK(_close_signal_handler),
-									   object);
+					       G_CALLBACK(_close_signal_handler),
+					       object);
 		dbus_g_proxy_disconnect_signal(proxy, "ActionInvoked",
-									   G_CALLBACK(_action_signal_handler),
-									   object);
+					       G_CALLBACK(_action_signal_handler),
+					       object);
 	}
 
 	g_free(obj->priv);
@@ -417,10 +417,10 @@ notify_notification_finalize(GObject *object)
 }
 
 static GtkWidget *
-get_internal_tray_icon (GtkStatusIcon *status) 
+get_internal_tray_icon (GtkStatusIcon *status)
 {
 	/* This function is a temporary hack */
-	return GTK_WIDGET (*((GtkWidget**)(status->priv)));	
+	return GTK_WIDGET (*((GtkWidget**)(status->priv)));
 }
 
 static void
@@ -448,7 +448,7 @@ _notify_notification_update_applet_hints(NotifyNotification *n)
 		}
 
 		if (!gtk_status_icon_get_geometry(priv->status_icon, &screen,
-										  &rect, NULL))
+						  &rect, NULL))
 		{
 			return;
 		}
@@ -527,17 +527,19 @@ _idle_check_updates(void *user_data)
  * Returns: The new #NotifyNotification.
  */
 NotifyNotification *
-notify_notification_new(const gchar *summary, const gchar *body,
-						const gchar *icon, GtkWidget *attach)
+notify_notification_new(const gchar *summary,
+			const gchar *body,
+			const gchar *icon,
+			GtkWidget *attach)
 {
 	g_return_val_if_fail(attach == NULL || GTK_IS_WIDGET(attach), NULL);
 
 	return g_object_new(NOTIFY_TYPE_NOTIFICATION,
-						"summary", summary,
-						"body", body,
-						"icon-name",  icon,
-						"attach-widget", attach,
-						NULL);
+			    "summary", summary,
+			    "body", body,
+			    "icon-name",  icon,
+			    "attach-widget", attach,
+			    NULL);
 }
 
 #ifdef HAVE_STATUS_ICON
@@ -566,11 +568,11 @@ notify_notification_new_with_status_icon(const gchar *summary,
 	g_return_val_if_fail(GTK_IS_STATUS_ICON(status_icon), NULL);
 
 	return g_object_new(NOTIFY_TYPE_NOTIFICATION,
-						"summary", summary,
-						"body", message,
-						"icon-name",  icon,
-						"status-icon", status_icon,
-						NULL);
+			    "summary", summary,
+			    "body", message,
+			    "icon-name",  icon,
+			    "status-icon", status_icon,
+			    NULL);
 }
 #endif /* HAVE_STATUS_ICON */
 
@@ -589,8 +591,9 @@ notify_notification_new_with_status_icon(const gchar *summary,
  */
 gboolean
 notify_notification_update(NotifyNotification *notification,
-						   const gchar *summary, const gchar *body,
-						   const gchar *icon)
+			   const gchar *summary,
+			   const gchar *body,
+			   const gchar *icon)
 {
 	g_return_val_if_fail(notification != NULL,                 FALSE);
 	g_return_val_if_fail(NOTIFY_IS_NOTIFICATION(notification), FALSE);
@@ -635,7 +638,7 @@ notify_notification_update(NotifyNotification *notification,
  */
 void
 notify_notification_attach_to_widget(NotifyNotification *notification,
-									 GtkWidget *attach)
+				     GtkWidget *attach)
 {
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 
@@ -665,7 +668,7 @@ notify_notification_attach_to_widget(NotifyNotification *notification,
  */
 void
 notify_notification_attach_to_status_icon(NotifyNotification *notification,
-										  GtkStatusIcon *status_icon)
+					  GtkStatusIcon *status_icon)
 {
 	NotifyNotificationPrivate *priv;
 
@@ -680,7 +683,7 @@ notify_notification_attach_to_status_icon(NotifyNotification *notification,
 	if (priv->status_icon != NULL)
 	{
 		g_object_remove_weak_pointer(G_OBJECT(priv->status_icon),
-									 (gpointer)&priv->status_icon);
+					     (gpointer)&priv->status_icon);
 	}
 
 	priv->status_icon = status_icon;
@@ -688,7 +691,7 @@ notify_notification_attach_to_status_icon(NotifyNotification *notification,
 	if (priv->status_icon != NULL)
 	{
 		g_object_add_weak_pointer(G_OBJECT(priv->status_icon),
-								  (gpointer)&priv->status_icon);
+					  (gpointer)&priv->status_icon);
 	}
 
 	g_object_notify(G_OBJECT(notification), "status-icon");
@@ -710,9 +713,9 @@ notify_notification_attach_to_status_icon(NotifyNotification *notification,
  */
 void
 notify_notification_set_geometry_hints(NotifyNotification *notification,
-									   GdkScreen *screen,
-									   gint x,
-									   gint y)
+				       GdkScreen *screen,
+				       gint x,
+				       gint y)
 {
 	char *display_name;
 
@@ -730,8 +733,10 @@ notify_notification_set_geometry_hints(NotifyNotification *notification,
 }
 
 static void
-_close_signal_handler(DBusGProxy *proxy, guint32 id, guint32 reason,
-					  NotifyNotification *notification)
+_close_signal_handler(DBusGProxy *proxy,
+		      guint32 id,
+		      guint32 reason,
+		      NotifyNotification *notification)
 {
 	if (id == notification->priv->id)
 	{
@@ -744,8 +749,10 @@ _close_signal_handler(DBusGProxy *proxy, guint32 id, guint32 reason,
 }
 
 static void
-_action_signal_handler(DBusGProxy *proxy, guint32 id, gchar *action,
-					   NotifyNotification *notification)
+_action_signal_handler(DBusGProxy *proxy,
+		       guint32 id,
+		       gchar *action,
+		       NotifyNotification *notification)
 {
 	CallbackPair *pair;
 
@@ -774,7 +781,7 @@ _gslist_to_string_array(GSList *list)
 {
 	GSList *l;
 	GArray *a = g_array_sized_new(TRUE, FALSE, sizeof(gchar *),
-								  g_slist_length(list));
+				      g_slist_length(list));
 
 	for (l = list; l != NULL; l = l->next)
 		g_array_append_val(a, l->data);
@@ -793,7 +800,8 @@ _gslist_to_string_array(GSList *list)
  *          @error.
  */
 gboolean
-notify_notification_show(NotifyNotification *notification, GError **error)
+notify_notification_show(NotifyNotification *notification,
+			 GError **error)
 {
 	NotifyNotificationPrivate *priv;
 	GError *tmp_error = NULL;
@@ -810,12 +818,12 @@ notify_notification_show(NotifyNotification *notification, GError **error)
 	if (!priv->signals_registered)
 	{
 		dbus_g_proxy_connect_signal(proxy, "NotificationClosed",
-									G_CALLBACK(_close_signal_handler),
-									notification, NULL);
+					    G_CALLBACK(_close_signal_handler),
+					    notification, NULL);
 
 		dbus_g_proxy_connect_signal(proxy, "ActionInvoked",
-									G_CALLBACK(_action_signal_handler),
-									notification, NULL);
+					    G_CALLBACK(_action_signal_handler),
+					    notification, NULL);
 
 		priv->signals_registered = TRUE;
 	}
@@ -827,18 +835,18 @@ notify_notification_show(NotifyNotification *notification, GError **error)
 
 	/* TODO: make this nonblocking */
 	dbus_g_proxy_call(proxy, "Notify", &tmp_error,
-					  G_TYPE_STRING, notify_get_app_name(),
-					  G_TYPE_UINT, priv->id,
-					  G_TYPE_STRING, priv->icon_name,
-					  G_TYPE_STRING, priv->summary,
-					  G_TYPE_STRING, priv->body,
-					  G_TYPE_STRV, action_array,
-					  dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
-										  G_TYPE_VALUE), priv->hints,
-					  G_TYPE_INT, priv->timeout,
-					  G_TYPE_INVALID,
-					  G_TYPE_UINT, &priv->id,
-					  G_TYPE_INVALID);
+			  G_TYPE_STRING, notify_get_app_name(),
+			  G_TYPE_UINT, priv->id,
+			  G_TYPE_STRING, priv->icon_name,
+			  G_TYPE_STRING, priv->summary,
+			  G_TYPE_STRING, priv->body,
+			  G_TYPE_STRV, action_array,
+			  dbus_g_type_get_map("GHashTable", G_TYPE_STRING,
+					      G_TYPE_VALUE), priv->hints,
+			  G_TYPE_INT, priv->timeout,
+			  G_TYPE_INVALID,
+			  G_TYPE_UINT, &priv->id,
+			  G_TYPE_INVALID);
 
 	/* Don't free the elements because they are owned by priv->actions */
 	g_free(action_array);
@@ -863,7 +871,7 @@ notify_notification_show(NotifyNotification *notification, GError **error)
  */
 void
 notify_notification_set_timeout(NotifyNotification *notification,
-								gint timeout)
+				gint timeout)
 {
 	g_return_if_fail(notification != NULL);
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
@@ -890,7 +898,7 @@ _notify_notification_get_timeout(const NotifyNotification *notification)
  */
 void
 notify_notification_set_category(NotifyNotification *notification,
-								 const char *category)
+				 const char *category)
 {
 	g_return_if_fail(notification != NULL);
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
@@ -909,7 +917,7 @@ notify_notification_set_category(NotifyNotification *notification,
  */
 void
 notify_notification_set_urgency(NotifyNotification *notification,
-								NotifyUrgency urgency)
+				NotifyUrgency urgency)
 {
 	g_return_if_fail(notification != NULL);
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
@@ -969,7 +977,7 @@ _gvalue_array_append_byte_array(GValueArray *array, guchar *bytes, gsize len)
  */
 void
 notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
-										 GdkPixbuf *icon)
+					 GdkPixbuf *icon)
 {
 #if CHECK_DBUS_VERSION(0, 60)
 	gint width;
@@ -1012,7 +1020,7 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
 	g_value_take_boxed(value, image_struct);
 
 	g_hash_table_insert(notification->priv->hints,
-						g_strdup("icon_data"), value);
+			    g_strdup("icon_data"), value);
 #else /* D-BUS < 0.60 */
 	g_warning("Raw images and pixbufs require D-BUS >= 0.60");
 #endif
@@ -1028,7 +1036,8 @@ notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
  */
 void
 notify_notification_set_hint_int32(NotifyNotification *notification,
-								   const gchar *key, gint value)
+				   const gchar *key,
+				   gint value)
 {
 	GValue *hint_value;
 
@@ -1040,7 +1049,7 @@ notify_notification_set_hint_int32(NotifyNotification *notification,
 	g_value_init(hint_value, G_TYPE_INT);
 	g_value_set_int(hint_value, value);
 	g_hash_table_insert(notification->priv->hints,
-						g_strdup(key), hint_value);
+			    g_strdup(key), hint_value);
 }
 
 
@@ -1054,7 +1063,8 @@ notify_notification_set_hint_int32(NotifyNotification *notification,
  */
 void
 notify_notification_set_hint_uint32(NotifyNotification *notification,
-                                    const gchar *key, guint value)
+                                    const gchar *key,
+				    guint value)
 {
 	GValue *hint_value;
 
@@ -1066,7 +1076,7 @@ notify_notification_set_hint_uint32(NotifyNotification *notification,
 	g_value_init(hint_value, G_TYPE_UINT);
 	g_value_set_uint(hint_value, value);
 	g_hash_table_insert(notification->priv->hints,
-						g_strdup(key), hint_value);
+			    g_strdup(key), hint_value);
 }
 
 /**
@@ -1079,7 +1089,8 @@ notify_notification_set_hint_uint32(NotifyNotification *notification,
  */
 void
 notify_notification_set_hint_double(NotifyNotification *notification,
-									const gchar *key, gdouble value)
+				    const gchar *key,
+				    gdouble value)
 {
 	GValue *hint_value;
 
@@ -1091,7 +1102,7 @@ notify_notification_set_hint_double(NotifyNotification *notification,
 	g_value_init(hint_value, G_TYPE_FLOAT);
 	g_value_set_float(hint_value, value);
 	g_hash_table_insert(notification->priv->hints,
-						g_strdup(key), hint_value);
+			    g_strdup(key), hint_value);
 }
 
 /**
@@ -1104,7 +1115,8 @@ notify_notification_set_hint_double(NotifyNotification *notification,
  */
 void
 notify_notification_set_hint_byte(NotifyNotification *notification,
-								  const gchar *key, guchar value)
+				  const gchar *key,
+				  guchar value)
 {
 	GValue *hint_value;
 
@@ -1131,8 +1143,9 @@ notify_notification_set_hint_byte(NotifyNotification *notification,
  */
 void
 notify_notification_set_hint_byte_array(NotifyNotification *notification,
-										const gchar *key,
-										const guchar *value, gsize len)
+					const gchar *key,
+					const guchar *value,
+					gsize len)
 {
 	GValue *hint_value;
 	GArray *byte_array;
@@ -1148,11 +1161,11 @@ notify_notification_set_hint_byte_array(NotifyNotification *notification,
 
 	hint_value = g_new0(GValue, 1);
 	g_value_init(hint_value, dbus_g_type_get_collection("GArray",
-														G_TYPE_UCHAR));
+							    G_TYPE_UCHAR));
 	g_value_take_boxed(hint_value, byte_array);
 
 	g_hash_table_insert(notification->priv->hints,
-						g_strdup(key), hint_value);
+			    g_strdup(key), hint_value);
 }
 
 /**
@@ -1165,7 +1178,8 @@ notify_notification_set_hint_byte_array(NotifyNotification *notification,
  */
 void
 notify_notification_set_hint_string(NotifyNotification *notification,
-									const gchar *key, const gchar *value)
+				    const gchar *key,
+				    const gchar *value)
 {
 	GValue *hint_value;
 
@@ -1177,7 +1191,7 @@ notify_notification_set_hint_string(NotifyNotification *notification,
 	g_value_init(hint_value, G_TYPE_STRING);
 	g_value_set_string(hint_value, value);
 	g_hash_table_insert(notification->priv->hints,
-						g_strdup(key), hint_value);
+			    g_strdup(key), hint_value);
 }
 
 static gboolean
@@ -1199,7 +1213,7 @@ notify_notification_clear_hints(NotifyNotification *notification)
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 
 	g_hash_table_foreach_remove(notification->priv->hints,
-								(GHRFunc)_remove_all, NULL);
+				    (GHRFunc)_remove_all, NULL);
 }
 
 /**
@@ -1215,7 +1229,7 @@ notify_notification_clear_actions(NotifyNotification *notification)
 	g_return_if_fail(NOTIFY_IS_NOTIFICATION(notification));
 
 	g_hash_table_foreach_remove(notification->priv->action_map,
-								(GHRFunc)_remove_all, NULL);
+				    (GHRFunc)_remove_all, NULL);
 
 	if (notification->priv->actions != NULL)
 	{
@@ -1243,10 +1257,11 @@ notify_notification_clear_actions(NotifyNotification *notification)
  */
 void
 notify_notification_add_action(NotifyNotification *notification,
-							   const char *action,
-							   const char *label,
-							   NotifyActionCallback callback,
-							   gpointer user_data, GFreeFunc free_func)
+			       const char *action,
+			       const char *label,
+			       NotifyActionCallback callback,
+			       gpointer user_data,
+			       GFreeFunc free_func)
 {
 	NotifyNotificationPrivate *priv;
 	CallbackPair *pair;
@@ -1296,7 +1311,7 @@ _notify_notification_has_nondefault_actions(const NotifyNotification *n)
  */
 gboolean
 notify_notification_close(NotifyNotification *notification,
-						  GError **error)
+			  GError **error)
 {
 	NotifyNotificationPrivate *priv;
 	GError *tmp_error = NULL;
@@ -1308,8 +1323,8 @@ notify_notification_close(NotifyNotification *notification,
 	priv = notification->priv;
 
 	dbus_g_proxy_call(_notify_get_g_proxy(), "CloseNotification", &tmp_error,
-					  G_TYPE_UINT, priv->id, G_TYPE_INVALID,
-					  G_TYPE_INVALID);
+			  G_TYPE_UINT, priv->id, G_TYPE_INVALID,
+			  G_TYPE_INVALID);
 
 	if (tmp_error != NULL)
 	{

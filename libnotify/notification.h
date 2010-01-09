@@ -1,4 +1,5 @@
-/**
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file libnotify/notification.h Notification object
  *
  * @Copyright (C) 2006 Christian Hammond
@@ -77,17 +78,17 @@ typedef enum
 } NotifyUrgency;
 
 typedef void (*NotifyActionCallback)(NotifyNotification *notification,
-									 gchar *action,
-									 gpointer user_data);
+				     gchar *action,
+				     gpointer user_data);
 
 #define NOTIFY_ACTION_CALLBACK(func) ((NotifyActionCallback)(func))
 
 GType notify_notification_get_type();
 
 NotifyNotification *notify_notification_new(const gchar *summary,
-											const gchar *body,
-											const gchar *icon,
-											GtkWidget *attach);
+					    const gchar *body,
+					    const gchar *icon,
+					    GtkWidget *attach);
 #if GTK_CHECK_VERSION(2, 9, 2)
 NotifyNotification *notify_notification_new_with_status_icon(
 	const gchar *summary, const gchar *body,
@@ -95,12 +96,12 @@ NotifyNotification *notify_notification_new_with_status_icon(
 #endif
 
 gboolean notify_notification_update(NotifyNotification *notification,
-									const gchar *summary,
-									const gchar *body,
-									const gchar *icon);
+				    const gchar *summary,
+				    const gchar *body,
+				    const gchar *icon);
 
 void notify_notification_attach_to_widget(NotifyNotification* notification,
-										  GtkWidget *attach);
+					  GtkWidget *attach);
 
 #if GTK_CHECK_VERSION(2, 9, 2)
 void notify_notification_attach_to_status_icon(NotifyNotification *notification,
@@ -108,57 +109,63 @@ void notify_notification_attach_to_status_icon(NotifyNotification *notification,
 #endif
 
 void notify_notification_set_geometry_hints(NotifyNotification *notification,
-											GdkScreen *screen,
-											gint x,
-											gint y);
+					    GdkScreen *screen,
+					    gint x,
+					    gint y);
 
 gboolean notify_notification_show(NotifyNotification *notification,
-								  GError **error);
+				  GError **error);
 
 void notify_notification_set_timeout(NotifyNotification *notification,
-									 gint timeout);
+				     gint timeout);
 
 void notify_notification_set_category(NotifyNotification *notification,
-									  const char *category);
+				      const char *category);
 
 void notify_notification_set_urgency(NotifyNotification *notification,
-									 NotifyUrgency urgency);
+				     NotifyUrgency urgency);
 
 void notify_notification_set_icon_from_pixbuf(NotifyNotification *notification,
-											  GdkPixbuf *icon);
+					      GdkPixbuf *icon);
 
 void notify_notification_set_hint_int32(NotifyNotification *notification,
-										const gchar *key, gint value);
+					const gchar *key,
+					gint value);
 void notify_notification_set_hint_uint32(NotifyNotification *notification,
-										const gchar *key, guint value);
+					 const gchar *key,
+					 guint value);
 
 void notify_notification_set_hint_double(NotifyNotification *notification,
-										 const gchar *key, gdouble value);
+					 const gchar *key,
+					 gdouble value);
 
 void notify_notification_set_hint_string(NotifyNotification *notification,
-										 const gchar *key,
-										 const gchar *value);
+					 const gchar *key,
+					 const gchar *value);
 
 void notify_notification_set_hint_byte(NotifyNotification *notification,
-									   const gchar *key, guchar value);
+				       const gchar *key,
+				       guchar value);
 
 void notify_notification_set_hint_byte_array(NotifyNotification *notification,
-											 const gchar *key,
-											 const guchar *value, gsize len);
+					     const gchar *key,
+					     const guchar *value,
+					     gsize len);
 
 void notify_notification_clear_hints(NotifyNotification *notification);
 
 void notify_notification_add_action(NotifyNotification *notification,
-									const char *action, const char *label,
-									NotifyActionCallback callback,
-									gpointer user_data, GFreeFunc free_func);
+				    const char *action,
+				    const char *label,
+				    NotifyActionCallback callback,
+				    gpointer user_data,
+				    GFreeFunc free_func);
 
 void notify_notification_clear_actions(NotifyNotification *notification);
 gboolean notify_notification_close(NotifyNotification *notification,
-								   GError **error);
+				   GError **error);
 
-gint notify_notification_get_closed_reason(
-	const NotifyNotification *notification);
+gint notify_notification_get_closed_reason(const NotifyNotification *notification);
 
 G_END_DECLS
 
