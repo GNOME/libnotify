@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*-
  *
  * @file libnotify/internal.h Internal definitions
  *
@@ -22,13 +22,7 @@
 #ifndef _LIBNOTIFY_INTERNAL_H_
 #define _LIBNOTIFY_INTERNAL_H_
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
-#ifndef DBUS_API_SUBJECT_TO_CHANGE
-# define DBUS_API_SUBJECT_TO_CHANGE 1
-#endif
+#include "config.h"
 
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
@@ -39,13 +33,13 @@
 
 G_BEGIN_DECLS
 
-DBusGConnection *_notify_get_dbus_g_conn(void);
-DBusGProxy *_notify_get_g_proxy(void);
+DBusGConnection * _notify_get_dbus_g_conn (void);
+DBusGProxy      * _notify_get_g_proxy     (void);
 
-void _notify_cache_add_notification(NotifyNotification *n);
-void _notify_cache_remove_notification(NotifyNotification *n);
-gint _notify_notification_get_timeout(const NotifyNotification *n);
-gboolean _notify_notification_has_nondefault_actions(const NotifyNotification *n);
+void            _notify_cache_add_notification              (NotifyNotification       *n);
+void            _notify_cache_remove_notification           (NotifyNotification       *n);
+gint            _notify_notification_get_timeout            (const NotifyNotification *n);
+gboolean        _notify_notification_has_nondefault_actions (const NotifyNotification *n);
 
 G_END_DECLS
 

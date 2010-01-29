@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*-
  *
  * @file libnotify/notify.h Notifications library
  *
@@ -38,35 +38,35 @@ G_BEGIN_DECLS
  * @return TRUE if the library initialized properly and a connection to a
  *         notification server was made.
  */
-gboolean notify_init(const char *app_name);
+gboolean        notify_init (const char *app_name);
 
 /**
  * Uninitializes the notifications library.
  *
  * This will be automatically called on exit unless previously called.
  */
-void notify_uninit(void);
+void            notify_uninit (void);
 
 /**
  * Returns whether or not the notification library is initialized.
  *
  * @return TRUE if the library is initialized, or FALSE.
  */
-gboolean notify_is_initted(void);
+gboolean        notify_is_initted (void);
 
 /**
  * Returns the name of the application set when notify_init() was called.
  *
  * @return The name of the application.
  */
-const gchar *notify_get_app_name(void);
+const gchar    *notify_get_app_name (void);
 
 /**
  * Returns the capabilities of the notification server.
  *
  * @return A list of capability strings. These strings must be freed.
  */
-GList *notify_get_server_caps(void);
+GList          *notify_get_server_caps (void);
 
 /**
  * Returns the server notification information.
@@ -80,10 +80,10 @@ GList *notify_get_server_caps(void);
  *
  * @return TRUE if the call succeeded, or FALSE if there were errors.
  */
-gboolean notify_get_server_info(char **ret_name,
-				char **ret_vendor,
-				char **ret_version,
-				char **ret_spec_version);
+gboolean        notify_get_server_info (char **ret_name,
+                                        char **ret_vendor,
+                                        char **ret_version,
+                                        char **ret_spec_version);
 
 G_END_DECLS
 

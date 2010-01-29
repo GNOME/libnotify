@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*-
  *
  * @file libnotify/notify.c Notifications library
  *
@@ -20,6 +20,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -28,11 +29,11 @@
 #include <libnotify/internal.h>
 #include <libnotify/notify-marshal.h>
 
-static gboolean _initted = FALSE;
-static gchar *_app_name = NULL;
-static DBusGProxy *_proxy = NULL;
+static gboolean         _initted = FALSE;
+static char            *_app_name = NULL;
+static DBusGProxy      *_proxy = NULL;
 static DBusGConnection *_dbus_gconn = NULL;
-static GList *_active_notifications = NULL;
+static GList           *_active_notifications = NULL;
 
 /**
  * notify_init:
@@ -43,56 +44,59 @@ static GList *_active_notifications = NULL;
  * Returns: %TRUE if successful, or %FALSE on error.
  */
 gboolean
-notify_init(const char *app_name)
+notify_init (const char *app_name)
 {
-	GError *error = NULL;
-	DBusGConnection *bus = NULL;
+        GError          *error = NULL;
+        DBusGConnection *bus = NULL;
 
-	g_return_val_if_fail(app_name != NULL, FALSE);
-	g_return_val_if_fail(*app_name != '\0', FALSE);
+        g_return_val_if_fail (app_name != NULL, FALSE);
+        g_return_val_if_fail (*app_name != '\0', FALSE);
 
-	if (_initted)
-		return TRUE;
+        if (_initted)
+                return TRUE;
 
-	_app_name = g_strdup(app_name);
+        _app_name = g_strdup (app_name);
 
-	g_type_init();
+        g_type_init ();
 
-	bus = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
+        bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
 
-	if (error != NULL)
-	{
-		g_message("Unable to get session bus: %s", error->message);
-		g_error_free(error);
-		return FALSE;
-	}
+        if (error != NULL) {
+                g_message ("Unable to get session bus: %s", error->message);
+                g_error_free (error);
+                return FALSE;
+        }
 
-	_proxy = dbus_g_proxy_new_for_name(bus,
-					   NOTIFY_DBUS_NAME,
-					   NOTIFY_DBUS_CORE_OBJECT,
-					   NOTIFY_DBUS_CORE_INTERFACE);
-	dbus_g_connection_unref(bus);
+        _proxy = dbus_g_proxy_new_for_name (bus,
+                                            NOTIFY_DBUS_NAME,
+                                            NOTIFY_DBUS_CORE_OBJECT,
+                                            NOTIFY_DBUS_CORE_INTERFACE);
+        dbus_g_connection_unref (bus);
 
-	dbus_g_object_register_marshaller(notify_marshal_VOID__UINT_UINT,
-					  G_TYPE_NONE,
-					  G_TYPE_UINT,
-					  G_TYPE_UINT, G_TYPE_INVALID);
+        dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_UINT,
+                                           G_TYPE_NONE,
+                                           G_TYPE_UINT,
+                                           G_TYPE_UINT, G_TYPE_INVALID);
 
-	dbus_g_object_register_marshaller(notify_marshal_VOID__UINT_STRING,
-					  G_TYPE_NONE,
-					  G_TYPE_UINT,
-					  G_TYPE_STRING, G_TYPE_INVALID);
+        dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_STRING,
+                                           G_TYPE_NONE,
+                                           G_TYPE_UINT,
+                                           G_TYPE_STRING, G_TYPE_INVALID);
 
-	dbus_g_proxy_add_signal(_proxy, "NotificationClosed",
-				G_TYPE_UINT, G_TYPE_UINT,
-				G_TYPE_INVALID);
-	dbus_g_proxy_add_signal(_proxy, "ActionInvoked",
-				G_TYPE_UINT, G_TYPE_STRING,
-				G_TYPE_INVALID);
+        dbus_g_proxy_add_signal (_proxy,
+                                 "NotificationClosed",
+                                 G_TYPE_UINT,
+                                 G_TYPE_UINT,
+                                 G_TYPE_INVALID);
+        dbus_g_proxy_add_signal (_proxy,
+                                 "ActionInvoked",
+                                 G_TYPE_UINT,
+                                 G_TYPE_STRING,
+                                 G_TYPE_INVALID);
 
-	_initted = TRUE;
+        _initted = TRUE;
 
-	return TRUE;
+        return TRUE;
 }
 
 /**
@@ -102,10 +106,10 @@ notify_init(const char *app_name)
  *
  * Returns: The registered application name, passed to notify_init().
  */
-const gchar *
-notify_get_app_name(void)
+const char *
+notify_get_app_name (void)
 {
-	return _app_name;
+        return _app_name;
 }
 
 /**
@@ -117,33 +121,30 @@ notify_get_app_name(void)
  * the rest of its lifecycle, typically just before exitting.
  */
 void
-notify_uninit(void)
+notify_uninit (void)
 {
-	GList *l;
+        GList *l;
 
-	if (!_initted)
-		return;
+        if (!_initted)
+                return;
 
-	if (_app_name != NULL)
-	{
-		g_free(_app_name);
-		_app_name = NULL;
-	}
+        if (_app_name != NULL) {
+                g_free (_app_name);
+                _app_name = NULL;
+        }
 
-	for (l = _active_notifications; l != NULL; l = l->next)
-	{
-		NotifyNotification *n = NOTIFY_NOTIFICATION(l->data);
+        for (l = _active_notifications; l != NULL; l = l->next) {
+                NotifyNotification *n = NOTIFY_NOTIFICATION (l->data);
 
-		if (_notify_notification_get_timeout(n) == 0 ||
-			_notify_notification_has_nondefault_actions(n))
-		{
-			notify_notification_close(n, NULL);
-		}
-	}
+                if (_notify_notification_get_timeout (n) == 0 ||
+                    _notify_notification_has_nondefault_actions (n)) {
+                        notify_notification_close (n, NULL);
+                }
+        }
 
-	g_object_unref(_proxy);
+        g_object_unref (_proxy);
 
-	_initted = FALSE;
+        _initted = FALSE;
 }
 
 /**
@@ -154,21 +155,21 @@ notify_uninit(void)
  * Returns: %TRUE if libnotify is initialized, or %FALSE otherwise.
  */
 gboolean
-notify_is_initted(void)
+notify_is_initted (void)
 {
-	return _initted;
+        return _initted;
 }
 
 DBusGConnection *
-_notify_get_dbus_g_conn(void)
+_notify_get_dbus_g_conn (void)
 {
-	return _dbus_gconn;
+        return _dbus_gconn;
 }
 
 DBusGProxy *
-_notify_get_g_proxy(void)
+_notify_get_g_proxy (void)
 {
-	return _proxy;
+        return _proxy;
 }
 
 /**
@@ -178,33 +179,36 @@ _notify_get_g_proxy(void)
  *
  * Returns: A #GList of server capability strings.
  */
-GList *
-notify_get_server_caps(void)
+GList          *
+notify_get_server_caps (void)
 {
-	GError *error = NULL;
-	char **caps = NULL, **cap;
-	GList *result = NULL;
-	DBusGProxy *proxy = _notify_get_g_proxy();
+        GError         *error = NULL;
+        char          **caps = NULL;
+        char          **cap;
+        GList          *result = NULL;
+        DBusGProxy     *proxy = _notify_get_g_proxy ();
 
-	g_return_val_if_fail(proxy != NULL, NULL);
+        g_return_val_if_fail (proxy != NULL, NULL);
 
-	if (!dbus_g_proxy_call(proxy, "GetCapabilities", &error,
-			       G_TYPE_INVALID,
-			       G_TYPE_STRV, &caps, G_TYPE_INVALID))
-	{
-		g_message("GetCapabilities call failed: %s", error->message);
-		g_error_free(error);
-		return NULL;
-	}
+        if (!dbus_g_proxy_call (proxy,
+                                "GetCapabilities",
+                                &error,
+                                G_TYPE_INVALID,
+                                G_TYPE_STRV,
+                                &caps,
+                                G_TYPE_INVALID)) {
+                g_message ("GetCapabilities call failed: %s", error->message);
+                g_error_free (error);
+                return NULL;
+        }
 
-	for (cap = caps; *cap != NULL; cap++)
-	{
-		result = g_list_append(result, g_strdup(*cap));
-	}
+        for (cap = caps; *cap != NULL; cap++) {
+                result = g_list_append (result, g_strdup (*cap));
+        }
 
-	g_strfreev(caps);
+        g_strfreev (caps);
 
-	return result;
+        return result;
 }
 
 /**
@@ -223,52 +227,57 @@ notify_get_server_caps(void)
  *          on failure.
  */
 gboolean
-notify_get_server_info(char **ret_name,
-		       char **ret_vendor,
-		       char **ret_version,
-		       char **ret_spec_version)
+notify_get_server_info (char **ret_name,
+                        char **ret_vendor,
+                        char **ret_version,
+                        char **ret_spec_version)
 {
-	GError *error = NULL;
-	DBusGProxy *proxy = _notify_get_g_proxy();
-	char *name, *vendor, *version, *spec_version;
+        GError         *error = NULL;
+        DBusGProxy     *proxy = _notify_get_g_proxy ();
+        char           *name;
+        char           *vendor;
+        char           *version;
+        char           *spec_version;
 
-	g_return_val_if_fail(proxy != NULL, FALSE);
+        g_return_val_if_fail (proxy != NULL, FALSE);
 
-	if (!dbus_g_proxy_call(proxy, "GetServerInformation", &error,
-			       G_TYPE_INVALID,
-			       G_TYPE_STRING, &name,
-			       G_TYPE_STRING, &vendor,
-			       G_TYPE_STRING, &version,
-			       G_TYPE_STRING, &spec_version,
-			       G_TYPE_INVALID))
-	{
-		g_message("GetServerInformation call failed: %s", error->message);
-		return FALSE;
-	}
+        if (!dbus_g_proxy_call (proxy,
+                                "GetServerInformation",
+                                &error,
+                                G_TYPE_INVALID,
+                                G_TYPE_STRING, &name,
+                                G_TYPE_STRING, &vendor,
+                                G_TYPE_STRING, &version,
+                                G_TYPE_STRING, &spec_version,
+                                G_TYPE_INVALID)) {
+                g_message ("GetServerInformation call failed: %s",
+                           error->message);
+                return FALSE;
+        }
 
-	if (ret_name != NULL)
-		*ret_name = name;
+        if (ret_name != NULL)
+                *ret_name = name;
 
-	if (ret_vendor != NULL)
-		*ret_vendor = vendor;
+        if (ret_vendor != NULL)
+                *ret_vendor = vendor;
 
-	if (ret_version != NULL)
-		*ret_version = version;
+        if (ret_version != NULL)
+                *ret_version = version;
 
-	if (spec_version != NULL)
-		*ret_spec_version = spec_version;
+        if (spec_version != NULL)
+                *ret_spec_version = spec_version;
 
-	return TRUE;
+        return TRUE;
 }
 
 void
-_notify_cache_add_notification(NotifyNotification *n)
+_notify_cache_add_notification (NotifyNotification * n)
 {
-	_active_notifications = g_list_prepend(_active_notifications, n);
+        _active_notifications = g_list_prepend (_active_notifications, n);
 }
 
 void
-_notify_cache_remove_notification(NotifyNotification *n)
+_notify_cache_remove_notification (NotifyNotification * n)
 {
-	_active_notifications = g_list_remove(_active_notifications, n);
+        _active_notifications = g_list_remove (_active_notifications, n);
 }
