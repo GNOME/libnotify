@@ -293,15 +293,23 @@ notify_get_server_info (char **ret_name,
 
         if (ret_name != NULL)
                 *ret_name = name;
+        else
+                g_free (name);
 
         if (ret_vendor != NULL)
                 *ret_vendor = vendor;
+        else
+                g_free (vendor);
 
         if (ret_version != NULL)
                 *ret_version = version;
+        else
+                g_free (version);
 
         if (spec_version != NULL)
                 *ret_spec_version = spec_version;
+        else
+                g_free (spec_version);
 
         return TRUE;
 }
