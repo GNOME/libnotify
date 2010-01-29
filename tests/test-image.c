@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*-
  *
  * @file tests/test-image.c Unit test: images
  *
@@ -72,7 +72,7 @@ main (int argc, char *argv[])
         file = g_get_current_dir ();
         uri = g_strdup_printf ("file://%s/%s",
                                file,
-                               "applet-critical.png");
+                               "dewdop_leaf.jpg");
 
         g_free (file);
         printf ("sending %s\n", uri);
