@@ -34,6 +34,37 @@ static char            *_app_name = NULL;
 static DBusGProxy      *_proxy = NULL;
 static DBusGConnection *_dbus_gconn = NULL;
 static GList           *_active_notifications = NULL;
+static int              _spec_version_major = 0;
+static int              _spec_version_minor = 0;
+
+gboolean
+_notify_check_spec_version (int major,
+                            int minor)
+{
+       if (_spec_version_major > major)
+               return TRUE;
+       if (_spec_version_major < major)
+               return FALSE;
+       return _spec_version_minor >= minor;
+}
+
+static gboolean
+_notify_update_spec_version (void)
+{
+       char *spec_version;
+
+       if (!notify_get_server_info (NULL, NULL, NULL, &spec_version))
+               return FALSE;
+
+       sscanf (spec_version,
+               "%d.%d",
+               &_spec_version_major,
+               &_spec_version_minor);
+
+       g_free (spec_version);
+
+       return TRUE;
+}
 
 /**
  * notify_init:
@@ -93,6 +124,11 @@ notify_init (const char *app_name)
                                  G_TYPE_UINT,
                                  G_TYPE_STRING,
                                  G_TYPE_INVALID);
+
+        if (!_notify_update_spec_version ()) {
+               g_message ("Error getting spec version");
+               return FALSE;
+        }
 
         _initted = TRUE;
 

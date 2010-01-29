@@ -987,6 +987,7 @@ notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
         gsize           image_len;
         GValueArray    *image_struct;
         GValue         *value;
+        const char     *hint_name;
 #endif
 
         g_return_if_fail (notification != NULL);
@@ -1018,8 +1019,15 @@ notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
         g_value_init (value, G_TYPE_VALUE_ARRAY);
         g_value_take_boxed (value, image_struct);
 
+        if (_notify_check_spec_version(1, 1)) {
+                hint_name = "image_data";
+        } else {
+                hint_name = "icon_data";
+        }
+
         g_hash_table_insert (notification->priv->hints,
-                             g_strdup ("icon_data"), value);
+                             g_strdup (hint_name),
+                             value);
 #else /* D-BUS < 0.60 */
         g_warning ("Raw images and pixbufs require D-BUS >= 0.60");
 #endif

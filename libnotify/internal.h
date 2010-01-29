@@ -40,6 +40,7 @@ void            _notify_cache_add_notification              (NotifyNotification 
 void            _notify_cache_remove_notification           (NotifyNotification       *n);
 gint            _notify_notification_get_timeout            (const NotifyNotification *n);
 gboolean        _notify_notification_has_nondefault_actions (const NotifyNotification *n);
+gboolean        _notify_check_spec_version                  (int major, int minor);
 
 G_END_DECLS
 
