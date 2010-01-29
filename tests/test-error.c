@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-default-action.c Unit test: error handling
  *
  * @Copyright (C) 2004 Mike Hearn <mike@navi.cx>
@@ -23,26 +24,26 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int main() {
-	NotifyNotification *n;
+int
+main ()
+{
+        NotifyNotification *n;
 
-	g_type_init ();
+        g_type_init ();
 
-	notify_init("Error Handling");
+        notify_init ("Error Handling");
 
-	n = notify_notification_new ("Summary", 
-                                     "Content",
-                                     NULL, NULL);
-        notify_notification_set_timeout (n, 3000); //3 seconds
+        n = notify_notification_new ("Summary", "Content", NULL, NULL);
+        notify_notification_set_timeout (n, 3000);      //3 seconds
 
-	/* TODO: Create an error condition */
-
-
-	if (!notify_notification_show (n, NULL)) {
-		fprintf(stderr, "failed to send notification\n");
-		return 1;
-	}
+        /* TODO: Create an error condition */
 
 
-	return 0;
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                return 1;
+        }
+
+
+        return 0;
 }

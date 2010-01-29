@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-markup.c Unit test: markup
  *
  * @Copyright (C) 2004 Mike Hearn <mike@navi.cx>
@@ -23,21 +24,24 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int main() {
-	NotifyNotification *n;
+int
+main ()
+{
+        NotifyNotification *n;
 
-	notify_init("Markup");
+        notify_init ("Markup");
 
-	n = notify_notification_new ("Summary", 
-	                             "Some <b>bold</b>, <u>underlined</u>, <i>italic</i>, "
-	                             "<a href='http://www.google.com'>linked</a> text",
-                                     NULL, NULL);
-        notify_notification_set_timeout (n, 3000); //3 seconds
+        n = notify_notification_new ("Summary",
+                                     "Some <b>bold</b>, <u>underlined</u>, <i>italic</i>, "
+                                     "<a href='http://www.google.com'>linked</a> text",
+                                     NULL,
+                                     NULL);
+        notify_notification_set_timeout (n, 3000);      //3 seconds
 
-	if (!notify_notification_show (n, NULL)) {
-		fprintf(stderr, "failed to send notification\n");
-		return 1;
-	}
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                return 1;
+        }
 
-	return 0;
+        return 0;
 }

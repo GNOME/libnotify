@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-xy.c Unit test: X, Y hints
  *
  * @Copyright (C) 2005 Christian Hammond <chipx86@chipx86.com>
@@ -23,22 +24,25 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int main() {
-	NotifyNotification *n;
+int
+main ()
+{
+        NotifyNotification *n;
 
-	notify_init("XY");
+        notify_init ("XY");
 
-	n = notify_notification_new ("X, Y Test", 
+        n = notify_notification_new ("X, Y Test",
                                      "This notification should point to 150, 10",
-                                     NULL, NULL);
+                                     NULL,
+                                     NULL);
 
-	notify_notification_set_hint_int32 (n, "x", 150);
-	notify_notification_set_hint_int32 (n, "y", 10);
+        notify_notification_set_hint_int32 (n, "x", 150);
+        notify_notification_set_hint_int32 (n, "y", 10);
 
-	if (!notify_notification_show (n, NULL)) {
-		fprintf(stderr, "failed to send notification\n");
-		return 1;
-	}
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                return 1;
+        }
 
-	return 0;
+        return 0;
 }

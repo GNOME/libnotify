@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-server-info.c Retrieves the server info and caps
  *
  * @Copyright (C) 2004 Mike Hearn <mike@navi.cx>
@@ -24,38 +25,36 @@
 #include <stdlib.h>
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-	GList *l, *caps;
-	char *name, *vendor, *version, *spec_version;
+        GList          *l, *caps;
+        char           *name, *vendor, *version, *spec_version;
 
-	notify_init("TestCaps");
+        notify_init ("TestCaps");
 
-	if (!notify_get_server_info(&name, &vendor, &version, &spec_version))
-	{
-		fprintf(stderr, "Failed to receive server info.\n");
-		exit(1);
-	}
+        if (!notify_get_server_info (&name, &vendor, &version, &spec_version)) {
+                fprintf (stderr, "Failed to receive server info.\n");
+                exit (1);
+        }
 
-	printf("Name:         %s\n", name);
-	printf("Vendor:       %s\n", vendor);
-	printf("Version:      %s\n", version);
-	printf("Spec Version: %s\n", spec_version);
-	printf("Capabilities:\n");
+        printf ("Name:         %s\n", name);
+        printf ("Vendor:       %s\n", vendor);
+        printf ("Version:      %s\n", version);
+        printf ("Spec Version: %s\n", spec_version);
+        printf ("Capabilities:\n");
 
-	caps = notify_get_server_caps();
+        caps = notify_get_server_caps ();
 
-	if (caps == NULL)
-	{
-		fprintf(stderr, "Failed to receive server caps.\n");
-		exit(1);
-	}
+        if (caps == NULL) {
+                fprintf (stderr, "Failed to receive server caps.\n");
+                exit (1);
+        }
 
-	for (l = caps; l != NULL; l = l->next)
-		printf("\t%s\n", (char *)l->data);
+        for (l = caps; l != NULL; l = l->next)
+                printf ("\t%s\n", (char *) l->data);
 
-	g_list_foreach(caps, (GFunc)g_free, NULL);
-	g_list_free(caps);
+        g_list_foreach (caps, (GFunc) g_free, NULL);
+        g_list_free (caps);
 
-	return 0;
+        return 0;
 }

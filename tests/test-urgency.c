@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-urgency.c Unit test: urgency levels
  *
  * @Copyright(C) 2006 Christian Hammond <chipx8@chipx86.com>
@@ -23,51 +24,52 @@
 #include <stdlib.h>
 
 int
-main(int argc, char *argv[])
+main (int argc, char *argv[])
 {
-	NotifyNotification *n;
+        NotifyNotification *n;
 
-	notify_init("Urgency");
+        notify_init ("Urgency");
 
-	n = notify_notification_new("Low Urgency", "Joe signed online.",
-								NULL, NULL);
-	notify_notification_set_urgency(n, NOTIFY_URGENCY_LOW);
-	if (!notify_notification_show(n, NULL))
-	{
-		fprintf(stderr, "failed to send notification\n");
-		exit(1);
-	}
+        n = notify_notification_new ("Low Urgency",
+                                     "Joe signed online.",
+                                     NULL,
+                                     NULL);
+        notify_notification_set_urgency (n, NOTIFY_URGENCY_LOW);
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                exit (1);
+        }
 
-	g_object_unref(G_OBJECT(n));
-
-
-	n = notify_notification_new("Normal Urgency",
-								"You have a meeting in 10 minutes.",
-								NULL, NULL);
-	notify_notification_set_urgency(n, NOTIFY_URGENCY_NORMAL);
-	if (!notify_notification_show(n, NULL))
-	{
-		fprintf(stderr, "failed to send notification\n");
-		exit(1);
-	}
-
-	g_object_unref(G_OBJECT(n));
+        g_object_unref (G_OBJECT (n));
 
 
-	n = notify_notification_new("Critical Urgency",
-								"This message will self-destruct in 10 "
-								"seconds.",
-								NULL, NULL);
-	notify_notification_set_urgency(n, NOTIFY_URGENCY_CRITICAL);
-	notify_notification_set_timeout(n, 10000); // 10 seconds
+        n = notify_notification_new ("Normal Urgency",
+                                     "You have a meeting in 10 minutes.",
+                                     NULL,
+                                     NULL);
+        notify_notification_set_urgency (n, NOTIFY_URGENCY_NORMAL);
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                exit (1);
+        }
 
-	if (!notify_notification_show(n, NULL))
-	{
-		fprintf(stderr, "failed to send notification\n");
-		exit(1);
-	}
+        g_object_unref (G_OBJECT (n));
 
-	g_object_unref(G_OBJECT(n));
 
-	return 0;
+        n = notify_notification_new ("Critical Urgency",
+                                     "This message will self-destruct in 10 "
+                                     "seconds.",
+                                     NULL,
+                                     NULL);
+        notify_notification_set_urgency (n, NOTIFY_URGENCY_CRITICAL);
+        notify_notification_set_timeout (n, 10000);     // 10 seconds
+
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                exit (1);
+        }
+
+        g_object_unref (G_OBJECT (n));
+
+        return 0;
 }

@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-basic.c Unit test: basics
  *
  * @Copyright (C) 2004 Mike Hearn <mike@navi.cx>
@@ -23,22 +24,25 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int main() {
-	NotifyNotification *n;
+int
+main ()
+{
+        NotifyNotification *n;
 
-	notify_init("Basics");
+        notify_init ("Basics");
 
-	n = notify_notification_new ("Summary", 
+        n = notify_notification_new ("Summary",
                                      "Content that is very long 8374983278r32j4 rhjjfh dw8f 43jhf 8ds7 ur2389f jdbjkt h8924yf jkdbjkt 892hjfiHER98HEJIF BDSJHF hjdhF JKLH 890YRHEJHFU 89HRJKSHdd dddd ddddd dddd ddddd dddd ddddd dddd dddd ddd ddd dddd Fdd d ddddd dddddddd ddddddddhjkewdkjsjfjk sdhkjf hdkj dadasdadsa adsd asd sd saasd fadskfkhsjf hsdkhfkshfjkhsd kjfhsjdkhfj ksdhfkjshkjfsd sadhfjkhaskd jfhsdajkfhkjs dhfkjsdhfkjs adhjkfhasdkj fhdsakjhfjk asdhkjkfhd akfjshjfsk afhjkasdhf jkhsdaj hf kjsdfahkfh sakjhfksdah kfdashkjf ksdahfj shdjdh",
-                                     NULL, NULL);
-        notify_notification_set_timeout (n, 3000); //3 seconds
+                                     NULL,
+                                     NULL);
+        notify_notification_set_timeout (n, 3000);      //3 seconds
 
-	if (!notify_notification_show (n, NULL)) {
-		fprintf(stderr, "failed to send notification\n");
-		return 1;
-	}
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                return 1;
+        }
 
-	g_object_unref(G_OBJECT(n));
+        g_object_unref (G_OBJECT (n));
 
-	return 0;
+        return 0;
 }

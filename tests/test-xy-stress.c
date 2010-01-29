@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-xy.c Unit test: X, Y hints
  *
  * @Copyright(C) 2005 Christian Hammond <chipx86@chipx86.com>
@@ -10,7 +11,7 @@
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
@@ -25,68 +26,71 @@
 #include <unistd.h>
 
 static void
-_handle_closed(GObject *obj)
+_handle_closed (GObject * obj)
 {
-	g_message("closing");
-	g_object_unref(obj);
+        g_message ("closing");
+        g_object_unref (obj);
 }
 
 static void
-emit_notification(int x, int y)
+emit_notification (int x, int y)
 {
-	char *buffer;
-	NotifyNotification *n;
+        char               *buffer;
+        NotifyNotification *n;
 
-	buffer = g_strdup_printf("This notification should point to %d, %d.",
-							 x, y);
+        buffer = g_strdup_printf ("This notification should point to %d, %d.",
+                                  x,
+                                  y);
 
-	n = notify_notification_new("X, Y Test", buffer, NULL, NULL);
-	g_free(buffer);
+        n = notify_notification_new ("X, Y Test", buffer, NULL, NULL);
+        g_free (buffer);
 
-	notify_notification_set_hint_int32(n, "x", x);
-	notify_notification_set_hint_int32(n, "y", y);
+        notify_notification_set_hint_int32 (n, "x", x);
+        notify_notification_set_hint_int32 (n, "y", y);
 
-	g_signal_connect(G_OBJECT(n), "closed",
-					 G_CALLBACK(_handle_closed), NULL);
+        g_signal_connect (G_OBJECT (n),
+                          "closed",
+                          G_CALLBACK (_handle_closed),
+                          NULL);
 
-	if (!notify_notification_show(n, NULL))
-		fprintf(stderr, "failed to send notification\n");
+        if (!notify_notification_show (n, NULL))
+                fprintf (stderr, "failed to send notification\n");
 }
 
 static gboolean
-_popup_random_bubble(gpointer unused)
+_popup_random_bubble (gpointer unused)
 {
-	GdkDisplay *display;
-	GdkScreen *screen;
+        GdkDisplay     *display;
+        GdkScreen      *screen;
 
-	int screen_x2, screen_y2;
-	int x, y;
+        int             screen_x2, screen_y2;
+        int             x, y;
 
-	display   = gdk_display_get_default();
-	screen    = gdk_display_get_default_screen(display);
-	screen_x2 = gdk_screen_get_width(screen)  - 1;
-	screen_y2 = gdk_screen_get_height(screen) - 1;
+        display = gdk_display_get_default ();
+        screen = gdk_display_get_default_screen (display);
+        screen_x2 = gdk_screen_get_width (screen) - 1;
+        screen_y2 = gdk_screen_get_height (screen) - 1;
 
-	x = g_random_int_range(0, screen_x2);
-	y = g_random_int_range(0, screen_y2);
-	emit_notification(x, y);
+        x = g_random_int_range (0, screen_x2);
+        y = g_random_int_range (0, screen_y2);
+        emit_notification (x, y);
 
-	return TRUE;
+        return TRUE;
 }
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-	GMainLoop *loop;
+        GMainLoop *loop;
 
-	gdk_init(&argc, &argv);
+        gdk_init (&argc, &argv);
 
-	notify_init("XY");
+        notify_init ("XY");
 
-	g_timeout_add(1000, _popup_random_bubble, NULL);
+        g_timeout_add (1000, _popup_random_bubble, NULL);
 
-	loop = g_main_loop_new(NULL, FALSE);
-	g_main_loop_run(loop);
+        loop = g_main_loop_new (NULL, FALSE);
+        g_main_loop_run (loop);
 
-	return 0;
+        return 0;
 }

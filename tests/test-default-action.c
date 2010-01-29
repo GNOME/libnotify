@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-default-action.c Unit test: default action
  *
  * @Copyright (C) 2004 Mike Hearn <mike@navi.cx>
@@ -35,43 +36,50 @@
 
 static GMainLoop *loop;
 
-static void callback(NotifyNotification *n, const char *action, void *user_data)
+static void
+callback (NotifyNotification *n,
+          const char         *action,
+          void               *user_data)
 {
-	printf("callback\n");
-	assert (action != NULL);
+        printf ("callback\n");
+        assert (action != NULL);
         assert (strcmp ("default", action) == 0);
 
-	notify_notification_close (n, NULL);
+        notify_notification_close (n, NULL);
 
-	g_main_loop_quit(loop);
+        g_main_loop_quit (loop);
 }
 
 int
-main()
+main ()
 {
         NotifyNotification *n;
-	DBusConnection *conn;
+        DBusConnection     *conn;
 
-	if (!notify_init("Default Action Test")) exit(1);
+        if (!notify_init ("Default Action Test"))
+                exit (1);
 
-	conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
-	loop = g_main_loop_new(NULL, FALSE);
+        conn = dbus_bus_get (DBUS_BUS_SESSION, NULL);
+        loop = g_main_loop_new (NULL, FALSE);
 
-	dbus_connection_setup_with_g_main(conn, NULL);
+        dbus_connection_setup_with_g_main (conn, NULL);
 
         n = notify_notification_new ("Matt is online", "", NULL, NULL);
         notify_notification_set_timeout (n, NOTIFY_EXPIRES_DEFAULT);
-        notify_notification_add_action (n, "default", "Do Default Action",
-										(NotifyActionCallback)callback,
-										NULL, NULL);
-	notify_notification_set_category (n, "presence.online");
+        notify_notification_add_action (n,
+                                        "default",
+                                        "Do Default Action",
+                                        (NotifyActionCallback) callback,
+                                        NULL,
+                                        NULL);
+        notify_notification_set_category (n, "presence.online");
 
-	if (!notify_notification_show (n, NULL)) {
-		fprintf(stderr, "failed to send notification\n");
-		return 1;
-	}
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                return 1;
+        }
 
-	g_main_loop_run(loop);
+        g_main_loop_run (loop);
 
-	return 0;
+        return 0;
 }

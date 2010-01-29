@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-xy-actions.c Unit test: X, Y hints and actions
  *
  * @Copyright (C) 2006 Christian Hammond <chipx86@chipx86.com>
@@ -31,46 +32,54 @@
 static GMainLoop *loop;
 
 static void
-action_cb(NotifyNotification *n, const char *action)
+action_cb (NotifyNotification *n,
+           const char         *action)
 {
-	printf("You clicked '%s'\n", action);
+        printf ("You clicked '%s'\n", action);
 
-	g_main_loop_quit(loop);
+        g_main_loop_quit (loop);
 }
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-	NotifyNotification *n;
-	DBusConnection *conn;
+        NotifyNotification *n;
+        DBusConnection     *conn;
 
-	notify_init("XY");
+        notify_init ("XY");
 
-	conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
-	loop = g_main_loop_new(NULL, FALSE);
+        conn = dbus_bus_get (DBUS_BUS_SESSION, NULL);
+        loop = g_main_loop_new (NULL, FALSE);
 
-	dbus_connection_setup_with_g_main(conn, NULL);
+        dbus_connection_setup_with_g_main (conn, NULL);
 
-	n = notify_notification_new("System update available",
-								"New system updates are available. It is "
-								"recommended that you install the updates.",
-								NULL, NULL);
+        n = notify_notification_new ("System update available",
+                                     "New system updates are available. It is "
+                                     "recommended that you install the updates.",
+                                     NULL,
+                                     NULL);
 
-	notify_notification_set_hint_int32(n, "x", 600);
-	notify_notification_set_hint_int32(n, "y", 10);
-	notify_notification_add_action(n, "help", "Help",
-								   (NotifyActionCallback)action_cb,
-								   NULL, NULL);
-	notify_notification_add_action(n, "update", "Update",
-								   (NotifyActionCallback)action_cb,
-								   NULL, NULL);
+        notify_notification_set_hint_int32 (n, "x", 600);
+        notify_notification_set_hint_int32 (n, "y", 10);
+        notify_notification_add_action (n,
+                                        "help",
+                                        "Help",
+                                        (NotifyActionCallback) action_cb,
+                                        NULL,
+                                        NULL);
+        notify_notification_add_action (n,
+                                        "update",
+                                        "Update",
+                                        (NotifyActionCallback) action_cb,
+                                        NULL,
+                                        NULL);
 
-	if (!notify_notification_show(n, NULL)) {
-		fprintf(stderr, "failed to send notification\n");
-		return 1;
-	}
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                return 1;
+        }
 
-	g_main_loop_run(loop);
+        g_main_loop_run (loop);
 
-	return 0;
+        return 0;
 }

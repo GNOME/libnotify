@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*-
+ *
  * @file tests/test-multi-actions.c Unit test: multiple actions
  *
  * @Copyright(C) 2004 Mike Hearn <mike@navi.cx>
@@ -35,83 +36,96 @@
 static GMainLoop *loop;
 
 static void
-help_callback(NotifyNotification *n, const char *action)
+help_callback (NotifyNotification *n,
+               const char         *action)
 {
-	g_assert(action != NULL);
-	g_assert(strcmp(action, "help") == 0);
+        g_assert (action != NULL);
+        g_assert (strcmp (action, "help") == 0);
 
-	printf("You clicked Help\n");
+        printf ("You clicked Help\n");
 
-	notify_notification_close(n, NULL);
+        notify_notification_close (n, NULL);
 
-	g_main_loop_quit(loop);
+        g_main_loop_quit (loop);
 }
 
 static void
-ignore_callback(NotifyNotification *n, const char *action)
+ignore_callback (NotifyNotification *n,
+                 const char         *action)
 {
-	g_assert(action != NULL);
-	g_assert(strcmp(action, "ignore") == 0);
+        g_assert (action != NULL);
+        g_assert (strcmp (action, "ignore") == 0);
 
-	printf("You clicked Ignore\n");
+        printf ("You clicked Ignore\n");
 
-	notify_notification_close(n, NULL);
+        notify_notification_close (n, NULL);
 
-	g_main_loop_quit(loop);
+        g_main_loop_quit (loop);
 }
 
 static void
-empty_callback(NotifyNotification *n, const char *action)
+empty_callback (NotifyNotification *n,
+                const char         *action)
 {
-	g_assert(action != NULL);
-	g_assert(strcmp(action, "empty") == 0);
+        g_assert (action != NULL);
+        g_assert (strcmp (action, "empty") == 0);
 
-	printf("You clicked Empty Trash\n");
+        printf ("You clicked Empty Trash\n");
 
-	notify_notification_close(n, NULL);
+        notify_notification_close (n, NULL);
 
-	g_main_loop_quit(loop);
+        g_main_loop_quit (loop);
 }
 
 
 int
-main(int argc, char **argv)
+main (int argc, char **argv)
 {
-	NotifyNotification *n;
-	DBusConnection *conn;
+        NotifyNotification *n;
+        DBusConnection     *conn;
 
-	if (!notify_init("Multi Action Test"))
-		exit(1);
+        if (!notify_init ("Multi Action Test"))
+                exit (1);
 
-	conn = dbus_bus_get(DBUS_BUS_SESSION, NULL);
-	loop = g_main_loop_new(NULL, FALSE);
+        conn = dbus_bus_get (DBUS_BUS_SESSION, NULL);
+        loop = g_main_loop_new (NULL, FALSE);
 
-	dbus_connection_setup_with_g_main(conn, NULL);
+        dbus_connection_setup_with_g_main (conn, NULL);
 
-	n = notify_notification_new("Low disk space",
-								"You can free up some disk space by "
-								"emptying the trash can.",
-								NULL, NULL);
-	notify_notification_set_urgency(n, NOTIFY_URGENCY_CRITICAL);
-	notify_notification_set_timeout(n, NOTIFY_EXPIRES_DEFAULT);
-	notify_notification_add_action(n, "help", "Help",
-								   (NotifyActionCallback)help_callback,
-								   NULL, NULL);
-	notify_notification_add_action(n, "ignore", "Ignore",
-								   (NotifyActionCallback)ignore_callback,
-								   NULL, NULL);
-	notify_notification_add_action(n, "empty", "Empty Trash",
-								   (NotifyActionCallback)empty_callback,
-								   NULL, NULL);
-	notify_notification_set_category(n, "device");
+        n = notify_notification_new ("Low disk space",
+                                     "You can free up some disk space by "
+                                     "emptying the trash can.",
+                                     NULL,
+                                     NULL);
+        notify_notification_set_urgency (n, NOTIFY_URGENCY_CRITICAL);
+        notify_notification_set_timeout (n, NOTIFY_EXPIRES_DEFAULT);
+        notify_notification_add_action (n,
+                                        "help",
+                                        "Help",
+                                        (NotifyActionCallback) help_callback,
+                                        NULL,
+                                        NULL);
+        notify_notification_add_action (n,
+                                        "ignore",
+                                        "Ignore",
+                                        (NotifyActionCallback)
+                                        ignore_callback,
+                                        NULL,
+                                        NULL);
+        notify_notification_add_action (n,
+                                        "empty",
+                                        "Empty Trash",
+                                        (NotifyActionCallback) empty_callback,
+                                        NULL,
+                                        NULL);
+        notify_notification_set_category (n, "device");
 
-	if (!notify_notification_show(n, NULL))
-	{
-		fprintf(stderr, "failed to send notification\n");
-		return 1;
-	}
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                return 1;
+        }
 
-	g_main_loop_run(loop);
+        g_main_loop_run (loop);
 
-	return 0;
+        return 0;
 }
