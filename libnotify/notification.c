@@ -969,6 +969,7 @@ _gvalue_array_append_byte_array (GValueArray *array,
  * @icon: The icon.
  *
  * Sets the icon in the notification from a #GdkPixbuf.
+ * Deprecated: use notify_notification_set_image_from_pixbuf() instead.
  *
  * This will only work when libnotify is compiled against D-BUS 0.60 or
  * higher.
@@ -976,6 +977,23 @@ _gvalue_array_append_byte_array (GValueArray *array,
 void
 notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
                                           GdkPixbuf          *icon)
+{
+        notify_notification_set_image_from_pixbuf (notification, icon);
+}
+
+/**
+ * notify_notification_set_image_from_pixbuf:
+ * @notification: The notification.
+ * @pixbuf: The image.
+ *
+ * Sets the image in the notification from a #GdkPixbuf.
+ *
+ * This will only work when libnotify is compiled against D-BUS 0.60 or
+ * higher.
+ */
+void
+notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
+                                           GdkPixbuf          *pixbuf)
 {
 #if CHECK_DBUS_VERSION(0, 60)
         gint            width;
@@ -994,15 +1012,15 @@ notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
 #if CHECK_DBUS_VERSION(0, 60)
-        width = gdk_pixbuf_get_width (icon);
-        height = gdk_pixbuf_get_height (icon);
-        rowstride = gdk_pixbuf_get_rowstride (icon);
-        n_channels = gdk_pixbuf_get_n_channels (icon);
-        bits_per_sample = gdk_pixbuf_get_bits_per_sample (icon);
+        width = gdk_pixbuf_get_width (pixbuf);
+        height = gdk_pixbuf_get_height (pixbuf);
+        rowstride = gdk_pixbuf_get_rowstride (pixbuf);
+        n_channels = gdk_pixbuf_get_n_channels (pixbuf);
+        bits_per_sample = gdk_pixbuf_get_bits_per_sample (pixbuf);
         image_len = (height - 1) * rowstride + width *
                 ((n_channels * bits_per_sample + 7) / 8);
 
-        image = gdk_pixbuf_get_pixels (icon);
+        image = gdk_pixbuf_get_pixels (pixbuf);
 
         image_struct = g_value_array_new (1);
 
@@ -1010,7 +1028,7 @@ notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
         _gvalue_array_append_int (image_struct, height);
         _gvalue_array_append_int (image_struct, rowstride);
         _gvalue_array_append_bool (image_struct,
-                                   gdk_pixbuf_get_has_alpha (icon));
+                                   gdk_pixbuf_get_has_alpha (pixbuf));
         _gvalue_array_append_int (image_struct, bits_per_sample);
         _gvalue_array_append_int (image_struct, n_channels);
         _gvalue_array_append_byte_array (image_struct, image, image_len);
