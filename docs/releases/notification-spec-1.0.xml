@@ -746,7 +746,7 @@
       </entry>
      </row>
      <row>
-      <entry><literal>"image_data"</literal></entry>
+      <entry><literal>"icon_data"</literal></entry>
       <entry>(iiibiiay)</entry>
       <entry>
         This is a raw data image format which describes the width, height,
