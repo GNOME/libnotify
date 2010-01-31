@@ -726,7 +726,7 @@
       </entry>
      </row>
      <row>
-      <entry><literal>"desktop-entry"></literal></entry>
+      <entry><literal>"desktop-entry"</literal></entry>
       <entry>string</entry>
       <entry>
        This specifies the name of the desktop filename representing the
