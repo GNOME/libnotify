@@ -210,10 +210,17 @@ tools/Makefile
 
 AC_OUTPUT
 
-echo
-echo $PACKAGE v$VERSION
+echo "
+                    $PACKAGE $VERSION
+                    ========================
 
-echo
-echo "Now type make to compile"
-echo "Then su to root and type: make install"
-echo
+	prefix:                   ${prefix}
+	exec_prefix:              ${exec_prefix}
+        bindir:                   ${bindir}
+        datadir:                  ${datadir}
+	source code location:	  ${srcdir}
+	cflags:		          ${CFLAGS}
+
+        Build docs:               ${enable_docbook_docs}
+
+"
