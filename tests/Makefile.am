@@ -66,3 +66,5 @@ EXTRA_DIST = applet-critical.png
 INCLUDES = $(PACKAGE_CFLAGS)	\
 	$(GDK_CFLAGS)		\
 	-I$(top_srcdir)
+
+-include $(top_srcdir)/git.mk

@@ -9,3 +9,5 @@ notify_send_LDADD   = $(common_ldflags)
 
 INCLUDES = $(PACKAGE_CFLAGS)	\
 	-I$(top_srcdir)
+
+-include $(top_srcdir)/git.mk

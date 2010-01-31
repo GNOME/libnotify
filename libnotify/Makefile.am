@@ -87,3 +87,5 @@ INCLUDES = \
 	-I$(top_srcdir) \
 	-DG_LOG_DOMAIN=\"libnotify\" \
 	$(PACKAGE_CFLAGS)
+
+-include $(top_srcdir)/git.mk
