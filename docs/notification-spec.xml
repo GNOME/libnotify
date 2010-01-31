@@ -789,6 +789,17 @@
       </entry>
      </row>
      <row>
+      <entry><literal>"sound-name"</literal></entry>
+      <entry>string</entry>
+      <entry>
+       A themeable named sound from the freedesktop.org
+       <ulink url="http://0pointer.de/public/sound-naming-spec.html">sound
+       naming specification</ulink> to play when the notification pops
+       up. Similar to icon-name, only for sounds. An example would be
+       "message-new-instant".
+      </entry>
+     </row>
+     <row>
       <entry><literal>"suppress-sound"</literal></entry>
       <entry>boolean</entry>
       <entry>
