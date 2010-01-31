@@ -3,7 +3,7 @@
 <article id="index">
  <articleinfo>
   <title>Desktop Notifications Specification</title>
-  <releaseinfo>Version 1.0</releaseinfo>
+  <releaseinfo>Version 1.1</releaseinfo>
   <date>25 August 2007</date>
   <authorgroup>
    <author>
@@ -31,8 +31,8 @@
     <date>25 August 2007</date>
     <authorinitials>cdh</authorinitials>
     <revremark>
-	 Added spec_version to the GetServerInformation return values.
-	 Mark this specification as a 1.0.
+     Added spec_version to the GetServerInformation return values.
+     Mark this specification as a 1.0.
     </revremark>
    </revision>
    <revision>
@@ -195,9 +195,7 @@
      <row>
       <entry>Notification Icon</entry>
       <entry>
-       The notification icon. This is represented either as a URI
-       (file:// is the only URI schema supported right now) or a name in
-       a freedesktop.org-compliant icon theme (not a GTK+ stock ID).
+        The notification icon. See <xref linkend="icons-and-images-formats"/>.
       </entry>
      </row>
      <row>
@@ -254,35 +252,11 @@
      <row>
       <entry>Hints</entry>
       <entry>
-       <para>See <xref linkend="hints"/>.</para>
        <para>
-        Beyond the core protocol is the hints table. A couple of core
-        elements have been moved to hints mostly because in a huge number
-        of cases their default values would be sufficent. The elements moved
-        to hints are:
+        Hints are a way to provide extra data to a notification server that
+        the server may be able to make use of.
        </para>
-       <segmentedlist>
-        <title>Elements Moved to Hints</title>
-        <segtitle>Element</segtitle>
-        <segtitle>Description</segtitle>
-        <seglistitem>
-         <seg>Category ID</seg>
-         <seg>An optional ID representing the type of notification (the name
-              has been changed from Notification Type ID in pervious versions).
-              See <xref linkend="categories"/>.</seg>
-        </seglistitem>
-        <seglistitem>
-         <seg>Urgency Level</seg>
-         <seg>The urgency of the notification. See
-              <xref linkend="urgency-levels"/>. (Defaults to 1 - Normal)</seg>
-        </seglistitem>
-        <seglistitem>
-         <seg>Icon Data</seg>
-         <seg>Deprecated and should not be used in new
-         implementations.  Use the Image Data hint instead.
-         </seg>
-        </seglistitem>
-       </segmentedlist>
+       <para>See <xref linkend="hints"/> for a list of available hints.</para>
       </entry>
      </row>
      <row>
@@ -449,34 +423,54 @@
   </sect2>
  </sect1>
 
- <sect1 id="icons" xreflabel="Icons">
-  <title>Icons</title>
+ <sect1 id="icons-and-images" xreflabel="Icons and Images">
+  <title>Icons and Images</title>
   <para>
-   A notification can optionally have an icon specified by the Notification
-   Icon field or by the image_data or image_path hints.
+   A notification can optionally have an associated icon and/or image.
   </para>
   <para>
-   The image_data hint should be a raw image data structure of signature
-   (iiibiiay) which describes the width, height, rowstride, has alpha, bits
-   per sample, channels and image data respectively. If an implementation
-   cannot display multiple icons then image_data should be preferred over
-   the Notification Icon field, as this icon is generally used to provide
-   more specific information about the notification (for example, a chat
-   application may use this field for a contact's icon).
+   The icon is defined by the "app_icon" parameter.
+   The image can be defined by the "image_path", the "image_data" hint or the
+   deprecated "icon_data" hint.
   </para>
-  <para>
-   The image_path hint should be a string that contains the path to an image
-   to use, or a FreeDesktop.org icon name. For the same reasons as above
-   this icon should be used before the icon specified in the Notification Icon
-   field if present. If the image_data hint is present, this hint should
-   be ignored.
+  <sect2>
+   <title>Priorities</title>
+   <para>
+    An implementation which only displays one image or icon must choose which one
+    to display using the following order:
+    <orderedlist>
+     <listitem><para>"image_data"</para></listitem>
+     <listitem><para>"image_path"</para></listitem>
+     <listitem><para>app_icon parameter</para></listitem>
+     <listitem><para>for compatibility reason, "icon_data"</para></listitem>
+    </orderedlist>
+   </para>
+
+   <para>
+    An implementation which can display both the image and icon must show the
+    icon from the "app_icon" parameter and choose which image to display using
+    the following order:
+    <orderedlist>
+     <listitem><para>"image_data"</para></listitem>
+     <listitem><para>"image_path"</para></listitem>
+     <listitem><para>for compatibility reason, "icon_data"</para></listitem>
+    </orderedlist>
+   </para>
+  </sect2>
+
+  <sect2 id="icons-and-images-formats" xreflabel="Icons and Images Formats">
+   <title>Formats</title>
+   <para>
+    The "image_data" and "icon_data" hints should be a raw image data structure
+    of signature (iiibiiay) which describes the width, height, rowstride, has
+    alpha, bits per sample, channels and image data respectively.
   </para>
-  <para>
-   In existing implementations, a third deprecated hint "icon_data" may be
-   present, and is used similarly to the image_data hint. However,
-   new implementations should not use this hint, and existing
-   implementations should migrate to image_data instead.
-  </para>
+   <para>
+    The "app_icon" parameter and "image_path" hint should be either an URI
+    (file:// is the only URI schema supported right now) or a name in a
+    freedesktop.org-compliant icon theme (not a GTK+ stock ID).
+   </para>
+  </sect2>
  </sect1>
 
  <sect1 id="categories" xreflabel="Categories">
@@ -735,6 +729,7 @@
       <entry>Name</entry>
       <entry>Value Type</entry>
       <entry>Description</entry>
+      <entry>Spec Version</entry>
      </row>
     </thead>
     <tbody valign="top">
@@ -744,6 +739,7 @@
       <entry>
        The urgency level.
       </entry>
+      <entry/>
      </row>
      <row>
       <entry><literal>"category"</literal></entry>
@@ -751,6 +747,7 @@
       <entry>
        The type of notification this is.
       </entry>
+      <entry/>
      </row>
      <row>
       <entry><literal>"desktop-entry"</literal></entry>
@@ -762,15 +759,7 @@
        "rhythmbox.desktop". This can be used by the daemon to retrieve the
        correct icon for the application, for logging purposes, etc.
       </entry>
-     </row>
-     <row>
-      <entry><literal>"image_path"</literal></entry>
-      <entry>string</entry>
-      <entry>
-       This is represented either as a URI (file:// is the only URI
-       schema supported right now) or a name in a
-       freedesktop.org-compliant icon theme (not a GTK+ stock ID).
-      </entry>
+      <entry/>
      </row>
      <row>
       <entry><literal>"image_data"</literal></entry>
@@ -780,6 +769,15 @@
         rowstride, has alpha, bits per sample, channels and image data
         respectively.
       </entry>
+      <entry>&gt;= 1.1</entry>
+     </row>
+     <row>
+      <entry><literal>"image_path"</literal></entry>
+      <entry>string</entry>
+      <entry>
+        Alternative way to define the notification image. See <xref linkend="icons-and-images"/>.
+      </entry>
+      <entry>&gt;= 1.1</entry>
      </row>
      <row>
       <entry><literal>"icon_data"</literal></entry>
@@ -787,6 +785,7 @@
       <entry>
         <emphasis>Deprecated</emphasis>. Use image_data instead.
       </entry>
+      <entry>&lt; 1.1</entry>
      </row>
      <row>
       <entry><literal>"sound-file"</literal></entry>
@@ -794,17 +793,18 @@
       <entry>
        The path to a sound file to play when the notification pops up.
       </entry>
+      <entry/>
      </row>
      <row>
       <entry><literal>"sound-name"</literal></entry>
       <entry>string</entry>
       <entry>
        A themeable named sound from the freedesktop.org
-       <ulink url="http://0pointer.de/public/sound-naming-spec.html">sound
-       naming specification</ulink> to play when the notification pops
-       up. Similar to icon-name, only for sounds. An example would be
-       "message-new-instant".
+       <ulink url="http://0pointer.de/public/sound-naming-spec.html">sound naming specification</ulink>
+       to play when the notification pops up. Similar to icon-name, only for
+       sounds. An example would be "message-new-instant".
       </entry>
+      <entry/>
      </row>
      <row>
       <entry><literal>"suppress-sound"</literal></entry>
@@ -814,6 +814,7 @@
        ability. This is usually set when the client itself is going to
        play its own sound.
       </entry>
+      <entry/>
      </row>
      <row>
       <entry><literal>"x"</literal></entry>
@@ -822,6 +823,7 @@
        Specifies the X location on the screen that the notification should
        point to. The <literal>"y"</literal> hint must also be specified.
       </entry>
+      <entry/>
      </row>
      <row>
       <entry><literal>"y"</literal></entry>
@@ -830,6 +832,7 @@
        Specifies the Y location on the screen that the notification should
        point to. The <literal>"x"</literal> hint must also be specified.
       </entry>
+      <entry/>
      </row>
     </tbody>
    </tgroup>
@@ -996,7 +999,7 @@
         <entry><parameter>app_icon</parameter></entry>
         <entry>STRING</entry>
         <entry>
-         The optional program icon of the calling application. See <xref linkend="icons"/>.
+         The optional program icon of the calling application. See <xref linkend="icons-and-images"/>.
          Can be an empty string, indicating no icon.
         </entry>
        </row>
