@@ -118,6 +118,39 @@ dnl # Set up gtk-doc
 dnl ################################################################
 GTK_DOC_CHECK([1.4])
 
+dnl ---------------------------------------------------------------------------
+dnl - DocBook Documentation
+dnl ---------------------------------------------------------------------------
+
+AC_ARG_ENABLE(docbook-docs,
+	[AC_HELP_STRING([--enable-docbook-docs],
+	[build documentation (requires xmlto)])],
+	enable_docbook_docs=$enableval,enable_docbook_docs=no)
+AC_PATH_PROG(XMLTO, xmlto, no)
+AC_MSG_CHECKING([whether to build DocBook documentation])
+if test x$XMLTO = xno ; then
+	have_docbook=no
+else
+	have_docbook=yes
+fi
+if test x$enable_docbook_docs = xauto ; then
+	 if test x$have_docbook = xno ; then
+		enable_docbook_docs=no
+	else
+		enable_docbook_docs=yes
+	fi
+fi
+if test x$enable_docbook_docs = xyes; then
+	if test x$have_docbook = xno; then
+		AC_MSG_ERROR([Building DocBook docs explicitly required, but DocBook not found])
+	fi
+fi
+AM_CONDITIONAL(DOCBOOK_DOCS_ENABLED, test x$enable_docbook_docs = xyes)
+AC_MSG_RESULT(yes)
+
+AC_ARG_VAR([XMLTO],[Define/override the `xmlto' location.])
+AC_ARG_VAR([XMLTO_FLAGS],[Define/override `xmlto' options, like `--skip-validation'.])
+
 
 # Turn on the additional warnings last
 
