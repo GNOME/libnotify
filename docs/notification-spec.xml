@@ -278,8 +278,9 @@
         </seglistitem>
         <seglistitem>
          <seg>Icon Data</seg>
-         <seg>Instead of overloading the icon field we now have an icon_data
-              field that is used when icon is blank.</seg>
+         <seg>Deprecated and should not be used in new
+         implementations.  Use the Image Data hint instead.
+         </seg>
         </seglistitem>
        </segmentedlist>
       </entry>
@@ -452,12 +453,22 @@
   <title>Icons</title>
   <para>
    A notification can optionally have an icon specified by the Notification
-   Icon field or by the icon_data hint.
+   Icon field or by the image_data or image_path hints.
   </para>
   <para>
-   The icon_data field should be a raw image data structure of signature
+   The image_data field should be a raw image data structure of signature
    (iiibiiay) which describes the width, height, rowstride, has alpha, bits
    per sample, channels and image data respectively.
+  </para>
+  <para>
+   The image_path hint should be a string that contains the path to an image
+   to use, or a FreeDesktop.org icon name.
+  </para>
+  <para>
+   In existing implementations, a third deprecated hint "icon_data" may be
+   present, and is used similarly to the image_data hint. However,
+   new implementations should not use this hint, and existing
+   implementations should migrate to image_data instead.
   </para>
  </sect1>
 
@@ -746,12 +757,28 @@
       </entry>
      </row>
      <row>
-      <entry><literal>"icon_data"</literal></entry>
+      <entry><literal>"image_path"</literal></entry>
+      <entry>string</entry>
+      <entry>
+       This is represented either as a URI (file:// is the only URI
+       schema supported right now) or a name in a
+       freedesktop.org-compliant icon theme (not a GTK+ stock ID).
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"image_data"</literal></entry>
       <entry>(iiibiiay)</entry>
       <entry>
         This is a raw data image format which describes the width, height,
         rowstride, has alpha, bits per sample, channels and image data
-        respectively. We use this value if the icon field is left blank.
+        respectively.
+      </entry>
+     </row>
+     <row>
+      <entry><literal>"icon_data"</literal></entry>
+      <entry>(iiibiiay)</entry>
+      <entry>
+        <emphasis>Deprecated</emphasis>. Use image_data instead.
       </entry>
      </row>
      <row>
