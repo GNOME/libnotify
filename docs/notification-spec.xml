@@ -456,13 +456,20 @@
    Icon field or by the image_data or image_path hints.
   </para>
   <para>
-   The image_data field should be a raw image data structure of signature
+   The image_data hint should be a raw image data structure of signature
    (iiibiiay) which describes the width, height, rowstride, has alpha, bits
-   per sample, channels and image data respectively.
+   per sample, channels and image data respectively. If an implementation
+   cannot display multiple icons then image_data should be preferred over
+   the Notification Icon field, as this icon is generally used to provide
+   more specific information about the notification (for example, a chat
+   application may use this field for a contact's icon).
   </para>
   <para>
    The image_path hint should be a string that contains the path to an image
-   to use, or a FreeDesktop.org icon name.
+   to use, or a FreeDesktop.org icon name. For the same reasons as above
+   this icon should be used before the icon specified in the Notification Icon
+   field if present. If the image_data hint is present, this hint should
+   be ignored.
   </para>
   <para>
    In existing implementations, a third deprecated hint "icon_data" may be
