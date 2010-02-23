@@ -77,9 +77,6 @@ _notify_update_spec_version (void)
 gboolean
 notify_init (const char *app_name)
 {
-        GError          *error = NULL;
-        DBusGConnection *bus = NULL;
-
         g_return_val_if_fail (app_name != NULL, FALSE);
         g_return_val_if_fail (*app_name != '\0', FALSE);
 
@@ -89,46 +86,6 @@ notify_init (const char *app_name)
         _app_name = g_strdup (app_name);
 
         g_type_init ();
-
-        bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
-
-        if (error != NULL) {
-                g_message ("Unable to get session bus: %s", error->message);
-                g_error_free (error);
-                return FALSE;
-        }
-
-        _proxy = dbus_g_proxy_new_for_name (bus,
-                                            NOTIFY_DBUS_NAME,
-                                            NOTIFY_DBUS_CORE_OBJECT,
-                                            NOTIFY_DBUS_CORE_INTERFACE);
-        dbus_g_connection_unref (bus);
-
-        dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_UINT,
-                                           G_TYPE_NONE,
-                                           G_TYPE_UINT,
-                                           G_TYPE_UINT, G_TYPE_INVALID);
-
-        dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_STRING,
-                                           G_TYPE_NONE,
-                                           G_TYPE_UINT,
-                                           G_TYPE_STRING, G_TYPE_INVALID);
-
-        dbus_g_proxy_add_signal (_proxy,
-                                 "NotificationClosed",
-                                 G_TYPE_UINT,
-                                 G_TYPE_UINT,
-                                 G_TYPE_INVALID);
-        dbus_g_proxy_add_signal (_proxy,
-                                 "ActionInvoked",
-                                 G_TYPE_UINT,
-                                 G_TYPE_STRING,
-                                 G_TYPE_INVALID);
-
-        if (!_notify_update_spec_version ()) {
-               g_message ("Error getting spec version");
-               return FALSE;
-        }
 
         _initted = TRUE;
 
@@ -205,6 +162,53 @@ _notify_get_dbus_g_conn (void)
 DBusGProxy *
 _notify_get_g_proxy (void)
 {
+        GError          *error = NULL;
+        DBusGConnection *bus = NULL;
+
+        if (_proxy != NULL)
+                return _proxy;
+
+        /* lazily initialize D-Bus connection */
+        bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+
+        if (error != NULL) {
+                g_message ("Unable to get session bus: %s", error->message);
+                g_error_free (error);
+                return NULL;
+        }
+
+        _proxy = dbus_g_proxy_new_for_name (bus,
+                                            NOTIFY_DBUS_NAME,
+                                            NOTIFY_DBUS_CORE_OBJECT,
+                                            NOTIFY_DBUS_CORE_INTERFACE);
+        dbus_g_connection_unref (bus);
+
+        dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_UINT,
+                                           G_TYPE_NONE,
+                                           G_TYPE_UINT,
+                                           G_TYPE_UINT, G_TYPE_INVALID);
+
+        dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_STRING,
+                                           G_TYPE_NONE,
+                                           G_TYPE_UINT,
+                                           G_TYPE_STRING, G_TYPE_INVALID);
+
+        dbus_g_proxy_add_signal (_proxy,
+                                 "NotificationClosed",
+                                 G_TYPE_UINT,
+                                 G_TYPE_UINT,
+                                 G_TYPE_INVALID);
+        dbus_g_proxy_add_signal (_proxy,
+                                 "ActionInvoked",
+                                 G_TYPE_UINT,
+                                 G_TYPE_STRING,
+                                 G_TYPE_INVALID);
+
+        if (!_notify_update_spec_version ()) {
+               g_message ("Error getting spec version");
+               return NULL;
+        }
+
         return _proxy;
 }
 
