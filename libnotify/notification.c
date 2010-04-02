@@ -480,37 +480,6 @@ _notify_notification_update_applet_hints (NotifyNotification *n)
         notify_notification_set_geometry_hints (n, screen, x, y);
 }
 
-#if 0
-
-/*
- * This is left here just incase we revisit autoupdating
- * One thought would be to check for updates every time the icon
- * is redrawn but we still have to deal with the race conditions
- * that could occure between the server and the client so we will
- * leave this alone for now.
- */
-static gboolean
-_idle_check_updates (void *user_data)
-{
-        NotifyNotification        *n = NOTIFY_NOTIFICATION (user_data);
-        NotifyNotificationPrivate *priv = n->priv;
-
-        if (priv->is_visible) {
-                priv->updates_pending =
-                        _notify_notification_update_applet_hints (n);
-
-                if (priv->updates_pending) {
-                        /* Try again if we fail on next idle */
-                        priv->updates_pending = !notify_notification_show (n, NULL);
-                }
-        } else {
-                priv->updates_pending = FALSE;
-        }
-
-        return TRUE;
-}
-#endif
-
 /**
  * notify_notification_new:
  * @summary: The required summary text.
