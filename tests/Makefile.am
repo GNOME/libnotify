@@ -8,6 +8,7 @@ noinst_PROGRAMS = \
 	test-basic \
 	test-error \
 	test-markup \
+	test-rtl \
 	test-size-changes \
 	test-urgency \
 	test-xy \
@@ -60,6 +61,9 @@ test_xy_actions_LDADD = $(common_ldflags)
 
 test_xy_stress_SOURCES = test-xy-stress.c
 test_xy_stress_LDADD = $(common_ldflags)
+
+test_rtl_SOURCES = test-rtl.c
+test_rtl_LDADD = $(common_ldflags)
 
 EXTRA_DIST = applet-critical.png
 
