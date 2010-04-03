@@ -420,13 +420,6 @@ notify_notification_finalize (GObject *object)
         G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
-static GtkWidget *
-get_internal_tray_icon (GtkStatusIcon *status)
-{
-        /* This function is a temporary hack */
-        return GTK_WIDGET (*((GtkWidget **) (status->priv)));
-}
-
 static void
 _notify_notification_update_applet_hints (NotifyNotification *n)
 {
@@ -436,43 +429,39 @@ _notify_notification_update_applet_hints (NotifyNotification *n)
 
         if (priv->status_icon != NULL) {
                 GdkRectangle    rect;
-                GtkWidget      *internal_tray = get_internal_tray_icon (priv->status_icon);
                 GdkWindow      *window;
+                guint32         xid;
 
-                // TODO: this is sort of a hack, but we need a window ID to send along
-                gtk_widget_realize (internal_tray);
-                window = internal_tray->window;
-
-                if (window != NULL) {
-                        guint32 xid = GDK_WINDOW_XID (window);
-
-                        notify_notification_set_hint_uint32 (n,
-                                                             "window-xid",
-                                                             xid);
+                xid = gtk_status_icon_get_x11_window_id (priv->status_icon);
+                if (xid > 0) {
+                        notify_notification_set_hint_uint32 (n, "window-xid", xid);
                 }
 
                 if (!gtk_status_icon_get_geometry (priv->status_icon,
                                                    &screen,
-                                                   &rect, NULL)) {
+                                                   &rect,
+                                                   NULL)) {
                         return;
                 }
 
                 x = rect.x + rect.width / 2;
                 y = rect.y + rect.height / 2;
         } else if (priv->attached_widget != NULL) {
-                GtkWidget *widget = priv->attached_widget;
+                GtkWidget    *widget = priv->attached_widget;
+                GtkAllocation allocation;
 
                 screen = gtk_widget_get_screen (widget);
 
-                gdk_window_get_origin (widget->window, &x, &y);
+                gdk_window_get_origin (gtk_widget_get_window (widget), &x, &y);
+                gtk_widget_get_allocation (widget, &allocation);
 
-                if (GTK_WIDGET_NO_WINDOW (widget)) {
-                        x += widget->allocation.x;
-                        y += widget->allocation.y;
+                if (!gtk_widget_get_has_window (widget)) {
+                        x += allocation.x;
+                        y += allocation.y;
                 }
 
-                x += widget->allocation.width / 2;
-                y += widget->allocation.height / 2;
+                x += allocation.width / 2;
+                y += allocation.height / 2;
         } else {
                 return;
         }
