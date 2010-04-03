@@ -125,7 +125,7 @@ int
 main (int argc, char *argv[])
 {
         static const char  *summary = NULL;
-        static const char  *body = "";
+        char               *body;
         static const char  *type = NULL;
         static char        *icon_str = NULL;
         static char        *icons = NULL;
@@ -167,6 +167,8 @@ main (int argc, char *argv[])
                 {NULL}
         };
 
+        body = NULL;
+
         g_type_init ();
 
         g_set_prgname (argv[0]);
@@ -197,7 +199,7 @@ main (int argc, char *argv[])
         }
 
         if (n_text[1] != NULL) {
-                body = n_text[1];
+                body = g_strcompress (n_text[1]);
 
                 if (n_text[2] != NULL) {
                         fprintf (stderr, "%s\n",
@@ -219,12 +221,17 @@ main (int argc, char *argv[])
         if (!notify_init ("notify-send"))
                 exit (1);
 
-        notify = notify_notification_new (summary, body, icon_str, NULL);
+        notify = notify_notification_new (summary,
+                                          body == NULL ? "" : body,
+                                          icon_str,
+                                          NULL);
         notify_notification_set_category (notify, type);
         notify_notification_set_urgency (notify, urgency);
         notify_notification_set_timeout (notify, expire_timeout);
 
-        // Set hints
+        g_free (body);
+
+        /* Set hints */
         if (hints != NULL) {
                 gint            i = 0;
                 gint            l;
