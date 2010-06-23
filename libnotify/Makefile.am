@@ -37,17 +37,17 @@ libnotify_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
 notify-marshal.h: notify-marshal.list
-	$(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
 		--header > notify-marshal.h
 
 notify-marshal.c: notify-marshal.list
-	$(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
-		--body > notify-marshal.c
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
+		--header --body > notify-marshal.c
 
 $(ENUM_FILE).h: s-enum-types-h
 	@true
 s-enum-types-h: $(notify_headers) Makefile
-	( cd $(srcdir) && glib-mkenums \
+	$(AM_V_GEN) ( cd $(srcdir) && glib-mkenums \
 			--fhead "#ifndef _NOTIFY_ENUM_TYPES_H_\n#define _NOTIFY_ENUM_TYPES_H_\n\n#include <glib-object.h>\n\nG_BEGIN_DECLS\n" \
 			--fprod "/* enumerations from \"@filename@\" */\n" \
 			--vhead "GType @enum_name@_get_type(void);\n#define NOTIFY_TYPE_@ENUMSHORT@ (@enum_name@_get_type())\n"	\
@@ -60,7 +60,7 @@ s-enum-types-h: $(notify_headers) Makefile
 $(ENUM_FILE).c: s-enum-types-c
 	@true
 s-enum-types-c: $(notify_headers) Makefile
-	( cd $(srcdir) && glib-mkenums \
+	$(AM_V_GEN) ( cd $(srcdir) && glib-mkenums \
 			--fhead "#include <libnotify/notify.h>" \
 			--fprod "\n/* enumerations from \"@filename@\" */" \
 			--vhead "GType\n@enum_name@_get_type (void)\n{\n  static GType etype = 0;\n  if (etype == 0) {\n    static const G@Type@Value values[] = {" 	\
