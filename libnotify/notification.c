@@ -429,7 +429,6 @@ _notify_notification_update_applet_hints (NotifyNotification *n)
 
         if (priv->status_icon != NULL) {
                 GdkRectangle    rect;
-                GdkWindow      *window;
                 guint32         xid;
 
                 xid = gtk_status_icon_get_x11_window_id (priv->status_icon);
