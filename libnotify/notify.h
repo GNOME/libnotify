@@ -35,8 +35,7 @@ G_BEGIN_DECLS
  *
  * @param app_name The application name.
  *
- * @return TRUE if the library initialized properly and a connection to a
- *         notification server was made.
+ * @return TRUE if the library initialized properly.
  */
 gboolean        notify_init (const char *app_name);
 
