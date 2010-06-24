@@ -383,6 +383,23 @@ notify_notification_init (NotifyNotification *obj)
 }
 
 static void
+on_proxy_destroy (DBusGProxy         *proxy,
+                  NotifyNotification *notification)
+{
+        if (notification->priv->signals_registered) {
+                dbus_g_proxy_disconnect_signal (proxy,
+                                                "NotificationClosed",
+                                                G_CALLBACK (_close_signal_handler),
+                                                notification);
+                dbus_g_proxy_disconnect_signal (proxy,
+                                                "ActionInvoked",
+                                                G_CALLBACK (_action_signal_handler),
+                                                notification);
+                notification->priv->signals_registered = FALSE;
+        }
+}
+
+static void
 notify_notification_finalize (GObject *object)
 {
         NotifyNotification        *obj = NOTIFY_NOTIFICATION (object);
@@ -415,6 +432,10 @@ notify_notification_finalize (GObject *object)
 
         proxy = _notify_get_g_proxy ();
         if (proxy != NULL && priv->signals_registered) {
+                g_signal_handlers_disconnect_by_func (proxy,
+                                                      G_CALLBACK (on_proxy_destroy),
+                                                      object);
+
                 dbus_g_proxy_disconnect_signal (proxy,
                                                 "NotificationClosed",
                                                 G_CALLBACK (_close_signal_handler),
@@ -748,24 +769,6 @@ _gslist_to_string_array (GSList *list)
 
         return (char **) g_array_free (a, FALSE);
 }
-
-static void
-on_proxy_destroy (DBusGProxy         *proxy,
-                  NotifyNotification *notification)
-{
-        if (notification->priv->signals_registered) {
-                dbus_g_proxy_disconnect_signal (proxy,
-                                                "NotificationClosed",
-                                                G_CALLBACK (_close_signal_handler),
-                                                notification);
-                dbus_g_proxy_disconnect_signal (proxy,
-                                                "ActionInvoked",
-                                                G_CALLBACK (_action_signal_handler),
-                                                notification);
-                notification->priv->signals_registered = FALSE;
-        }
-}
-
 
 /**
  * notify_notification_show:
