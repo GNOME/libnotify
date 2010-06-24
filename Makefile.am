@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS = libnotify docs tools tests
 
 pcdata_DATA = libnotify.pc
