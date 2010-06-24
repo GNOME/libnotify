@@ -959,6 +959,7 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         gint            bits_per_sample;
         gint            n_channels;
         guchar         *image;
+        gboolean        has_alpha;
         gsize           image_len;
         GValueArray    *image_struct;
         GValue         *value;
@@ -969,23 +970,24 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
 #if CHECK_DBUS_VERSION(0, 60)
-        width = gdk_pixbuf_get_width (pixbuf);
-        height = gdk_pixbuf_get_height (pixbuf);
-        rowstride = gdk_pixbuf_get_rowstride (pixbuf);
-        n_channels = gdk_pixbuf_get_n_channels (pixbuf);
-        bits_per_sample = gdk_pixbuf_get_bits_per_sample (pixbuf);
+        g_object_get (pixbuf,
+                      "width", &width,
+                      "height", &height,
+                      "rowstride", &rowstride,
+                      "n-channels", &n_channels,
+                      "bits-per-sample", &bits_per_sample,
+                      "pixels", &image,
+                      "has-alpha", &has_alpha,
+                      NULL);
         image_len = (height - 1) * rowstride + width *
                 ((n_channels * bits_per_sample + 7) / 8);
-
-        image = gdk_pixbuf_get_pixels (pixbuf);
 
         image_struct = g_value_array_new (1);
 
         _gvalue_array_append_int (image_struct, width);
         _gvalue_array_append_int (image_struct, height);
         _gvalue_array_append_int (image_struct, rowstride);
-        _gvalue_array_append_bool (image_struct,
-                                   gdk_pixbuf_get_has_alpha (pixbuf));
+        _gvalue_array_append_bool (image_struct, has_alpha);
         _gvalue_array_append_int (image_struct, bits_per_sample);
         _gvalue_array_append_int (image_struct, n_channels);
         _gvalue_array_append_byte_array (image_struct, image, image_len);
