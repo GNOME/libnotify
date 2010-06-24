@@ -64,7 +64,7 @@ main ()
                                      NULL,
                                      NULL,
                                      NULL);
-        notify_notification_set_timeout (n, 3000);      //3 seconds
+        notify_notification_set_timeout (n, NOTIFY_EXPIRES_NEVER);
 
         if (!notify_notification_show (n, NULL)) {
                 fprintf (stderr, "failed to send notification\n");
