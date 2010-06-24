@@ -184,7 +184,6 @@ _notify_get_g_proxy (void)
         bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
 
         if (error != NULL) {
-                g_message ("Unable to get session bus: %s", error->message);
                 g_error_free (error);
                 return NULL;
         }
@@ -224,7 +223,6 @@ _notify_get_g_proxy (void)
                                  G_TYPE_INVALID);
 
         if (!_notify_update_spec_version ()) {
-               g_message ("Error getting spec version");
                return NULL;
         }
 
@@ -263,7 +261,6 @@ notify_get_server_caps (void)
                                 G_TYPE_STRV,
                                 &caps,
                                 G_TYPE_INVALID)) {
-                g_message ("GetCapabilities call failed: %s", error->message);
                 g_error_free (error);
                 return NULL;
         }
@@ -319,8 +316,6 @@ notify_get_server_info (char **ret_name,
                                 G_TYPE_STRING, &version,
                                 G_TYPE_STRING, &spec_version,
                                 G_TYPE_INVALID)) {
-                g_message ("GetServerInformation call failed: %s",
-                           error->message);
                 return FALSE;
         }
 
