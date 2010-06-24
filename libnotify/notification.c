@@ -404,7 +404,7 @@ notify_notification_finalize (GObject *object)
                 g_object_remove_weak_pointer (G_OBJECT (priv->status_icon),
                                               (gpointer) & priv->status_icon);
 
-        if (priv->signals_registered) {
+        if (proxy != NULL && priv->signals_registered) {
                 dbus_g_proxy_disconnect_signal (proxy,
                                                 "NotificationClosed",
                                                 G_CALLBACK (_close_signal_handler),
@@ -734,6 +734,24 @@ _gslist_to_string_array (GSList *list)
         return (char **) g_array_free (a, FALSE);
 }
 
+static void
+on_proxy_destroy (DBusGProxy         *proxy,
+                  NotifyNotification *notification)
+{
+        if (notification->priv->signals_registered) {
+                dbus_g_proxy_disconnect_signal (proxy,
+                                                "NotificationClosed",
+                                                G_CALLBACK (_close_signal_handler),
+                                                notification);
+                dbus_g_proxy_disconnect_signal (proxy,
+                                                "ActionInvoked",
+                                                G_CALLBACK (_action_signal_handler),
+                                                notification);
+                notification->priv->signals_registered = FALSE;
+        }
+}
+
+
 /**
  * notify_notification_show:
  * @notification: The notification.
@@ -759,8 +777,17 @@ notify_notification_show (NotifyNotification *notification,
 
         priv = notification->priv;
         proxy = _notify_get_g_proxy ();
+        if (proxy == NULL) {
+                g_set_error (error, 0, 0, "Unable to connect to server");
+                return FALSE;
+        }
 
         if (!priv->signals_registered) {
+                g_signal_connect (proxy,
+                                  "destroy",
+                                  G_CALLBACK (on_proxy_destroy),
+                                  notification);
+
                 dbus_g_proxy_connect_signal (proxy,
                                              "NotificationClosed",
                                              G_CALLBACK (_close_signal_handler),
@@ -1308,6 +1335,7 @@ notify_notification_close (NotifyNotification *notification,
 {
         NotifyNotificationPrivate *priv;
         GError         *tmp_error = NULL;
+        DBusGProxy     *proxy;
 
         g_return_val_if_fail (notification != NULL, FALSE);
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
@@ -1315,7 +1343,13 @@ notify_notification_close (NotifyNotification *notification,
 
         priv = notification->priv;
 
-        dbus_g_proxy_call (_notify_get_g_proxy (),
+        proxy = _notify_get_g_proxy ();
+        if (proxy == NULL) {
+                g_set_error (error, 0, 0, "Unable to connect to server");
+                return FALSE;
+        }
+
+        dbus_g_proxy_call (proxy,
                            "CloseNotification",
                            &tmp_error,
                            G_TYPE_UINT,

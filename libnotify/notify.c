@@ -159,6 +159,13 @@ _notify_get_dbus_g_conn (void)
         return _dbus_gconn;
 }
 
+static void
+on_proxy_destroy (DBusGProxy *proxy,
+                  gpointer    data)
+{
+        _proxy = NULL;
+}
+
 DBusGProxy *
 _notify_get_g_proxy (void)
 {
@@ -182,6 +189,11 @@ _notify_get_g_proxy (void)
                                             NOTIFY_DBUS_CORE_OBJECT,
                                             NOTIFY_DBUS_CORE_INTERFACE);
         dbus_g_connection_unref (bus);
+
+        g_signal_connect (_proxy,
+                          "destroy",
+                          G_CALLBACK (on_proxy_destroy),
+                          NULL);
 
         dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_UINT,
                                            G_TYPE_NONE,
@@ -226,9 +238,12 @@ notify_get_server_caps (void)
         char          **caps = NULL;
         char          **cap;
         GList          *result = NULL;
-        DBusGProxy     *proxy = _notify_get_g_proxy ();
+        DBusGProxy     *proxy;
 
-        g_return_val_if_fail (proxy != NULL, NULL);
+        proxy = _notify_get_g_proxy ();
+        if (proxy == NULL) {
+                return NULL;
+        }
 
         if (!dbus_g_proxy_call (proxy,
                                 "GetCapabilities",
@@ -273,13 +288,16 @@ notify_get_server_info (char **ret_name,
                         char **ret_spec_version)
 {
         GError         *error = NULL;
-        DBusGProxy     *proxy = _notify_get_g_proxy ();
+        DBusGProxy     *proxy;
         char           *name;
         char           *vendor;
         char           *version;
         char           *spec_version;
 
-        g_return_val_if_fail (proxy != NULL, FALSE);
+        proxy = _notify_get_g_proxy ();
+        if (proxy == NULL) {
+                return FALSE;
+        }
 
         if (!dbus_g_proxy_call (proxy,
                                 "GetServerInformation",
