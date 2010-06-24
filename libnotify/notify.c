@@ -182,7 +182,6 @@ _notify_get_g_proxy (void)
         /* lazily initialize D-Bus connection */
         error = NULL;
         bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
-
         if (error != NULL) {
                 g_error_free (error);
                 return NULL;
@@ -295,7 +294,7 @@ notify_get_server_info (char **ret_name,
                         char **ret_version,
                         char **ret_spec_version)
 {
-        GError         *error = NULL;
+        GError         *error;
         DBusGProxy     *proxy;
         char           *name;
         char           *vendor;
@@ -307,6 +306,7 @@ notify_get_server_info (char **ret_name,
                 return FALSE;
         }
 
+        error = NULL;
         if (!dbus_g_proxy_call (proxy,
                                 "GetServerInformation",
                                 &error,
@@ -316,6 +316,7 @@ notify_get_server_info (char **ret_name,
                                 G_TYPE_STRING, &version,
                                 G_TYPE_STRING, &spec_version,
                                 G_TYPE_INVALID)) {
+                g_error_free (error);
                 return FALSE;
         }
 
