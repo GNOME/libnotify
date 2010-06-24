@@ -222,7 +222,7 @@ main (int argc, char *argv[])
                 exit (1);
 
         notify = notify_notification_new (summary,
-                                          body == NULL ? "" : body,
+                                          body,
                                           icon_str,
                                           NULL);
         notify_notification_set_category (notify, type);
