@@ -1,9 +1,8 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*-
  *
- * @file libnotify/notify.c Notifications library
- *
- * @Copyright (C) 2004-2006 Christian Hammond <chipx86@chipx86.com>
- * @Copyright (C) 2004-2006 Mike Hearn <mike@navi.cx>
+ * Copyright (C) 2004-2006 Christian Hammond <chipx86@chipx86.com>
+ * Copyright (C) 2004-2006 Mike Hearn <mike@navi.cx>
+ * Copyright (C) 2010 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,13 +20,16 @@
  * Boston, MA  02111-1307, USA.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <unistd.h>
-#include <libnotify/notify.h>
-#include <libnotify/internal.h>
-#include <libnotify/notify-marshal.h>
+
+#include "notify.h"
+#include "internal.h"
+#include "notify-marshal.h"
 
 static gboolean         _initted = FALSE;
 static char            *_app_name = NULL;
@@ -53,8 +55,9 @@ _notify_update_spec_version (void)
 {
        char *spec_version;
 
-       if (!notify_get_server_info (NULL, NULL, NULL, &spec_version))
+       if (!notify_get_server_info (NULL, NULL, NULL, &spec_version)) {
                return FALSE;
+       }
 
        sscanf (spec_version,
                "%d.%d",
@@ -118,8 +121,9 @@ notify_uninit (void)
 {
         GList *l;
 
-        if (!_initted)
+        if (!_initted) {
                 return;
+        }
 
         if (_app_name != NULL) {
                 g_free (_app_name);
@@ -169,13 +173,14 @@ on_proxy_destroy (DBusGProxy *proxy,
 DBusGProxy *
 _notify_get_g_proxy (void)
 {
-        GError          *error = NULL;
-        DBusGConnection *bus = NULL;
+        GError          *error;
+        DBusGConnection *bus;
 
         if (_proxy != NULL)
                 return _proxy;
 
         /* lazily initialize D-Bus connection */
+        error = NULL;
         bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
 
         if (error != NULL) {
@@ -198,12 +203,14 @@ _notify_get_g_proxy (void)
         dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_UINT,
                                            G_TYPE_NONE,
                                            G_TYPE_UINT,
-                                           G_TYPE_UINT, G_TYPE_INVALID);
+                                           G_TYPE_UINT,
+                                           G_TYPE_INVALID);
 
         dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_STRING,
                                            G_TYPE_NONE,
                                            G_TYPE_UINT,
-                                           G_TYPE_STRING, G_TYPE_INVALID);
+                                           G_TYPE_STRING,
+                                           G_TYPE_INVALID);
 
         dbus_g_proxy_add_signal (_proxy,
                                  "NotificationClosed",
@@ -231,20 +238,24 @@ _notify_get_g_proxy (void)
  *
  * Returns: A #GList of server capability strings.
  */
-GList          *
+GList *
 notify_get_server_caps (void)
 {
-        GError         *error = NULL;
-        char          **caps = NULL;
+        GError         *error;
+        char          **caps;
         char          **cap;
-        GList          *result = NULL;
+        GList          *result;
         DBusGProxy     *proxy;
+
+        caps = NULL;
+        result = NULL;
 
         proxy = _notify_get_g_proxy ();
         if (proxy == NULL) {
                 return NULL;
         }
 
+        error = NULL;
         if (!dbus_g_proxy_call (proxy,
                                 "GetCapabilities",
                                 &error,
@@ -313,37 +324,41 @@ notify_get_server_info (char **ret_name,
                 return FALSE;
         }
 
-        if (ret_name != NULL)
+        if (ret_name != NULL) {
                 *ret_name = name;
-        else
+        } else {
                 g_free (name);
+        }
 
-        if (ret_vendor != NULL)
+        if (ret_vendor != NULL) {
                 *ret_vendor = vendor;
-        else
+        } else {
                 g_free (vendor);
+        }
 
-        if (ret_version != NULL)
+        if (ret_version != NULL) {
                 *ret_version = version;
-        else
+        } else {
                 g_free (version);
+        }
 
-        if (spec_version != NULL)
+        if (spec_version != NULL) {
                 *ret_spec_version = spec_version;
-        else
+        } else {
                 g_free (spec_version);
+        }
 
         return TRUE;
 }
 
 void
-_notify_cache_add_notification (NotifyNotification * n)
+_notify_cache_add_notification (NotifyNotification *n)
 {
         _active_notifications = g_list_prepend (_active_notifications, n);
 }
 
 void
-_notify_cache_remove_notification (NotifyNotification * n)
+_notify_cache_remove_notification (NotifyNotification *n)
 {
         _active_notifications = g_list_remove (_active_notifications, n);
 }

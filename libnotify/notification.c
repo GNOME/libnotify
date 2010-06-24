@@ -1,9 +1,8 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*-
  *
- * @file libnotify/notification.c Notification object
- *
- * @Copyright (C) 2006 Christian Hammond
- * @Copyright (C) 2006 John Palmieri
+ * Copyright (C) 2006 Christian Hammond
+ * Copyright (C) 2006 John Palmieri
+ * Copyright (C) 2010 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,15 +19,17 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
+
 #include "config.h"
+
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 
-#include <libnotify/notify.h>
-#include <libnotify/internal.h>
-
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+
+#include "notify.h"
+#include "internal.h"
 
 #define CHECK_DBUS_VERSION(major, minor) \
         (DBUS_MAJOR_VER > (major) || \
@@ -162,10 +163,15 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                 g_signal_new ("closed",
                               G_TYPE_FROM_CLASS (object_class),
                               G_SIGNAL_RUN_FIRST,
-                              G_STRUCT_OFFSET (NotifyNotificationClass, closed), NULL, NULL,
-                              g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+                              G_STRUCT_OFFSET (NotifyNotificationClass, closed),
+                              NULL,
+                              NULL,
+                              g_cclosure_marshal_VOID__VOID,
+                              G_TYPE_NONE,
+                              0);
 
-        g_object_class_install_property (object_class, PROP_ID,
+        g_object_class_install_property (object_class,
+                                         PROP_ID,
                                          g_param_spec_int ("id", "ID",
                                                            "The notification ID",
                                                            0,
@@ -177,7 +183,8 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                            | G_PARAM_STATIC_NICK
                                                            | G_PARAM_STATIC_BLURB));
 
-        g_object_class_install_property (object_class, PROP_SUMMARY,
+        g_object_class_install_property (object_class,
+                                         PROP_SUMMARY,
                                          g_param_spec_string ("summary",
                                                               "Summary",
                                                               "The summary text",
@@ -188,7 +195,8 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
 
-        g_object_class_install_property (object_class, PROP_BODY,
+        g_object_class_install_property (object_class,
+                                         PROP_BODY,
                                          g_param_spec_string ("body",
                                                               "Message Body",
                                                               "The message body text",
@@ -199,7 +207,8 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
 
-        g_object_class_install_property (object_class, PROP_ICON_NAME,
+        g_object_class_install_property (object_class,
+                                         PROP_ICON_NAME,
                                          g_param_spec_string ("icon-name",
                                                               "Icon Name",
                                                               "The icon filename or icon theme-compliant name",
@@ -210,7 +219,8 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
 
-        g_object_class_install_property (object_class, PROP_ATTACH_WIDGET,
+        g_object_class_install_property (object_class,
+                                         PROP_ATTACH_WIDGET,
                                          g_param_spec_object ("attach-widget",
                                                               "Attach Widget",
                                                               "The widget to attach the notification to",
@@ -221,7 +231,8 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
 
-        g_object_class_install_property (object_class, PROP_STATUS_ICON,
+        g_object_class_install_property (object_class,
+                                         PROP_STATUS_ICON,
                                          g_param_spec_object ("status-icon",
                                                               "Status Icon",
                                                               "The status icon to attach the notification to",
@@ -232,7 +243,8 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
 
-        g_object_class_install_property (object_class, PROP_CLOSED_REASON,
+        g_object_class_install_property (object_class,
+                                         PROP_CLOSED_REASON,
                                          g_param_spec_int ("closed-reason",
                                                            "Closed Reason",
                                                            "The reason code for why the notification was closed",
@@ -350,8 +362,9 @@ _g_value_free (GValue *value)
 static void
 destroy_pair (CallbackPair *pair)
 {
-        if (pair->user_data != NULL && pair->free_func != NULL)
+        if (pair->user_data != NULL && pair->free_func != NULL) {
                 pair->free_func (pair->user_data);
+        }
 
         g_free (pair);
 }
@@ -378,7 +391,7 @@ notify_notification_finalize (GObject *object)
 {
         NotifyNotification        *obj = NOTIFY_NOTIFICATION (object);
         NotifyNotificationPrivate *priv = obj->priv;
-        DBusGProxy                *proxy = _notify_get_g_proxy ();
+        DBusGProxy                *proxy;
 
         _notify_cache_remove_notification (obj);
 
@@ -404,6 +417,7 @@ notify_notification_finalize (GObject *object)
                 g_object_remove_weak_pointer (G_OBJECT (priv->status_icon),
                                               (gpointer) & priv->status_icon);
 
+        proxy = _notify_get_g_proxy ();
         if (proxy != NULL && priv->signals_registered) {
                 dbus_g_proxy_disconnect_signal (proxy,
                                                 "NotificationClosed",
@@ -492,7 +506,8 @@ notify_notification_new (const char *summary,
                              "summary", summary,
                              "body", body,
                              "icon-name", icon,
-                             "attach-widget", attach, NULL);
+                             "attach-widget", attach,
+                             NULL);
 }
 
 /**
@@ -712,8 +727,9 @@ _action_signal_handler (DBusGProxy         *proxy,
                                                      action);
 
         if (pair == NULL) {
-                if (g_ascii_strcasecmp (action, "default"))
+                if (g_ascii_strcasecmp (action, "default")) {
                         g_warning ("Received unknown action %s", action);
+                }
         } else {
                 pair->cb (notification, action, pair->user_data);
         }
@@ -722,14 +738,17 @@ _action_signal_handler (DBusGProxy         *proxy,
 static char  **
 _gslist_to_string_array (GSList *list)
 {
-        GSList         *l;
-        GArray         *a = g_array_sized_new (TRUE,
-                                               FALSE,
-                                               sizeof (char *),
-                                               g_slist_length (list));
+        GSList *l;
+        GArray *a;
 
-        for (l = list; l != NULL; l = l->next)
+        a = g_array_sized_new (TRUE,
+                               FALSE,
+                               sizeof (char *),
+                               g_slist_length (list));
+
+        for (l = list; l != NULL; l = l->next) {
                 g_array_append_val (a, l->data);
+        }
 
         return (char **) g_array_free (a, FALSE);
 }
@@ -809,7 +828,9 @@ notify_notification_show (NotifyNotification *notification,
         action_array = _gslist_to_string_array (priv->actions);
 
         /* TODO: make this nonblocking */
-        dbus_g_proxy_call (proxy, "Notify", &tmp_error,
+        dbus_g_proxy_call (proxy,
+                           "Notify",
+                           &tmp_error,
                            G_TYPE_STRING, notify_get_app_name (),
                            G_TYPE_UINT, priv->id,
                            G_TYPE_STRING, priv->icon_name,
@@ -822,7 +843,8 @@ notify_notification_show (NotifyNotification *notification,
                            priv->hints,
                            G_TYPE_INT, priv->timeout,
                            G_TYPE_INVALID,
-                           G_TYPE_UINT, &priv->id, G_TYPE_INVALID);
+                           G_TYPE_UINT, &priv->id,
+                           G_TYPE_INVALID);
 
         /* Don't free the elements because they are owned by priv->actions */
         g_free (action_array);
@@ -909,7 +931,7 @@ static void
 _gvalue_array_append_int (GValueArray *array,
                           gint         i)
 {
-        GValue          value = { 0 };
+        GValue value = { 0 };
 
         g_value_init (&value, G_TYPE_INT);
         g_value_set_int (&value, i);
@@ -920,7 +942,7 @@ _gvalue_array_append_int (GValueArray *array,
 static void
 _gvalue_array_append_bool (GValueArray *array, gboolean b)
 {
-        GValue          value = { 0 };
+        GValue value = { 0 };
 
         g_value_init (&value, G_TYPE_BOOLEAN);
         g_value_set_boolean (&value, b);
@@ -933,8 +955,8 @@ _gvalue_array_append_byte_array (GValueArray *array,
                                  guchar      *bytes,
                                  gsize        len)
 {
-        GArray         *byte_array;
-        GValue          value = { 0 };
+        GArray *byte_array;
+        GValue  value = { 0 };
 
         byte_array = g_array_sized_new (FALSE, FALSE, sizeof (guchar), len);
         g_assert (byte_array != NULL);
@@ -1198,7 +1220,7 @@ notify_notification_set_hint_string (NotifyNotification *notification,
                                      const char         *key,
                                      const char         *value)
 {
-        GValue         *hint_value;
+        GValue *hint_value;
 
         g_return_if_fail (notification != NULL);
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
