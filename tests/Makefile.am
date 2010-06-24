@@ -13,12 +13,12 @@ noinst_PROGRAMS = \
 	test-urgency \
 	test-xy \
 	test-xy-actions \
-	test-xy-stress
+	test-xy-stress \
+	test-gtk3
 
 common_ldflags = \
 	$(top_builddir)/libnotify/libnotify.la \
-	$(PACKAGE_LIBS) \
-	$(GDK_LIBS)
+	$(PACKAGE_LIBS)
 
 test_replace_SOURCES = test-replace.c
 test_replace_LDADD  = $(common_ldflags)
@@ -65,10 +65,13 @@ test_xy_stress_LDADD = $(common_ldflags)
 test_rtl_SOURCES = test-rtl.c
 test_rtl_LDADD = $(common_ldflags)
 
+test_gtk3_SOURCES = test-gtk3.c
+test_gtk3_LDADD = $(top_builddir)/libnotify/libnotify.la $(GTK3_LIBS)
+
 EXTRA_DIST = applet-critical.png
 
 INCLUDES = $(PACKAGE_CFLAGS)	\
-	$(GDK_CFLAGS)		\
+	$(GTK3_CFLAGS)		\
 	-I$(top_srcdir)
 
 -include $(top_srcdir)/git.mk

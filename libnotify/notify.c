@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <gmodule.h>
 
 #include "notify.h"
 #include "internal.h"
@@ -38,6 +39,25 @@ static DBusGConnection *_dbus_gconn = NULL;
 static GList           *_active_notifications = NULL;
 static int              _spec_version_major = 0;
 static int              _spec_version_minor = 0;
+
+/* For the GTK+ and gdk-pixbuf functions */
+static GModule *module = NULL;
+static struct GtkDlMapping {
+        const char *function_name;
+        gpointer function_ptr;
+} gtk_dl_mapping [] = {
+#define MAP(a) { #a, (gpointer *)&a }
+        MAP(gdk_screen_make_display_name),
+        MAP(gdk_window_get_origin),
+        MAP(gtk_status_icon_get_geometry),
+        MAP(gtk_status_icon_get_x11_window_id),
+        MAP(gtk_widget_get_allocation),
+        MAP(gtk_widget_get_has_window),
+        MAP(gtk_widget_get_screen),
+        MAP(gtk_widget_get_window)
+#undef MAP
+};
+
 
 gboolean
 _notify_check_spec_version (int major,
@@ -80,15 +100,38 @@ _notify_update_spec_version (void)
 gboolean
 notify_init (const char *app_name)
 {
+        guint i;
+
         g_return_val_if_fail (app_name != NULL, FALSE);
         g_return_val_if_fail (*app_name != '\0', FALSE);
 
         if (_initted)
                 return TRUE;
 
+        g_free (_app_name);
         _app_name = g_strdup (app_name);
 
         g_type_init ();
+
+        /* Look up the symbols for the GTK+ and GDK
+         * functions we use */
+        module = g_module_open (NULL, G_MODULE_BIND_LAZY | G_MODULE_BIND_LOCAL);
+        if (module == NULL) {
+                g_warning ("Failed to get our own symbols: '%s'",
+                           g_module_error ());
+                return FALSE;
+        }
+        for (i = 0; i < G_N_ELEMENTS (gtk_dl_mapping); i++) {
+                if (!g_module_symbol (module,
+                                      gtk_dl_mapping[i].function_name,
+                                      &gtk_dl_mapping[i].function_ptr)) {
+                        g_warning ("Missing symbol '%s'",
+                                   gtk_dl_mapping[i].function_name);
+                        g_module_close (module);
+                        module = NULL;
+                        return FALSE;
+                }
+        }
 
         _initted = TRUE;
 

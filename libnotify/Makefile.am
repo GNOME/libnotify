@@ -31,7 +31,7 @@ libnotify_la_SOURCES = \
 	notify-marshal.c
 
 libnotify_la_LIBADD = \
-	$(PACKAGE_LIBS)
+	$(LINKS_LIBS)
 
 libnotify_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
