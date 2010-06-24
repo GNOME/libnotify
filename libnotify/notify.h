@@ -1,8 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*-
  *
- * @file libnotify/notify.h Notifications library
- *
- * @Copyright (C) 2004-2006 Christian Hammond
+ * Copyright (C) 2004-2006 Christian Hammond
+ * Copyright (C) 2010 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,6 +18,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307, USA.
  */
+
 #ifndef _LIBNOTIFY_NOTIFY_H_
 #define _LIBNOTIFY_NOTIFY_H_
 

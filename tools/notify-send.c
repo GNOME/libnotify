@@ -1,7 +1,5 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 8 -*-
  *
- * @file notify-send.c A tool for sending notifications.
- *
  * Copyright (C) 2004 Christian Hammond.
  *
  * This library is free software; you can redistribute it and/or
@@ -20,7 +18,7 @@
  * Boston, MA  02111-1307, USA.
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <libnotify/notify.h>
 #include <stdio.h>
