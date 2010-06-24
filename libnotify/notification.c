@@ -31,10 +31,6 @@
 #include "notify.h"
 #include "internal.h"
 
-#define CHECK_DBUS_VERSION(major, minor) \
-        (DBUS_MAJOR_VER > (major) || \
-         (DBUS_MAJOR_VER == (major) && DBUS_MINOR_VER >= (minor)))
-
 #if !defined(G_PARAM_STATIC_NAME) && !defined(G_PARAM_STATIC_NICK) && \
     !defined(G_PARAM_STATIC_BLURB)
 # define G_PARAM_STATIC_NAME 0
@@ -926,7 +922,6 @@ notify_notification_set_urgency (NotifyNotification *notification,
                                            (guchar) urgency);
 }
 
-#if CHECK_DBUS_VERSION(0, 60)
 static void
 _gvalue_array_append_int (GValueArray *array,
                           gint         i)
@@ -967,7 +962,6 @@ _gvalue_array_append_byte_array (GValueArray *array,
         g_value_array_append (array, &value);
         g_value_unset (&value);
 }
-#endif /* D-BUS >= 0.60 */
 
 /**
  * notify_notification_set_icon_from_pixbuf:
@@ -1001,7 +995,6 @@ void
 notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
                                            GdkPixbuf          *pixbuf)
 {
-#if CHECK_DBUS_VERSION(0, 60)
         gint            width;
         gint            height;
         gint            rowstride;
@@ -1013,12 +1006,10 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         GValueArray    *image_struct;
         GValue         *value;
         const char     *hint_name;
-#endif
 
         g_return_if_fail (notification != NULL);
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
-#if CHECK_DBUS_VERSION(0, 60)
         g_object_get (pixbuf,
                       "width", &width,
                       "height", &height,
@@ -1054,9 +1045,6 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         g_hash_table_insert (notification->priv->hints,
                              g_strdup (hint_name),
                              value);
-#else /* D-BUS < 0.60 */
-        g_warning ("Raw images and pixbufs require D-BUS >= 0.60");
-#endif
 }
 
 /**
