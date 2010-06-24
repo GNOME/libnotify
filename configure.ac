@@ -7,6 +7,8 @@ AC_INIT([libnotify],[0.5.0],[https://bugzilla.gnome.org/enter_bug.cgi?product=li
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
 
+AC_CONFIG_MACRO_DIR([m4])
+
 dnl ################################################################
 dnl # Version information
 dnl ################################################################
