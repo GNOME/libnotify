@@ -17,6 +17,9 @@ Notification API
 <!-- ##### SECTION Stability_Level ##### -->
 
 
+<!-- ##### SECTION Image ##### -->
+
+
 <!-- ##### FUNCTION notify_init ##### -->
 <para>
 
@@ -31,6 +34,7 @@ Notification API
 
 </para>
 
+@void: 
 
 
 <!-- ##### FUNCTION notify_is_initted ##### -->
@@ -38,6 +42,7 @@ Notification API
 
 </para>
 
+@void: 
 @Returns: 
 
 
@@ -46,6 +51,7 @@ Notification API
 
 </para>
 
+@void: 
 @Returns: 
 
 
@@ -54,6 +60,7 @@ Notification API
 
 </para>
 
+@void: 
 @Returns: 
 
 

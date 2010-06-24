@@ -22,6 +22,9 @@ and this API enforces that.
 <!-- ##### SECTION Stability_Level ##### -->
 
 
+<!-- ##### SECTION Image ##### -->
+
+
 <!-- ##### MACRO NOTIFY_EXPIRES_DEFAULT ##### -->
 <para>
 The default expiration time on a notification.
