@@ -3,18 +3,16 @@ dnl Process this file with autoconf to create configure.
 dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
-AC_INIT(libnotify, 0.4.5, chipx86@chipx86.com)
+AC_INIT([libnotify],[0.5.0],[https://bugzilla.gnome.org/enter_bug.cgi?product=libnotify],[libnotify])
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
-AC_COPYRIGHT([Copyright 2004-2008 Christian Hammond])
-
 
 dnl ################################################################
 dnl # Version information
 dnl ################################################################
 LIBNOTIFY_MAJOR_VERSION=0
-LIBNOTIFY_MINOR_VERSION=4
-LIBNOTIFY_MICRO_VERSION=5
+LIBNOTIFY_MINOR_VERSION=5
+LIBNOTIFY_MICRO_VERSION=0
 LIBNOTIFY_DEVEL_VERSION=0
 
 LIBNOTIFY_VERSION=$LIBNOTIFY_MAJOR_VERSION.$LIBNOTIFY_MINOR_VERSION.$LIBNOTIFY_MICRO_VERSION
