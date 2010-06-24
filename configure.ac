@@ -59,7 +59,7 @@ dnl ################################################################
 VERSION=$LIBNOTIFY_VERSION
 PACKAGE=libnotify
 
-AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
+AM_INIT_AUTOMAKE([1.10 no-dist-gzip dist-bzip2])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl ################################################################
