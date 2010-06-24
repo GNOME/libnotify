@@ -80,12 +80,11 @@ NotifyNotification *notify_notification_new                  (const char        
                                                               const char         *body,
                                                               const char         *icon,
                                                               GtkWidget          *attach);
-#if GTK_CHECK_VERSION(2, 9, 2)
+
 NotifyNotification *notify_notification_new_with_status_icon  (const char         *summary,
                                                                const char         *body,
                                                                const char         *icon,
                                                                GtkStatusIcon      *status_icon);
-#endif
 
 gboolean            notify_notification_update                (NotifyNotification *notification,
                                                                const char         *summary,
@@ -95,10 +94,8 @@ gboolean            notify_notification_update                (NotifyNotificatio
 void                notify_notification_attach_to_widget      (NotifyNotification *notification,
                                                                GtkWidget          *attach);
 
-#if GTK_CHECK_VERSION(2, 9, 2)
 void                notify_notification_attach_to_status_icon (NotifyNotification *notification,
                                                                GtkStatusIcon      *status_icon);
-#endif
 
 void                notify_notification_set_geometry_hints    (NotifyNotification *notification,
                                                                GdkScreen          *screen,
