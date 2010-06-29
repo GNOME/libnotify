@@ -1,3 +1,7 @@
+NEW in 0.5.1:
+==============
+- Remove explicit GTK+ 2.x linking, so that libnotify can link against
+  both GTK+ 2.x or GTK+ 3.x
 
 NEW in 0.5.0:
 ==============
