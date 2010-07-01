@@ -139,7 +139,9 @@ notify_uninit (void)
                 }
         }
 
-        g_object_unref (_proxy);
+        if (_proxy != NULL) {
+            g_object_unref (_proxy);
+        }
 
         _initted = FALSE;
 }
