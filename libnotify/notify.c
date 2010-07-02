@@ -340,7 +340,7 @@ notify_get_server_info (char **ret_name,
                 g_free (version);
         }
 
-        if (spec_version != NULL) {
+        if (ret_spec_version != NULL) {
                 *ret_spec_version = spec_version;
         } else {
                 g_free (spec_version);
