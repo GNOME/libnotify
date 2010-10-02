@@ -1,3 +1,12 @@
+NEW in 0.6.0:
+==============
+
+The 0.5.1 release included changes that should not have been made on a
+stable branch.  It should have been a 0.6 series release.  So here it is.
+
+- Fixed #623096 Fix notify_get_server_info results
+
+
 NEW in 0.5.1:
 ==============
 - Remove explicit GTK+ 2.x linking, so that libnotify can link against
