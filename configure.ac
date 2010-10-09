@@ -96,6 +96,7 @@ pkg_modules="gdk-pixbuf-2.0 glib-2.0 >= $REQ_GLIB_VERSION, dbus-1 >= $REQ_DBUS_V
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_LIBS)
 AC_SUBST(PACKAGE_CFLAGS)
+AC_SUBST(pkg_modules)
 
 tests_modules="gtk+-3.0 >= $REQ_GTK_VERSION dbus-glib-1 >= $REQ_DBUS_VERSION"
 PKG_CHECK_MODULES(TESTS, [$tests_modules])
