@@ -17,6 +17,10 @@ LIBNOTIFY_MINOR_VERSION=6
 LIBNOTIFY_MICRO_VERSION=0
 LIBNOTIFY_DEVEL_VERSION=0
 
+AC_SUBST(LIBNOTIFY_MAJOR_VERSION)
+AC_SUBST(LIBNOTIFY_MINOR_VERSION)
+AC_SUBST(LIBNOTIFY_MICRO_VERSION)
+
 LIBNOTIFY_VERSION=$LIBNOTIFY_MAJOR_VERSION.$LIBNOTIFY_MINOR_VERSION.$LIBNOTIFY_MICRO_VERSION
 
 if test "x$LIBNOTIFY_DEVEL_VERSION" != "x0"; then
@@ -31,6 +35,7 @@ AC_DEFINE_UNQUOTED(LIBNOTIFY_MICRO_VERSION, $LIBNOTIFY_MICRO_VERSION,
 	[libnotify micro version.])
 AC_DEFINE_UNQUOTED(LIBNOTIFY_VERSION, "$LIBNOTIFY_VERSION",
 	[libnotify version.])
+
 
 dnl ################################################################
 dnl # libtool versioning
@@ -213,6 +218,7 @@ docs/Makefile
 docs/reference/Makefile
 libnotify.pc
 libnotify/Makefile
+libnotify/features.h
 tests/Makefile
 tools/Makefile
 ])
