@@ -27,7 +27,7 @@
 
 #include <libnotify/notification.h>
 #include <libnotify/notify-enum-types.h>
-#include <libnotify/features.h>
+#include <libnotify/notify-features.h>
 
 G_BEGIN_DECLS
 
