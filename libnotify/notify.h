@@ -23,7 +23,6 @@
 #define _LIBNOTIFY_NOTIFY_H_
 
 #include <glib.h>
-#include <time.h>
 
 #include <libnotify/notification.h>
 #include <libnotify/notify-enum-types.h>
@@ -59,7 +58,7 @@ gboolean        notify_is_initted (void);
  *
  * @return The name of the application.
  */
-const gchar    *notify_get_app_name (void);
+const char     *notify_get_app_name (void);
 
 /**
  * Returns the capabilities of the notification server.

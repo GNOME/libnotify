@@ -1,3 +1,7 @@
+INCLUDES = \
+	-I$(top_srcdir) \
+	$(TESTS_CFLAGS)
+
 noinst_PROGRAMS = \
 	test-replace \
 	test-replace-widget \
@@ -18,7 +22,7 @@ noinst_PROGRAMS = \
 
 common_ldflags = \
 	$(top_builddir)/libnotify/libnotify.la \
-	$(PACKAGE_LIBS)
+	$(TESTS_LIBS)
 
 test_replace_SOURCES = test-replace.c
 test_replace_LDADD  = $(common_ldflags)
@@ -69,9 +73,5 @@ test_persistence_SOURCES = test-persistence.c
 test_persistence_LDADD = $(common_ldflags)
 
 EXTRA_DIST = applet-critical.png
-
-INCLUDES = $(PACKAGE_CFLAGS)	\
-	$(GTK3_CFLAGS)		\
-	-I$(top_srcdir)
 
 -include $(top_srcdir)/git.mk

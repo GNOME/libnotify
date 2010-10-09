@@ -54,11 +54,6 @@ not be used directly. Use the accessor functions below.
 
 @notifynotification: the object which received the signal.
 
-<!-- ##### ARG NotifyNotification:attach-widget ##### -->
-<para>
-
-</para>
-
 <!-- ##### ARG NotifyNotification:body ##### -->
 <para>
 

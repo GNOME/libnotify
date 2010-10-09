@@ -4,6 +4,13 @@ MARSHAL_PREFIX = notify_marshal
 MARSHAL_FILE = notify-marshal
 ENUM_FILE = notify-enum-types
 
+AM_CPPFLAGS = \
+	-I.				\
+	-I..				\
+	-I$(top_srcdir)			\
+	-DG_LOG_DOMAIN=\"libnotify\"	\
+	$(PACKAGE_CFLAGS)
+
 lib_LTLIBRARIES = libnotify.la
 
 notify_headers = \
@@ -83,10 +90,5 @@ CLEANFILES = \
 	$(ENUM_FILE).h \
 	s-enum-types-c \
 	s-enum-types-h
-
-INCLUDES = \
-	-I$(top_srcdir) \
-	-DG_LOG_DOMAIN=\"libnotify\" \
-	$(PACKAGE_CFLAGS)
 
 -include $(top_srcdir)/git.mk

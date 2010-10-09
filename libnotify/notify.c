@@ -27,6 +27,10 @@
 #include <stdarg.h>
 #include <unistd.h>
 
+#include <glib.h>
+#include <dbus/dbus.h>
+#include <dbus/dbus-glib.h>
+
 #include "notify.h"
 #include "internal.h"
 #include "notify-marshal.h"
