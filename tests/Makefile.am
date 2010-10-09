@@ -8,6 +8,7 @@ noinst_PROGRAMS = \
 	test-basic \
 	test-error \
 	test-markup \
+	test-persistence \
 	test-rtl \
 	test-size-changes \
 	test-urgency \
@@ -64,6 +65,9 @@ test_xy_stress_LDADD = $(common_ldflags)
 
 test_rtl_SOURCES = test-rtl.c
 test_rtl_LDADD = $(common_ldflags)
+
+test_persistence_SOURCES = test-persistence.c
+test_persistence_LDADD = $(common_ldflags)
 
 test_gtk3_SOURCES = test-gtk3.c
 test_gtk3_LDADD = $(top_builddir)/libnotify/libnotify.la $(GTK3_LIBS)
