@@ -14,8 +14,7 @@ noinst_PROGRAMS = \
 	test-urgency \
 	test-xy \
 	test-xy-actions \
-	test-xy-stress \
-	test-gtk3
+	test-xy-stress
 
 common_ldflags = \
 	$(top_builddir)/libnotify/libnotify.la \
@@ -68,9 +67,6 @@ test_rtl_LDADD = $(common_ldflags)
 
 test_persistence_SOURCES = test-persistence.c
 test_persistence_LDADD = $(common_ldflags)
-
-test_gtk3_SOURCES = test-gtk3.c
-test_gtk3_LDADD = $(top_builddir)/libnotify/libnotify.la $(GTK3_LIBS)
 
 EXTRA_DIST = applet-critical.png
 

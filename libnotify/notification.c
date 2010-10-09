@@ -25,9 +25,6 @@
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 
-#include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-
 #include "notify.h"
 #include "internal.h"
 

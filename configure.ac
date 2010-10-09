@@ -92,21 +92,15 @@ REQ_DBUS_VERSION=0.76
 REQ_GTK_VERSION=2.18
 REQ_GLIB_VERSION=2.6
 
-pkg_modules="gtk+-2.0 >= $REQ_GTK_VERSION, glib-2.0 >= $REQ_GLIB_VERSION, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION gmodule-2.0"
+pkg_modules="gdk-pixbuf-2.0 glib-2.0 >= $REQ_GLIB_VERSION, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_LIBS)
 AC_SUBST(PACKAGE_CFLAGS)
 
-dnl The libraries against which we'll actually link
-link_modules="glib-2.0 >= $REQ_GLIB_VERSION, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION, gmodule-2.0"
-AC_SUBST(link_modules)
-PKG_CHECK_MODULES(LINKS, [$link_modules])
-AC_SUBST(LINKS_LIBS)
-
-dnl The libraries to compile the gtk3 test against
-PKG_CHECK_MODULES(GTK3, gtk+-3.0)
-AC_SUBST(GTK3_CFLAGS)
-AC_SUBST(GTK3_LIBS)
+tests_modules="gtk+-2.0 >= $REQ_GTK_VERSION, glib-2.0 >= $REQ_GLIB_VERSION, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"
+PKG_CHECK_MODULES(TEST, [$tests_modules])
+AC_SUBST(TESTS_LIBS)
+AC_SUBST(TESTS_CFLAGS)
 
 GLIB_GENMARSHAL=`pkg-config --variable=glib_genmarshal glib-2.0`
 AC_SUBST(GLIB_GENMARSHAL)
