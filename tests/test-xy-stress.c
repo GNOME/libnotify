@@ -42,7 +42,7 @@ emit_notification (int x, int y)
                                   x,
                                   y);
 
-        n = notify_notification_new ("X, Y Test", buffer, NULL, NULL);
+        n = notify_notification_new ("X, Y Test", buffer, NULL);
         g_free (buffer);
 
         notify_notification_set_hint_int32 (n, "x", x);

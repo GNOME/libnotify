@@ -32,7 +32,6 @@ main (int argc, char *argv[])
 
         n = notify_notification_new ("Low Urgency",
                                      "Joe signed online.",
-                                     NULL,
                                      NULL);
         notify_notification_set_urgency (n, NOTIFY_URGENCY_LOW);
         if (!notify_notification_show (n, NULL)) {
@@ -45,7 +44,6 @@ main (int argc, char *argv[])
 
         n = notify_notification_new ("Normal Urgency",
                                      "You have a meeting in 10 minutes.",
-                                     NULL,
                                      NULL);
         notify_notification_set_urgency (n, NOTIFY_URGENCY_NORMAL);
         if (!notify_notification_show (n, NULL)) {
@@ -57,9 +55,7 @@ main (int argc, char *argv[])
 
 
         n = notify_notification_new ("Critical Urgency",
-                                     "This message will self-destruct in 10 "
-                                     "seconds.",
-                                     NULL,
+                                     "This message will self-destruct in 10 seconds.",
                                      NULL);
         notify_notification_set_urgency (n, NOTIFY_URGENCY_CRITICAL);
         notify_notification_set_timeout (n, 10000);     // 10 seconds

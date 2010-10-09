@@ -79,11 +79,6 @@ not be used directly. Use the accessor functions below.
 
 </para>
 
-<!-- ##### ARG NotifyNotification:status-icon ##### -->
-<para>
-
-</para>
-
 <!-- ##### ARG NotifyNotification:summary ##### -->
 <para>
 
@@ -132,19 +127,6 @@ is much like G_CALLBACK().
 @summary: 
 @body: 
 @icon: 
-@attach: 
-@Returns: 
-
-
-<!-- ##### FUNCTION notify_notification_new_with_status_icon ##### -->
-<para>
-
-</para>
-
-@summary: 
-@body: 
-@icon: 
-@status_icon: 
 @Returns: 
 
 
@@ -158,35 +140,6 @@ is much like G_CALLBACK().
 @body: 
 @icon: 
 @Returns: 
-
-
-<!-- ##### FUNCTION notify_notification_attach_to_widget ##### -->
-<para>
-
-</para>
-
-@notification: 
-@attach: 
-
-
-<!-- ##### FUNCTION notify_notification_attach_to_status_icon ##### -->
-<para>
-
-</para>
-
-@notification: 
-@status_icon: 
-
-
-<!-- ##### FUNCTION notify_notification_set_geometry_hints ##### -->
-<para>
-
-</para>
-
-@notification: 
-@screen: 
-@x: 
-@y: 
 
 
 <!-- ##### FUNCTION notify_notification_show ##### -->

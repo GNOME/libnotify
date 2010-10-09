@@ -59,8 +59,7 @@ main (int argc, char *argv[])
         /* Stock icon */
         n = notify_notification_new ("Icon Test",
                                      "Testing stock icon",
-                                     "appointment-new",
-                                     NULL);
+                                     "appointment-new");
 
         if (!notify_notification_show (n, NULL)) {
                 fprintf (stderr, "failed to send notification\n");
@@ -80,8 +79,7 @@ main (int argc, char *argv[])
         /* URIs */
         n = notify_notification_new ("Alert!",
                                      "Testing URI icons",
-                                     uri,
-                                     NULL);
+                                     uri);
 
         if (!notify_notification_show (n, NULL)) {
                 fprintf (stderr, "failed to send notification\n");
@@ -93,7 +91,6 @@ main (int argc, char *argv[])
         /* Raw image */
         n = notify_notification_new ("Raw image test",
                                      "Testing sending raw pixbufs",
-                                     NULL,
                                      NULL);
 
         /*

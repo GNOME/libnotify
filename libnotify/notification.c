@@ -79,8 +79,6 @@ struct _NotifyNotificationPrivate
         GHashTable     *action_map;
         GHashTable     *hints;
 
-        GtkWidget      *attached_widget;
-
         gboolean        has_nondefault_actions;
         gboolean        updates_pending;
         gboolean        signals_registered;
@@ -101,7 +99,6 @@ enum
         PROP_SUMMARY,
         PROP_BODY,
         PROP_ICON_NAME,
-        PROP_ATTACH_WIDGET,
         PROP_CLOSED_REASON
 };
 
@@ -214,18 +211,6 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_BLURB));
 
         g_object_class_install_property (object_class,
-                                         PROP_ATTACH_WIDGET,
-                                         g_param_spec_object ("attach-widget",
-                                                              "Attach Widget",
-                                                              "The widget to attach the notification to",
-                                                              GTK_TYPE_WIDGET,
-                                                              G_PARAM_READWRITE
-                                                              | G_PARAM_CONSTRUCT
-                                                              | G_PARAM_STATIC_NAME
-                                                              | G_PARAM_STATIC_NICK
-                                                              | G_PARAM_STATIC_BLURB));
-
-        g_object_class_install_property (object_class,
                                          PROP_CLOSED_REASON,
                                          g_param_spec_int ("closed-reason",
                                                            "Closed Reason",
@@ -274,11 +259,6 @@ notify_notification_set_property (GObject      *object,
                                             g_value_get_string (value));
                 break;
 
-        case PROP_ATTACH_WIDGET:
-                notify_notification_attach_to_widget (notification,
-                                                      g_value_get_object (value));
-                break;
-
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
                 break;
@@ -309,10 +289,6 @@ notify_notification_get_property (GObject    *object,
 
         case PROP_ICON_NAME:
                 g_value_set_string (value, priv->icon_name);
-                break;
-
-        case PROP_ATTACH_WIDGET:
-                g_value_set_object (value, priv->attached_widget);
                 break;
 
         case PROP_CLOSED_REASON:
@@ -400,9 +376,6 @@ notify_notification_finalize (GObject *object)
         if (priv->hints != NULL)
                 g_hash_table_destroy (priv->hints);
 
-        if (priv->attached_widget != NULL)
-                g_object_unref (G_OBJECT (priv->attached_widget));
-
         proxy = _notify_get_g_proxy ();
         if (proxy != NULL && priv->signals_registered) {
                 g_signal_handlers_disconnect_by_func (proxy,
@@ -424,42 +397,11 @@ notify_notification_finalize (GObject *object)
         G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
-static void
-_notify_notification_update_applet_hints (NotifyNotification *n)
-{
-        NotifyNotificationPrivate *priv = n->priv;
-        GdkScreen                 *screen = NULL;
-        gint                       x, y;
-
-        if (priv->attached_widget != NULL) {
-                GtkWidget    *widget = priv->attached_widget;
-                GtkAllocation allocation;
-
-                screen = gtk_widget_get_screen (widget);
-
-                gdk_window_get_origin (gtk_widget_get_window (widget), &x, &y);
-                gtk_widget_get_allocation (widget, &allocation);
-
-                if (!gtk_widget_get_has_window (widget)) {
-                        x += allocation.x;
-                        y += allocation.y;
-                }
-
-                x += allocation.width / 2;
-                y += allocation.height / 2;
-        } else {
-                return;
-        }
-
-        notify_notification_set_geometry_hints (n, screen, x, y);
-}
-
 /**
  * notify_notification_new:
  * @summary: The required summary text.
  * @body: The optional body text.
  * @icon: The optional icon theme icon name or filename.
- * @attach: The optional widget to attach to.
  *
  * Creates a new #NotifyNotification. The summary text is required, but
  * all other parameters are optional.
@@ -469,16 +411,12 @@ _notify_notification_update_applet_hints (NotifyNotification *n)
 NotifyNotification *
 notify_notification_new (const char *summary,
                          const char *body,
-                         const char *icon,
-                         GtkWidget  *attach)
+                         const char *icon)
 {
-        g_return_val_if_fail (attach == NULL || GTK_IS_WIDGET (attach), NULL);
-
         return g_object_new (NOTIFY_TYPE_NOTIFICATION,
                              "summary", summary,
                              "body", body,
                              "icon-name", icon,
-                             "attach-widget", attach,
                              NULL);
 }
 
@@ -528,69 +466,6 @@ notify_notification_update (NotifyNotification *notification,
         notification->priv->updates_pending = TRUE;
 
         return TRUE;
-}
-
-/**
- * notify_notification_attach_to_widget:
- * @notification: The notification.
- * @attach: The widget to attach to, or %NULL.
- *
- * Attaches the notification to a widget. This will set hints on the
- * notification requesting that the notification point to the widget's
- * location. If @attach is %NULL, the widget will be unset.
- */
-void
-notify_notification_attach_to_widget (NotifyNotification *notification,
-                                      GtkWidget          *attach)
-{
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-
-        if (notification->priv->attached_widget == attach)
-                return;
-
-        if (notification->priv->attached_widget != NULL)
-                g_object_unref (notification->priv->attached_widget);
-
-        notification->priv->attached_widget =
-                (attach != NULL ? g_object_ref (attach) : NULL);
-
-        g_object_notify (G_OBJECT (notification), "attach-widget");
-}
-
-/**
- * notify_notification_set_geometry_hints:
- * @notification: The notification.
- * @screen: The #GdkScreen the notification should appear on.
- * @x: The X coordinate to point to.
- * @y: The Y coordinate to point to.
- *
- * Sets the geometry hints on the notification. This sets the screen
- * the notification should appear on and the X, Y coordinates it should
- * point to, if the particular notification supports X, Y hints.
- *
- * Since: 0.4.1
- */
-void
-notify_notification_set_geometry_hints (NotifyNotification *notification,
-                                        GdkScreen          *screen,
-                                        gint                x,
-                                        gint                y)
-{
-        char *display_name;
-
-        g_return_if_fail (notification != NULL);
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-        g_return_if_fail (screen != NULL);
-        g_return_if_fail (GDK_IS_SCREEN (screen));
-
-        notify_notification_set_hint_int32 (notification, "x", x);
-        notify_notification_set_hint_int32 (notification, "y", y);
-
-        display_name = gdk_screen_make_display_name (screen);
-        notify_notification_set_hint_string (notification,
-                                             "xdisplay",
-                                             display_name);
-        g_free (display_name);
 }
 
 static void
@@ -702,9 +577,6 @@ notify_notification_show (NotifyNotification *notification,
 
                 priv->signals_registered = TRUE;
         }
-
-        /* If attached to a widget, modify x and y in hints */
-        _notify_notification_update_applet_hints (notification);
 
         action_array = _gslist_to_string_array (priv->actions);
 

@@ -33,7 +33,6 @@ main ()
 
         n = notify_notification_new ("X, Y Test",
                                      "This notification should point to 150, 10",
-                                     NULL,
                                      NULL);
 
         notify_notification_set_hint_int32 (n, "x", 150);

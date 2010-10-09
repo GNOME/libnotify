@@ -56,7 +56,6 @@ main (int argc, char **argv)
         n = notify_notification_new ("System update available",
                                      "New system updates are available. It is "
                                      "recommended that you install the updates.",
-                                     NULL,
                                      NULL);
 
         notify_notification_set_hint_int32 (n, "x", 600);

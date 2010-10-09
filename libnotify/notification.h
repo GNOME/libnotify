@@ -78,21 +78,12 @@ GType               notify_notification_get_type             (void);
 
 NotifyNotification *notify_notification_new                  (const char         *summary,
                                                               const char         *body,
-                                                              const char         *icon,
-                                                              GtkWidget          *attach);
+                                                              const char         *icon);
 
 gboolean            notify_notification_update                (NotifyNotification *notification,
                                                                const char         *summary,
                                                                const char         *body,
                                                                const char         *icon);
-
-void                notify_notification_attach_to_widget      (NotifyNotification *notification,
-                                                               GtkWidget          *attach);
-
-void                notify_notification_set_geometry_hints    (NotifyNotification *notification,
-                                                               GdkScreen          *screen,
-                                                               gint                x,
-                                                               gint                y);
 
 gboolean            notify_notification_show                  (NotifyNotification *notification,
                                                                GError            **error);

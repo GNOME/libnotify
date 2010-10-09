@@ -67,8 +67,7 @@ main (int argc, char *argv[])
 
         n = notify_notification_new ("Software Updates Available",
                                      "Important updates for your apps are now available.",
-                                     "software-update-available",
-                                     NULL);
+                                     "software-update-available");
         notify_notification_add_action (n,
                                         "install",
                                         "Install now",

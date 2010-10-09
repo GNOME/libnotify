@@ -34,7 +34,6 @@ main ()
         n = notify_notification_new ("Summary",
                                      "Some <b>bold</b>, <u>underlined</u>, <i>italic</i>, "
                                      "<a href='http://www.google.com'>linked</a> text",
-                                     NULL,
                                      NULL);
         notify_notification_set_timeout (n, 3000);      //3 seconds
 

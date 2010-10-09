@@ -34,9 +34,7 @@ main ()
 
         n = notify_notification_new ("Summary",
                                      "First message",
-                                     NULL,  //no icon
-                                     NULL);     //don't attach to widget
-
+                                     NULL);  //no icon
 
         notify_notification_set_timeout (n, 0); //don't timeout
 

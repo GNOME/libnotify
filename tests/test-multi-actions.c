@@ -95,7 +95,6 @@ main (int argc, char **argv)
         n = notify_notification_new ("Low disk space",
                                      "You can free up some disk space by "
                                      "emptying the trash can.",
-                                     NULL,
                                      NULL);
         notify_notification_set_urgency (n, NOTIFY_URGENCY_CRITICAL);
         notify_notification_set_timeout (n, NOTIFY_EXPIRES_DEFAULT);

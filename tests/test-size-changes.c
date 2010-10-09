@@ -33,7 +33,6 @@ main ()
 
         n1 = notify_notification_new ("Notification 1",
                                       "Notification number 1!",
-                                      NULL,
                                       NULL);
         notify_notification_set_timeout (n1, 7000);
 
@@ -46,7 +45,6 @@ main ()
 
         n2 = notify_notification_new ("Notification 2",
                                       "Notification number 2!",
-                                      NULL,
                                       NULL);
         notify_notification_set_timeout (n2, 7000);
 
@@ -58,7 +56,6 @@ main ()
 
         n3 = notify_notification_new ("Notification 3",
                                       "Notification number 3!",
-                                      NULL,
                                       NULL);
         notify_notification_set_timeout (n3, 7000);
 

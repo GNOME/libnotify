@@ -74,8 +74,7 @@ main (int argc, char *argv[])
 
         n = notify_notification_new ("Widget Attachment Test",
                                      "Button has not been clicked yet",
-                                     NULL, //no icon
-                                     button);   //attach to button
+                                     NULL); //no icon
 
         notify_notification_set_timeout (n, 0); //don't timeout
 

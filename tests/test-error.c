@@ -33,7 +33,7 @@ main ()
 
         notify_init ("Error Handling");
 
-        n = notify_notification_new ("Summary", "Content", NULL, NULL);
+        n = notify_notification_new ("Summary", "Content", NULL);
         notify_notification_set_timeout (n, 3000);      //3 seconds
 
         /* TODO: Create an error condition */

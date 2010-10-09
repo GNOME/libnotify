@@ -1,0 +1,43 @@
+<!-- ##### ARG NotifyNotification:status-icon ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION notify_notification_attach_to_status_icon ##### -->
+<para>
+
+</para>
+
+@notification: 
+@status_icon: 
+
+<!-- ##### FUNCTION notify_notification_attach_to_widget ##### -->
+<para>
+
+</para>
+
+@notification: 
+@attach: 
+
+<!-- ##### FUNCTION notify_notification_new_with_status_icon ##### -->
+<para>
+
+</para>
+
+@summary: 
+@body: 
+@icon: 
+@status_icon: 
+@Returns: 
+
+<!-- ##### FUNCTION notify_notification_set_geometry_hints ##### -->
+<para>
+
+</para>
+
+@notification: 
+@screen: 
+@x: 
+@y: 
+

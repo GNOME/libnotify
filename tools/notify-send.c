@@ -221,8 +221,7 @@ main (int argc, char *argv[])
 
         notify = notify_notification_new (summary,
                                           body,
-                                          icon_str,
-                                          NULL);
+                                          icon_str);
         notify_notification_set_category (notify, type);
         notify_notification_set_urgency (notify, urgency);
         notify_notification_set_timeout (notify, expire_timeout);

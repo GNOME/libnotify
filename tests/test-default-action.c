@@ -64,7 +64,7 @@ main ()
 
         dbus_connection_setup_with_g_main (conn, NULL);
 
-        n = notify_notification_new ("Matt is online", "", NULL, NULL);
+        n = notify_notification_new ("Matt is online", "", NULL);
         notify_notification_set_timeout (n, NOTIFY_EXPIRES_DEFAULT);
         notify_notification_add_action (n,
                                         "default",
