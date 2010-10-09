@@ -81,11 +81,6 @@ NotifyNotification *notify_notification_new                  (const char        
                                                               const char         *icon,
                                                               GtkWidget          *attach);
 
-NotifyNotification *notify_notification_new_with_status_icon  (const char         *summary,
-                                                               const char         *body,
-                                                               const char         *icon,
-                                                               GtkStatusIcon      *status_icon);
-
 gboolean            notify_notification_update                (NotifyNotification *notification,
                                                                const char         *summary,
                                                                const char         *body,
@@ -93,9 +88,6 @@ gboolean            notify_notification_update                (NotifyNotificatio
 
 void                notify_notification_attach_to_widget      (NotifyNotification *notification,
                                                                GtkWidget          *attach);
-
-void                notify_notification_attach_to_status_icon (NotifyNotification *notification,
-                                                               GtkStatusIcon      *status_icon);
 
 void                notify_notification_set_geometry_hints    (NotifyNotification *notification,
                                                                GdkScreen          *screen,

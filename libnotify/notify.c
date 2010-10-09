@@ -49,8 +49,6 @@ static struct GtkDlMapping {
 #define MAP(a) { #a, (gpointer *)&a }
         MAP(gdk_screen_make_display_name),
         MAP(gdk_window_get_origin),
-        MAP(gtk_status_icon_get_geometry),
-        MAP(gtk_status_icon_get_x11_window_id),
         MAP(gtk_widget_get_allocation),
         MAP(gtk_widget_get_has_window),
         MAP(gtk_widget_get_screen),

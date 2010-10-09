@@ -80,7 +80,6 @@ struct _NotifyNotificationPrivate
         GHashTable     *hints;
 
         GtkWidget      *attached_widget;
-        GtkStatusIcon  *status_icon;
 
         gboolean        has_nondefault_actions;
         gboolean        updates_pending;
@@ -103,7 +102,6 @@ enum
         PROP_BODY,
         PROP_ICON_NAME,
         PROP_ATTACH_WIDGET,
-        PROP_STATUS_ICON,
         PROP_CLOSED_REASON
 };
 
@@ -228,18 +226,6 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_BLURB));
 
         g_object_class_install_property (object_class,
-                                         PROP_STATUS_ICON,
-                                         g_param_spec_object ("status-icon",
-                                                              "Status Icon",
-                                                              "The status icon to attach the notification to",
-                                                              GTK_TYPE_STATUS_ICON,
-                                                              G_PARAM_READWRITE
-                                                              | G_PARAM_CONSTRUCT
-                                                              | G_PARAM_STATIC_NAME
-                                                              | G_PARAM_STATIC_NICK
-                                                              | G_PARAM_STATIC_BLURB));
-
-        g_object_class_install_property (object_class,
                                          PROP_CLOSED_REASON,
                                          g_param_spec_int ("closed-reason",
                                                            "Closed Reason",
@@ -293,11 +279,6 @@ notify_notification_set_property (GObject      *object,
                                                       g_value_get_object (value));
                 break;
 
-        case PROP_STATUS_ICON:
-                notify_notification_attach_to_status_icon (notification,
-                                                           g_value_get_object (value));
-                break;
-
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
                 break;
@@ -332,10 +313,6 @@ notify_notification_get_property (GObject    *object,
 
         case PROP_ATTACH_WIDGET:
                 g_value_set_object (value, priv->attached_widget);
-                break;
-
-        case PROP_STATUS_ICON:
-                g_value_set_object (value, priv->status_icon);
                 break;
 
         case PROP_CLOSED_REASON:
@@ -426,10 +403,6 @@ notify_notification_finalize (GObject *object)
         if (priv->attached_widget != NULL)
                 g_object_unref (G_OBJECT (priv->attached_widget));
 
-        if (priv->status_icon != NULL)
-                g_object_remove_weak_pointer (G_OBJECT (priv->status_icon),
-                                              (gpointer) & priv->status_icon);
-
         proxy = _notify_get_g_proxy ();
         if (proxy != NULL && priv->signals_registered) {
                 g_signal_handlers_disconnect_by_func (proxy,
@@ -458,25 +431,7 @@ _notify_notification_update_applet_hints (NotifyNotification *n)
         GdkScreen                 *screen = NULL;
         gint                       x, y;
 
-        if (priv->status_icon != NULL) {
-                GdkRectangle    rect;
-                guint32         xid;
-
-                xid = gtk_status_icon_get_x11_window_id (priv->status_icon);
-                if (xid > 0) {
-                        notify_notification_set_hint_uint32 (n, "window-xid", xid);
-                }
-
-                if (!gtk_status_icon_get_geometry (priv->status_icon,
-                                                   &screen,
-                                                   &rect,
-                                                   NULL)) {
-                        return;
-                }
-
-                x = rect.x + rect.width / 2;
-                y = rect.y + rect.height / 2;
-        } else if (priv->attached_widget != NULL) {
+        if (priv->attached_widget != NULL) {
                 GtkWidget    *widget = priv->attached_widget;
                 GtkAllocation allocation;
 
@@ -524,38 +479,6 @@ notify_notification_new (const char *summary,
                              "body", body,
                              "icon-name", icon,
                              "attach-widget", attach,
-                             NULL);
-}
-
-/**
- * notify_notification_new_with_status_icon:
- * @summary: The required summary text.
- * @body: The optional body text.
- * @icon: The optional icon theme icon name or filename.
- * @status_icon: The required #GtkStatusIcon.
- *
- * Creates a new #NotifyNotification and attaches to a #GtkStatusIcon.
- * The summary text and @status_icon is required, but all other parameters
- * are optional.
- *
- * Returns: The new #NotifyNotification.
- *
- * Since: 0.4.1
- */
-NotifyNotification *
-notify_notification_new_with_status_icon (const char    *summary,
-                                          const char    *message,
-                                          const char    *icon,
-                                          GtkStatusIcon *status_icon)
-{
-        g_return_val_if_fail (status_icon != NULL, NULL);
-        g_return_val_if_fail (GTK_IS_STATUS_ICON (status_icon), NULL);
-
-        return g_object_new (NOTIFY_TYPE_NOTIFICATION,
-                             "summary", summary,
-                             "body", message,
-                             "icon-name", icon,
-                             "status-icon", status_icon,
                              NULL);
 }
 
@@ -632,47 +555,6 @@ notify_notification_attach_to_widget (NotifyNotification *notification,
                 (attach != NULL ? g_object_ref (attach) : NULL);
 
         g_object_notify (G_OBJECT (notification), "attach-widget");
-}
-
-/**
- * notify_notification_attach_to_status_icon:
- * @notification: The notification.
- * @status_icon: The #GtkStatusIcon to attach to, or %NULL.
- *
- * Attaches the notification to a #GtkStatusIcon. This will set hints on the
- * notification requesting that the notification point to the status icon's
- * location. If @status_icon is %NULL, the status icon will be unset.
- *
- * Since: 0.4.1
- */
-void
-notify_notification_attach_to_status_icon (NotifyNotification *notification,
-                                           GtkStatusIcon      *status_icon)
-{
-        NotifyNotificationPrivate *priv;
-
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-        g_return_if_fail (status_icon == NULL
-                          || GTK_IS_STATUS_ICON (status_icon));
-
-        priv = notification->priv;
-
-        if (priv->status_icon == status_icon)
-                return;
-
-        if (priv->status_icon != NULL) {
-                g_object_remove_weak_pointer (G_OBJECT (priv->status_icon),
-                                              (gpointer) & priv->status_icon);
-        }
-
-        priv->status_icon = status_icon;
-
-        if (priv->status_icon != NULL) {
-                g_object_add_weak_pointer (G_OBJECT (priv->status_icon),
-                                           (gpointer) & priv->status_icon);
-        }
-
-        g_object_notify (G_OBJECT (notification), "status-icon");
 }
 
 /**
@@ -821,7 +703,7 @@ notify_notification_show (NotifyNotification *notification,
                 priv->signals_registered = TRUE;
         }
 
-        /* If attached to a widget or status icon, modify x and y in hints */
+        /* If attached to a widget, modify x and y in hints */
         _notify_notification_update_applet_hints (notification);
 
         action_array = _gslist_to_string_array (priv->actions);
