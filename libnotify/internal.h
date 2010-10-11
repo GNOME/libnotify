@@ -22,19 +22,13 @@
 #ifndef _LIBNOTIFY_INTERNAL_H_
 #define _LIBNOTIFY_INTERNAL_H_
 
-#include "config.h"
-
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib.h>
-
 #define NOTIFY_DBUS_NAME           "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_INTERFACE "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_OBJECT    "/org/freedesktop/Notifications"
 
 G_BEGIN_DECLS
 
-DBusGConnection * _notify_get_dbus_g_conn (void);
-DBusGProxy      * _notify_get_g_proxy     (void);
+GDBusProxy      * _notify_get_proxy                         (GError **error);
 
 void            _notify_cache_add_notification              (NotifyNotification       *n);
 void            _notify_cache_remove_notification           (NotifyNotification       *n);

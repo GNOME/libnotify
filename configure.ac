@@ -88,17 +88,16 @@ AC_EXEEXT
 
 AM_PROG_LIBTOOL
 
-REQ_DBUS_VERSION=0.76
 REQ_GTK_VERSION=2.90
-REQ_GLIB_VERSION=2.6
+REQ_GLIB_VERSION=2.26.0
 
-pkg_modules="gdk-pixbuf-2.0 glib-2.0 >= $REQ_GLIB_VERSION, dbus-1 >= $REQ_DBUS_VERSION, dbus-glib-1 >= $REQ_DBUS_VERSION"
+pkg_modules="gdk-pixbuf-2.0 glib-2.0 >= $REQ_GLIB_VERSION gio-2.0 >= $REQ_GLIB_VERSION"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_LIBS)
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(pkg_modules)
 
-tests_modules="gtk+-3.0 >= $REQ_GTK_VERSION dbus-glib-1 >= $REQ_DBUS_VERSION"
+tests_modules="gtk+-3.0 >= $REQ_GTK_VERSION"
 PKG_CHECK_MODULES(TESTS, [$tests_modules])
 AC_SUBST(TESTS_LIBS)
 AC_SUBST(TESTS_CFLAGS)
@@ -109,18 +108,6 @@ AC_SUBST(GLIB_GENMARSHAL)
 dnl
 dnl Check the D-BUS version.
 dnl
-
-AC_MSG_CHECKING([dbus version])
-DBUS_VERSION=`$PKG_CONFIG --modversion dbus-1`
-DBUS_MAJOR_VER=`echo $DBUS_VERSION | cut -d. -f 1`
-DBUS_MINOR_VER=`echo $DBUS_VERSION | cut -d. -f 2`
-DBUS_MICRO_VER=`echo $DBUS_VERSION | cut -d. -f 3`
-
-AC_MSG_RESULT($DBUS_VERSION)
-AC_DEFINE_UNQUOTED(DBUS_MAJOR_VER, $DBUS_MAJOR_VER, [D-BUS major version.])
-AC_DEFINE_UNQUOTED(DBUS_MINOR_VER, $DBUS_MINOR_VER, [D-BUS minor version.])
-AC_DEFINE_UNQUOTED(DBUS_MICRO_VER, $DBUS_MICRO_VER, [D-BUS micro version.])
-
 
 dnl ################################################################
 dnl # Set up gtk-doc

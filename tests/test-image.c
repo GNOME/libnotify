@@ -31,14 +31,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-
-#define DBUS_API_SUBJECT_TO_CHANGE
-
-#include <glib.h>
 #include <gtk/gtk.h>
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib.h>
-#include <dbus/dbus-glib-lowlevel.h>
 
 GMainLoop          *loop;
 NotifyNotification *n;

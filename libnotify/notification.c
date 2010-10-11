@@ -3,6 +3,7 @@
  * Copyright (C) 2006 Christian Hammond
  * Copyright (C) 2006 John Palmieri
  * Copyright (C) 2010 Red Hat, Inc.
+ * Copyright © 2010 Christian Persch
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,8 +23,7 @@
 
 #include "config.h"
 
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib.h>
+#include <gio/gio.h>
 
 #include "notify.h"
 #include "internal.h"
@@ -38,15 +38,6 @@
 static void     notify_notification_class_init (NotifyNotificationClass *klass);
 static void     notify_notification_init       (NotifyNotification *sp);
 static void     notify_notification_finalize   (GObject            *object);
-static void     _close_signal_handler          (DBusGProxy         *proxy,
-                                                guint32             id,
-                                                guint32             reason,
-                                                NotifyNotification *notification);
-
-static void     _action_signal_handler         (DBusGProxy         *proxy,
-                                                guint32             id,
-                                                char               *action,
-                                                NotifyNotification *notification);
 
 typedef struct
 {
@@ -78,7 +69,8 @@ struct _NotifyNotificationPrivate
 
         gboolean        has_nondefault_actions;
         gboolean        updates_pending;
-        gboolean        signals_registered;
+
+        gulong          proxy_signal_handler;
 
         gint            closed_reason;
 };
@@ -299,13 +291,6 @@ notify_notification_get_property (GObject    *object,
 }
 
 static void
-_g_value_free (GValue *value)
-{
-        g_value_unset (value);
-        g_free (value);
-}
-
-static void
 destroy_pair (CallbackPair *pair)
 {
         if (pair->user_data != NULL && pair->free_func != NULL) {
@@ -324,29 +309,12 @@ notify_notification_init (NotifyNotification *obj)
         obj->priv->hints = g_hash_table_new_full (g_str_hash,
                                                   g_str_equal,
                                                   g_free,
-                                                  (GFreeFunc) _g_value_free);
+                                                  (GDestroyNotify) g_variant_unref);
 
         obj->priv->action_map = g_hash_table_new_full (g_str_hash,
                                                        g_str_equal,
                                                        g_free,
-                                                       (GFreeFunc) destroy_pair);
-}
-
-static void
-on_proxy_destroy (DBusGProxy         *proxy,
-                  NotifyNotification *notification)
-{
-        if (notification->priv->signals_registered) {
-                dbus_g_proxy_disconnect_signal (proxy,
-                                                "NotificationClosed",
-                                                G_CALLBACK (_close_signal_handler),
-                                                notification);
-                dbus_g_proxy_disconnect_signal (proxy,
-                                                "ActionInvoked",
-                                                G_CALLBACK (_action_signal_handler),
-                                                notification);
-                notification->priv->signals_registered = FALSE;
-        }
+                                                       (GDestroyNotify) destroy_pair);
 }
 
 static void
@@ -354,7 +322,7 @@ notify_notification_finalize (GObject *object)
 {
         NotifyNotification        *obj = NOTIFY_NOTIFICATION (object);
         NotifyNotificationPrivate *priv = obj->priv;
-        DBusGProxy                *proxy;
+        GDBusProxy                *proxy;
 
         _notify_cache_remove_notification (obj);
 
@@ -373,20 +341,9 @@ notify_notification_finalize (GObject *object)
         if (priv->hints != NULL)
                 g_hash_table_destroy (priv->hints);
 
-        proxy = _notify_get_g_proxy ();
-        if (proxy != NULL && priv->signals_registered) {
-                g_signal_handlers_disconnect_by_func (proxy,
-                                                      G_CALLBACK (on_proxy_destroy),
-                                                      object);
-
-                dbus_g_proxy_disconnect_signal (proxy,
-                                                "NotificationClosed",
-                                                G_CALLBACK (_close_signal_handler),
-                                                object);
-                dbus_g_proxy_disconnect_signal (proxy,
-                                                "ActionInvoked",
-                                                G_CALLBACK (_action_signal_handler),
-                                                object);
+        proxy = _notify_get_proxy (NULL);
+        if (proxy != NULL && priv->proxy_signal_handler != 0) {
+                g_signal_handler_disconnect (proxy, priv->proxy_signal_handler);
         }
 
         g_free (obj->priv);
@@ -466,62 +423,49 @@ notify_notification_update (NotifyNotification *notification,
 }
 
 static void
-_close_signal_handler (DBusGProxy         *proxy,
-                       guint32             id,
-                       guint32             reason,
-                       NotifyNotification *notification)
+proxy_g_signal_cb (GDBusProxy *proxy,
+                   const char *sender_name,
+                   const char *signal_name,
+                   GVariant   *parameters,
+                   NotifyNotification *notification)
 {
-        if (id == notification->priv->id) {
+        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+
+        if (g_strcmp0 (signal_name, "NotificationClosed") == 0 &&
+            g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(uu)"))) {
+                guint32 id, reason;
+
+                g_variant_get (parameters, "(uu)", &id, &reason);
+                if (id != notification->priv->id)
+                        return;
+
                 g_object_ref (G_OBJECT (notification));
                 notification->priv->closed_reason = reason;
                 g_signal_emit (notification, signals[SIGNAL_CLOSED], 0);
                 notification->priv->id = 0;
                 g_object_unref (G_OBJECT (notification));
-        }
-}
+        } else if (g_strcmp0 (signal_name, "ActionInvoked") == 0 &&
+                   g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(us)"))) {
+                guint32 id;
+                const char *action;
+                CallbackPair *pair;
 
-static void
-_action_signal_handler (DBusGProxy         *proxy,
-                        guint32             id,
-                        char               *action,
-                        NotifyNotification *notification)
-{
-        CallbackPair *pair;
+                g_variant_get (parameters, "(u&s)", &id, &action);
 
-        g_return_if_fail (notification != NULL);
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+                if (id != notification->priv->id)
+                        return;
 
-        if (id != notification->priv->id)
-                return;
+                pair = (CallbackPair *) g_hash_table_lookup (notification->priv->action_map,
+                                                            action);
 
-        pair = (CallbackPair *) g_hash_table_lookup (notification->priv->action_map,
-                                                     action);
-
-        if (pair == NULL) {
-                if (g_ascii_strcasecmp (action, "default")) {
-                        g_warning ("Received unknown action %s", action);
+                if (pair == NULL) {
+                        if (g_ascii_strcasecmp (action, "default")) {
+                                g_warning ("Received unknown action %s", action);
+                        }
+                } else {
+                        pair->cb (notification, (char *) action, pair->user_data);
                 }
-        } else {
-                pair->cb (notification, action, pair->user_data);
         }
-}
-
-static char  **
-_gslist_to_string_array (GSList *list)
-{
-        GSList *l;
-        GArray *a;
-
-        a = g_array_sized_new (TRUE,
-                               FALSE,
-                               sizeof (char *),
-                               g_slist_length (list));
-
-        for (l = list; l != NULL; l = l->next) {
-                g_array_append_val (a, l->data);
-        }
-
-        return (char **) g_array_free (a, FALSE);
 }
 
 /**
@@ -539,70 +483,69 @@ notify_notification_show (NotifyNotification *notification,
                           GError            **error)
 {
         NotifyNotificationPrivate *priv;
-        GError                    *tmp_error = NULL;
-        char                     **action_array;
-        DBusGProxy                *proxy;
+        GDBusProxy                *proxy;
+        GVariantBuilder            actions_builder, hints_builder;
+        GSList                    *l;
+        GHashTableIter             iter;
+        gpointer                   key, data;
+        GVariant                  *result;
 
         g_return_val_if_fail (notification != NULL, FALSE);
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
         g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
         priv = notification->priv;
-        proxy = _notify_get_g_proxy ();
+        proxy = _notify_get_proxy (error);
         if (proxy == NULL) {
-                g_set_error (error, 0, 0, "Unable to connect to server");
                 return FALSE;
         }
 
-        if (!priv->signals_registered) {
-                g_signal_connect (proxy,
-                                  "destroy",
-                                  G_CALLBACK (on_proxy_destroy),
-                                  notification);
-
-                dbus_g_proxy_connect_signal (proxy,
-                                             "NotificationClosed",
-                                             G_CALLBACK (_close_signal_handler),
-                                             notification,
-                                             NULL);
-
-                dbus_g_proxy_connect_signal (proxy,
-                                             "ActionInvoked",
-                                             G_CALLBACK (_action_signal_handler),
-                                             notification,
-                                             NULL);
-
-                priv->signals_registered = TRUE;
+        if (priv->proxy_signal_handler == 0) {
+                priv->proxy_signal_handler = g_signal_connect (proxy,
+                                                               "g-signal",
+                                                               G_CALLBACK (proxy_g_signal_cb),
+                                                               notification);
         }
 
-        action_array = _gslist_to_string_array (priv->actions);
+        g_variant_builder_init (&actions_builder, G_VARIANT_TYPE ("as"));
+        for (l = priv->actions; l != NULL; l = l->next) {
+                g_variant_builder_add (&actions_builder, "s", l->data);
+        }
+
+        g_variant_builder_init (&hints_builder, G_VARIANT_TYPE ("a{sv}"));
+        g_hash_table_iter_init (&iter, priv->hints);
+        while (g_hash_table_iter_next (&iter, &key, &data)) {
+                g_variant_builder_add (&hints_builder, "{sv}", key, data);
+        }
 
         /* TODO: make this nonblocking */
-        dbus_g_proxy_call (proxy,
-                           "Notify",
-                           &tmp_error,
-                           G_TYPE_STRING, notify_get_app_name (),
-                           G_TYPE_UINT, priv->id,
-                           G_TYPE_STRING, priv->icon_name,
-                           G_TYPE_STRING, priv->summary,
-                           G_TYPE_STRING, priv->body,
-                           G_TYPE_STRV, action_array,
-                           dbus_g_type_get_map ("GHashTable",
-                                                G_TYPE_STRING,
-                                                G_TYPE_VALUE),
-                           priv->hints,
-                           G_TYPE_INT, priv->timeout,
-                           G_TYPE_INVALID,
-                           G_TYPE_UINT, &priv->id,
-                           G_TYPE_INVALID);
-
-        /* Don't free the elements because they are owned by priv->actions */
-        g_free (action_array);
-
-        if (tmp_error != NULL) {
-                g_propagate_error (error, tmp_error);
+        result = g_dbus_proxy_call_sync (proxy,
+                                         "Notify",
+                                         g_variant_new ("(susssasa{sv}i)",
+                                                        notify_get_app_name (),
+                                                        priv->id,
+                                                        priv->icon_name ? priv->icon_name : "",
+                                                        priv->summary ? priv->summary : "",
+                                                        priv->body ? priv->body : "",
+                                                        &actions_builder,
+                                                        &hints_builder,
+                                                        priv->timeout),
+                                         G_DBUS_CALL_FLAGS_NONE,
+                                         -1 /* FIXME ? */,
+                                         NULL,
+                                         error);
+        if (result == NULL) {
                 return FALSE;
         }
+        if (!g_variant_is_of_type (result, G_VARIANT_TYPE ("(u)"))) {
+                g_variant_unref (result);
+                g_set_error (error, G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS,
+                             "Unexpected reply type");
+                return FALSE;
+        }
+
+        g_variant_get (result, "(u)", &priv->id);
+        g_variant_unref (result);
 
         return TRUE;
 }
@@ -676,47 +619,6 @@ notify_notification_set_urgency (NotifyNotification *notification,
                                            (guchar) urgency);
 }
 
-static void
-_gvalue_array_append_int (GValueArray *array,
-                          gint         i)
-{
-        GValue value = { 0 };
-
-        g_value_init (&value, G_TYPE_INT);
-        g_value_set_int (&value, i);
-        g_value_array_append (array, &value);
-        g_value_unset (&value);
-}
-
-static void
-_gvalue_array_append_bool (GValueArray *array, gboolean b)
-{
-        GValue value = { 0 };
-
-        g_value_init (&value, G_TYPE_BOOLEAN);
-        g_value_set_boolean (&value, b);
-        g_value_array_append (array, &value);
-        g_value_unset (&value);
-}
-
-static void
-_gvalue_array_append_byte_array (GValueArray *array,
-                                 guchar      *bytes,
-                                 gsize        len)
-{
-        GArray *byte_array;
-        GValue  value = { 0 };
-
-        byte_array = g_array_sized_new (FALSE, FALSE, sizeof (guchar), len);
-        g_assert (byte_array != NULL);
-        byte_array = g_array_append_vals (byte_array, bytes, len);
-
-        g_value_init (&value, DBUS_TYPE_G_UCHAR_ARRAY);
-        g_value_take_boxed (&value, byte_array);
-        g_value_array_append (array, &value);
-        g_value_unset (&value);
-}
-
 /**
  * notify_notification_set_icon_from_pixbuf:
  * @notification: The notification.
@@ -757,12 +659,21 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         guchar         *image;
         gboolean        has_alpha;
         gsize           image_len;
-        GValueArray    *image_struct;
-        GValue         *value;
+        GVariant       *value;
         const char     *hint_name;
 
-        g_return_if_fail (notification != NULL);
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+        g_return_if_fail (pixbuf == NULL || GDK_IS_PIXBUF (pixbuf));
+
+        if (_notify_check_spec_version(1, 1)) {
+                hint_name = "image_data";
+        } else {
+                hint_name = "icon_data";
+        }
+
+        if (pixbuf == NULL) {
+                notify_notification_set_hint (notification, hint_name, NULL);
+                return;
+        }
 
         g_object_get (pixbuf,
                       "width", &width,
@@ -776,29 +687,50 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         image_len = (height - 1) * rowstride + width *
                 ((n_channels * bits_per_sample + 7) / 8);
 
-        image_struct = g_value_array_new (1);
+        value = g_variant_new ("(iiibii@ay)",
+                               width,
+                               height,
+                               rowstride,
+                               has_alpha,
+                               bits_per_sample,
+                               n_channels,
+                               g_variant_new_from_data (G_VARIANT_TYPE ("ay"),
+                                                        image,
+                                                        image_len,
+                                                        TRUE,
+                                                        (GDestroyNotify) g_object_unref,
+                                                        pixbuf));
+        notify_notification_set_hint (notification, hint_name, value);
+}
 
-        _gvalue_array_append_int (image_struct, width);
-        _gvalue_array_append_int (image_struct, height);
-        _gvalue_array_append_int (image_struct, rowstride);
-        _gvalue_array_append_bool (image_struct, has_alpha);
-        _gvalue_array_append_int (image_struct, bits_per_sample);
-        _gvalue_array_append_int (image_struct, n_channels);
-        _gvalue_array_append_byte_array (image_struct, image, image_len);
+/**
+ * notify_notification_set_hint:
+ * @notification: a #NotifyNotification
+ * @key: the hint key
+ * @variant: (allow-none): the hint value, or %NULL to unset the hint
+ *
+ * Sets a hint for @key with value @variant. If @value is %NULL,
+ * a previously set hint for @key is unset.
+ *
+ * If @variant is floating, it is consumed.
+ *
+ * Since: 0.6
+ */
+void
+notify_notification_set_hint (NotifyNotification *notification,
+                              const char         *key,
+                              GVariant           *value)
+{
+        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+        g_return_if_fail (key != NULL && *key != '\0');
 
-        value = g_new0 (GValue, 1);
-        g_value_init (value, G_TYPE_VALUE_ARRAY);
-        g_value_take_boxed (value, image_struct);
-
-        if (_notify_check_spec_version(1, 1)) {
-                hint_name = "image_data";
+        if (value != NULL) {
+                g_hash_table_insert (notification->priv->hints,
+                                    g_strdup (key),
+                                    g_variant_ref_sink (value));
         } else {
-                hint_name = "icon_data";
+                g_hash_table_remove (notification->priv->hints, key);
         }
-
-        g_hash_table_insert (notification->priv->hints,
-                             g_strdup (hint_name),
-                             value);
 }
 
 /**
@@ -808,24 +740,16 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
  * @value: The hint's value.
  *
  * Sets a hint with a 32-bit integer value.
+ *
+ * Deprecated: 0.6. Use notify_notification_set_hint() instead
  */
 void
 notify_notification_set_hint_int32 (NotifyNotification *notification,
                                     const char         *key,
                                     gint                value)
 {
-        GValue *hint_value;
-
-        g_return_if_fail (notification != NULL);
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-        g_return_if_fail (key != NULL && *key != '\0');
-
-        hint_value = g_new0 (GValue, 1);
-        g_value_init (hint_value, G_TYPE_INT);
-        g_value_set_int (hint_value, value);
-        g_hash_table_insert (notification->priv->hints,
-                             g_strdup (key),
-                             hint_value);
+        notify_notification_set_hint (notification, key,
+                                      g_variant_new_int32 (value));
 }
 
 
@@ -836,24 +760,16 @@ notify_notification_set_hint_int32 (NotifyNotification *notification,
  * @value: The hint's value.
  *
  * Sets a hint with an unsigned 32-bit integer value.
+ *
+ * Deprecated: 0.6. Use notify_notification_set_hint() instead
  */
 void
 notify_notification_set_hint_uint32 (NotifyNotification *notification,
                                      const char         *key,
                                      guint               value)
 {
-        GValue *hint_value;
-
-        g_return_if_fail (notification != NULL);
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-        g_return_if_fail (key != NULL && *key != '\0');
-
-        hint_value = g_new0 (GValue, 1);
-        g_value_init (hint_value, G_TYPE_UINT);
-        g_value_set_uint (hint_value, value);
-        g_hash_table_insert (notification->priv->hints,
-                             g_strdup (key),
-                             hint_value);
+        notify_notification_set_hint (notification, key,
+                                      g_variant_new_uint32 (value));
 }
 
 /**
@@ -863,24 +779,16 @@ notify_notification_set_hint_uint32 (NotifyNotification *notification,
  * @value: The hint's value.
  *
  * Sets a hint with a double value.
+ *
+ * Deprecated: 0.6. Use notify_notification_set_hint() instead
  */
 void
 notify_notification_set_hint_double (NotifyNotification *notification,
                                      const char         *key,
                                      gdouble             value)
 {
-        GValue *hint_value;
-
-        g_return_if_fail (notification != NULL);
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-        g_return_if_fail (key != NULL && *key != '\0');
-
-        hint_value = g_new0 (GValue, 1);
-        g_value_init (hint_value, G_TYPE_FLOAT);
-        g_value_set_float (hint_value, value);
-        g_hash_table_insert (notification->priv->hints,
-                             g_strdup (key),
-                             hint_value);
+        notify_notification_set_hint (notification, key,
+                                      g_variant_new_double (value));
 }
 
 /**
@@ -890,25 +798,16 @@ notify_notification_set_hint_double (NotifyNotification *notification,
  * @value: The hint's value.
  *
  * Sets a hint with a byte value.
+ *
+ * Deprecated: 0.6. Use notify_notification_set_hint() instead
  */
 void
 notify_notification_set_hint_byte (NotifyNotification *notification,
                                    const char         *key,
                                    guchar              value)
 {
-        GValue *hint_value;
-
-        g_return_if_fail (notification != NULL);
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-        g_return_if_fail (key != NULL && *key != '\0');
-
-        hint_value = g_new0 (GValue, 1);
-        g_value_init (hint_value, G_TYPE_UCHAR);
-        g_value_set_uchar (hint_value, value);
-
-        g_hash_table_insert (notification->priv->hints,
-                             g_strdup (key),
-                             hint_value);
+        notify_notification_set_hint (notification, key,
+                                      g_variant_new_byte (value));
 }
 
 /**
@@ -920,6 +819,8 @@ notify_notification_set_hint_byte (NotifyNotification *notification,
  *
  * Sets a hint with a byte array value. The length of @value must be passed
  * as @len.
+ *
+ * Deprecated: 0.6. Use notify_notification_set_hint() instead
  */
 void
 notify_notification_set_hint_byte_array (NotifyNotification *notification,
@@ -927,26 +828,18 @@ notify_notification_set_hint_byte_array (NotifyNotification *notification,
                                          const guchar       *value,
                                          gsize               len)
 {
-        GValue *hint_value;
-        GArray *byte_array;
+        gpointer value_dup;
 
-        g_return_if_fail (notification != NULL);
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-        g_return_if_fail (key != NULL && *key != '\0');
-        g_return_if_fail (value != NULL);
-        g_return_if_fail (len > 0);
+        g_return_if_fail (value != NULL || len == 0);
 
-        byte_array = g_array_sized_new (FALSE, FALSE, sizeof (guchar), len);
-        byte_array = g_array_append_vals (byte_array, value, len);
-
-        hint_value = g_new0 (GValue, 1);
-        g_value_init (hint_value, dbus_g_type_get_collection ("GArray",
-                                                              G_TYPE_UCHAR));
-        g_value_take_boxed (hint_value, byte_array);
-
-        g_hash_table_insert (notification->priv->hints,
-                             g_strdup (key),
-                             hint_value);
+        value_dup = g_memdup (value, len);
+        notify_notification_set_hint (notification, key,
+                                      g_variant_new_from_data (G_VARIANT_TYPE ("ay"),
+                                                               value_dup,
+                                                               len,
+                                                               TRUE,
+                                                               g_free,
+                                                               value_dup));
 }
 
 /**
@@ -956,24 +849,16 @@ notify_notification_set_hint_byte_array (NotifyNotification *notification,
  * @value: The hint's value.
  *
  * Sets a hint with a string value.
+ *
+ * Deprecated: 0.6. Use notify_notification_set_hint() instead
  */
 void
 notify_notification_set_hint_string (NotifyNotification *notification,
                                      const char         *key,
                                      const char         *value)
 {
-        GValue *hint_value;
-
-        g_return_if_fail (notification != NULL);
-        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-        g_return_if_fail (key != NULL && *key != '\0');
-
-        hint_value = g_new0 (GValue, 1);
-        g_value_init (hint_value, G_TYPE_STRING);
-        g_value_set_string (hint_value, value);
-        g_hash_table_insert (notification->priv->hints,
-                             g_strdup (key),
-                             hint_value);
+        notify_notification_set_hint (notification, key,
+                                      g_variant_new_string (value));
 }
 
 static gboolean
@@ -1051,7 +936,6 @@ notify_notification_add_action (NotifyNotification  *notification,
         NotifyNotificationPrivate *priv;
         CallbackPair              *pair;
 
-        g_return_if_fail (notification != NULL);
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
         g_return_if_fail (action != NULL && *action != '\0');
         g_return_if_fail (label != NULL && *label != '\0');
@@ -1088,43 +972,41 @@ _notify_notification_has_nondefault_actions (const NotifyNotification *n)
  * @notification: The notification.
  * @error: The returned error information.
  *
- * Tells the notification server to hide the notification on the screen.
+ * Synchronously tells the notification server to hide the notification on the screen.
  *
- * Returns: %TRUE if successful. On error, this will return %FALSE and set
- *          @error.
+ * Returns: %TRUE on success, or %FALSE on error with @error filled in
  */
 gboolean
 notify_notification_close (NotifyNotification *notification,
                            GError            **error)
 {
         NotifyNotificationPrivate *priv;
-        GError         *tmp_error = NULL;
-        DBusGProxy     *proxy;
+        GDBusProxy  *proxy;
+        GVariant   *result;
 
-        g_return_val_if_fail (notification != NULL, FALSE);
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
         g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
         priv = notification->priv;
 
-        proxy = _notify_get_g_proxy ();
+        proxy = _notify_get_proxy (error);
         if (proxy == NULL) {
-                g_set_error (error, 0, 0, "Unable to connect to server");
                 return FALSE;
         }
 
-        dbus_g_proxy_call (proxy,
-                           "CloseNotification",
-                           &tmp_error,
-                           G_TYPE_UINT,
-                           priv->id,
-                           G_TYPE_INVALID,
-                           G_TYPE_INVALID);
-
-        if (tmp_error != NULL) {
-                g_propagate_error (error, tmp_error);
+        /* FIXME: make this nonblocking! */
+        result = g_dbus_proxy_call_sync (proxy,
+                                         "CloseNotification",
+                                         g_variant_new ("(u)", priv->id),
+                                         G_DBUS_CALL_FLAGS_NONE,
+                                         -1 /* FIXME! */,
+                                         NULL,
+                                         error);
+        if (result == NULL) {
                 return FALSE;
         }
+
+        g_variant_unref (result);
 
         return TRUE;
 }

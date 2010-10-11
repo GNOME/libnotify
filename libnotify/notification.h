@@ -126,6 +126,10 @@ void                notify_notification_set_hint_byte_array   (NotifyNotificatio
                                                                const guchar       *value,
                                                                gsize               len);
 
+void                notify_notification_set_hint              (NotifyNotification *notification,
+                                                               const char         *key,
+                                                               GVariant           *value);
+
 void                notify_notification_clear_hints           (NotifyNotification *notification);
 
 void                notify_notification_add_action            (NotifyNotification *notification,

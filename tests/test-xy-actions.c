@@ -24,11 +24,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define DBUS_API_SUBJECT_TO_CHANGE
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib.h>
-#include <dbus/dbus-glib-lowlevel.h>
-
 static GMainLoop *loop;
 
 static void
@@ -44,14 +39,10 @@ int
 main (int argc, char **argv)
 {
         NotifyNotification *n;
-        DBusConnection     *conn;
 
         notify_init ("XY");
 
-        conn = dbus_bus_get (DBUS_BUS_SESSION, NULL);
         loop = g_main_loop_new (NULL, FALSE);
-
-        dbus_connection_setup_with_g_main (conn, NULL);
 
         n = notify_notification_new ("System update available",
                                      "New system updates are available. It is "

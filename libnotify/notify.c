@@ -3,6 +3,7 @@
  * Copyright (C) 2004-2006 Christian Hammond <chipx86@chipx86.com>
  * Copyright (C) 2004-2006 Mike Hearn <mike@navi.cx>
  * Copyright (C) 2010 Red Hat, Inc.
+ * Copyright © 2010 Christian Persch
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,8 +29,7 @@
 #include <unistd.h>
 
 #include <glib.h>
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib.h>
+#include <gio/gio.h>
 
 #include "notify.h"
 #include "internal.h"
@@ -37,8 +37,7 @@
 
 static gboolean         _initted = FALSE;
 static char            *_app_name = NULL;
-static DBusGProxy      *_proxy = NULL;
-static DBusGConnection *_dbus_gconn = NULL;
+static GDBusProxy      *_proxy = NULL;
 static GList           *_active_notifications = NULL;
 static int              _spec_version_major = 0;
 static int              _spec_version_minor = 0;
@@ -55,11 +54,52 @@ _notify_check_spec_version (int major,
 }
 
 static gboolean
-_notify_update_spec_version (void)
+_notify_get_server_info (char **ret_name,
+                         char **ret_vendor,
+                         char **ret_version,
+                         char **ret_spec_version,
+                         GError **error)
+{
+        GDBusProxy *proxy;
+        GVariant   *result;
+
+        proxy = _notify_get_proxy (error);
+        if (proxy == NULL) {
+                return FALSE;
+        }
+
+        result = g_dbus_proxy_call_sync (proxy,
+                                         "GetServerInformation",
+                                         g_variant_new ("()"),
+                                         G_DBUS_CALL_FLAGS_NONE,
+                                         -1 /* FIXME shorter timeout? */,
+                                         NULL,
+                                         error);
+        if (result == NULL) {
+                return FALSE;
+        }
+        if (!g_variant_is_of_type (result, G_VARIANT_TYPE ("(ssss)"))) {
+                g_variant_unref (result);
+                g_set_error (error, G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS,
+                             "Unexpected reply type");
+                return FALSE;
+        }
+
+        g_variant_get (result, "(ssss)",
+                       ret_name,
+                       ret_vendor,
+                       ret_version,
+                       ret_spec_version);
+        g_variant_unref (result);
+        return TRUE;
+}
+
+static gboolean
+_notify_update_spec_version (GError **error)
 {
        char *spec_version;
 
-       if (!notify_get_server_info (NULL, NULL, NULL, &spec_version)) {
+       if (!_notify_get_server_info (NULL, NULL, NULL, &spec_version, error)) {
                return FALSE;
        }
 
@@ -146,6 +186,7 @@ notify_uninit (void)
 
         if (_proxy != NULL) {
             g_object_unref (_proxy);
+            _proxy = NULL;
         }
 
         _initted = FALSE;
@@ -164,73 +205,40 @@ notify_is_initted (void)
         return _initted;
 }
 
-DBusGConnection *
-_notify_get_dbus_g_conn (void)
+/*
+ * _notify_get_proxy:
+ * @error: (allow-none): a location to store a #GError, or %NULL
+ *
+ * Synchronously creates the #GDBusProxy for the notification service,
+ * and caches the result.
+ *
+ * Returns: the #GDBusProxy for the notification service, or %NULL on error
+ */
+GDBusProxy *
+_notify_get_proxy (GError **error)
 {
-        return _dbus_gconn;
-}
-
-static void
-on_proxy_destroy (DBusGProxy *proxy,
-                  gpointer    data)
-{
-        _proxy = NULL;
-}
-
-DBusGProxy *
-_notify_get_g_proxy (void)
-{
-        GError          *error;
-        DBusGConnection *bus;
-
         if (_proxy != NULL)
                 return _proxy;
 
-        /* lazily initialize D-Bus connection */
-        error = NULL;
-        bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
-        if (error != NULL) {
-                g_error_free (error);
+        _proxy = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+                                                G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
+                                                NULL,
+                                                NOTIFY_DBUS_NAME,
+                                                NOTIFY_DBUS_CORE_OBJECT,
+                                                NOTIFY_DBUS_CORE_INTERFACE,
+                                                NULL,
+                                                error);
+        if (_proxy == NULL) {
                 return NULL;
         }
 
-        _proxy = dbus_g_proxy_new_for_name (bus,
-                                            NOTIFY_DBUS_NAME,
-                                            NOTIFY_DBUS_CORE_OBJECT,
-                                            NOTIFY_DBUS_CORE_INTERFACE);
-        dbus_g_connection_unref (bus);
-
-        g_signal_connect (_proxy,
-                          "destroy",
-                          G_CALLBACK (on_proxy_destroy),
-                          NULL);
-
-        dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_UINT,
-                                           G_TYPE_NONE,
-                                           G_TYPE_UINT,
-                                           G_TYPE_UINT,
-                                           G_TYPE_INVALID);
-
-        dbus_g_object_register_marshaller (notify_marshal_VOID__UINT_STRING,
-                                           G_TYPE_NONE,
-                                           G_TYPE_UINT,
-                                           G_TYPE_STRING,
-                                           G_TYPE_INVALID);
-
-        dbus_g_proxy_add_signal (_proxy,
-                                 "NotificationClosed",
-                                 G_TYPE_UINT,
-                                 G_TYPE_UINT,
-                                 G_TYPE_INVALID);
-        dbus_g_proxy_add_signal (_proxy,
-                                 "ActionInvoked",
-                                 G_TYPE_UINT,
-                                 G_TYPE_STRING,
-                                 G_TYPE_INVALID);
-
-        if (!_notify_update_spec_version ()) {
+        if (!_notify_update_spec_version (error)) {
+               g_object_unref (_proxy);
+               _proxy = NULL;
                return NULL;
         }
+
+        g_object_add_weak_pointer (G_OBJECT (_proxy), (gpointer *) &_proxy);
 
         return _proxy;
 }
@@ -238,62 +246,64 @@ _notify_get_g_proxy (void)
 /**
  * notify_get_server_caps:
  *
- * Queries the server for its capabilities and returns them in a #GList.
+ * Synchronously queries the server for its capabilities and returns them in a #GList.
  *
- * Returns: A #GList of server capability strings.
+ * Returns: (transfer full) (element-type utf-8): a #GList of server capability strings. Free
+ *   the list elements with g_free() and the list itself with g_list_free().
  */
 GList *
 notify_get_server_caps (void)
 {
-        GError         *error;
-        char          **caps;
-        char          **cap;
-        GList          *result;
-        DBusGProxy     *proxy;
+        GDBusProxy *proxy;
+        GVariant   *result;
+        char      **cap, **caps;
+        GList      *list = NULL;
 
-        caps = NULL;
-        result = NULL;
-
-        proxy = _notify_get_g_proxy ();
+        proxy = _notify_get_proxy (NULL);
         if (proxy == NULL) {
-                return NULL;
+                return FALSE;
         }
 
-        error = NULL;
-        if (!dbus_g_proxy_call (proxy,
-                                "GetCapabilities",
-                                &error,
-                                G_TYPE_INVALID,
-                                G_TYPE_STRV,
-                                &caps,
-                                G_TYPE_INVALID)) {
-                g_error_free (error);
-                return NULL;
+        result = g_dbus_proxy_call_sync (proxy,
+                                         "GetCapabilities",
+                                         g_variant_new ("()"),
+                                         G_DBUS_CALL_FLAGS_NONE,
+                                         -1 /* FIXME shorter timeout? */,
+                                         NULL,
+                                         NULL);
+        if (result == NULL) {
+                return FALSE;
         }
+        if (!g_variant_is_of_type (result, G_VARIANT_TYPE ("(as)"))) {
+                g_variant_unref (result);
+                return FALSE;
+        }
+
+        g_variant_get (result, "(^as)", &caps);
 
         for (cap = caps; *cap != NULL; cap++) {
-                result = g_list_append (result, g_strdup (*cap));
+                list = g_list_prepend (list, *cap);
         }
 
-        g_strfreev (caps);
+        g_free (caps);
+        g_variant_unref (result);
 
-        return result;
+        return g_list_reverse (list);
 }
 
 /**
  * notify_get_server_info:
- * @ret_name: The resulting server name.
- * @ret_vendor: The resulting server vendor.
- * @ret_version: The resulting server version.
- * @ret_spec_version: The resulting version of the specification the server is
- *                    compliant with.
+ * @ret_name: (out) (allow-none): a location to store the server name, or %NULL
+ * @ret_vendor: (out) (allow-none): a location to store the server vendor, or %NULL
+ * @ret_version: (out) (allow-none): a location to store the server version, or %NULL
+ * @ret_spec_version: (out) (allow-none): a location to store the version the service is compliant with, or %NULL
  *
- * Queries the server for its information, specifically, the name, vendor,
+ * Synchronously queries the server for its information, specifically, the name, vendor,
  * server version, and the version of the notifications specification that it
  * is compliant with.
  *
- * Returns: %TRUE if successful, and the variables passed will be set. %FALSE
- *          on failure.
+ * Returns: %TRUE if successful, and the variables passed will be set, %FALSE
+ *          on error. The returned strings must be freed with g_free
  */
 gboolean
 notify_get_server_info (char **ret_name,
@@ -301,57 +311,7 @@ notify_get_server_info (char **ret_name,
                         char **ret_version,
                         char **ret_spec_version)
 {
-        GError         *error;
-        DBusGProxy     *proxy;
-        char           *name;
-        char           *vendor;
-        char           *version;
-        char           *spec_version;
-
-        proxy = _notify_get_g_proxy ();
-        if (proxy == NULL) {
-                return FALSE;
-        }
-
-        error = NULL;
-        if (!dbus_g_proxy_call (proxy,
-                                "GetServerInformation",
-                                &error,
-                                G_TYPE_INVALID,
-                                G_TYPE_STRING, &name,
-                                G_TYPE_STRING, &vendor,
-                                G_TYPE_STRING, &version,
-                                G_TYPE_STRING, &spec_version,
-                                G_TYPE_INVALID)) {
-                g_error_free (error);
-                return FALSE;
-        }
-
-        if (ret_name != NULL) {
-                *ret_name = name;
-        } else {
-                g_free (name);
-        }
-
-        if (ret_vendor != NULL) {
-                *ret_vendor = vendor;
-        } else {
-                g_free (vendor);
-        }
-
-        if (ret_version != NULL) {
-                *ret_version = version;
-        } else {
-                g_free (version);
-        }
-
-        if (ret_spec_version != NULL) {
-                *ret_spec_version = spec_version;
-        } else {
-                g_free (spec_version);
-        }
-
-        return TRUE;
+        return _notify_get_server_info (ret_name, ret_vendor, ret_version, ret_spec_version, NULL);
 }
 
 void

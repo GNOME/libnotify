@@ -183,6 +183,16 @@ is much like G_CALLBACK().
 @icon: 
 
 
+<!-- ##### FUNCTION notify_notification_set_hint ##### -->
+<para>
+
+</para>
+
+@notification: 
+@key: 
+@value: 
+
+
 <!-- ##### FUNCTION notify_notification_set_hint_int32 ##### -->
 <para>
 

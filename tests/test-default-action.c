@@ -27,13 +27,6 @@
 #include <assert.h>
 #include <string.h>
 
-#define DBUS_API_SUBJECT_TO_CHANGE
-
-#include <glib.h>
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib.h>
-#include <dbus/dbus-glib-lowlevel.h>
-
 static GMainLoop *loop;
 
 static void
@@ -54,15 +47,11 @@ int
 main ()
 {
         NotifyNotification *n;
-        DBusConnection     *conn;
 
         if (!notify_init ("Default Action Test"))
                 exit (1);
 
-        conn = dbus_bus_get (DBUS_BUS_SESSION, NULL);
         loop = g_main_loop_new (NULL, FALSE);
-
-        dbus_connection_setup_with_g_main (conn, NULL);
 
         n = notify_notification_new ("Matt is online", "", NULL);
         notify_notification_set_timeout (n, NOTIFY_EXPIRES_DEFAULT);
