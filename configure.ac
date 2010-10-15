@@ -47,9 +47,9 @@ dnl #  ? : +1 :  ?   == internal changes that doesn't break anything.
 dnl #
 dnl # CURRENT : REVISION : AGE
 dnl #
-LT_CURRENT=3
-LT_REVISION=3
-LT_AGE=2
+LT_CURRENT=4
+LT_REVISION=0
+LT_AGE=3
 
 LT_RELEASE=$LIBNOTIFY_MAJOR_VERSION.$LIBNOTIFY_MINOR_VERSION.$LIBNOTIFY_MICRO_VERSION
 
