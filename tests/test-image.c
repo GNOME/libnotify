@@ -41,8 +41,7 @@ main (int argc, char *argv[])
 {
         char           *file;
         char           *uri;
-        GdkPixbuf      *icon;
-        GtkWidget      *helper;
+        GdkPixbuf      *pixbuf;
 
         gtk_init (&argc, &argv);
 
@@ -85,28 +84,23 @@ main (int argc, char *argv[])
         n = notify_notification_new ("Raw image test",
                                      "Testing sending raw pixbufs",
                                      NULL);
+        pixbuf = gtk_icon_theme_load_icon (gtk_icon_theme_get_for_screen (gdk_screen_get_default ()),
+                                           "folder-open",
+                                           48,
+                                           GTK_ICON_LOOKUP_USE_BUILTIN,
+                                           NULL);
+        if (pixbuf == NULL) {
+                fprintf (stderr, "failed to render pixbuf\n");
+                return 1;
+        }
 
-        /*
-         * This is just a hack to get a stock icon's pixbuf in a realworld app
-         * if you were sending bitmapped data you would know the file location
-         * and open it up with a method that could generate a bmp for you
-         */
-        helper = gtk_button_new ();
-        icon = gtk_widget_render_icon (helper,
-                                       GTK_STOCK_DIALOG_QUESTION,
-                                       GTK_ICON_SIZE_DIALOG,
-                                       NULL);
-        gtk_widget_destroy (helper);
-
-        notify_notification_set_icon_from_pixbuf (n, icon);
-        g_object_unref (G_OBJECT (icon));
+        notify_notification_set_icon_from_pixbuf (n, pixbuf);
+        g_object_unref (pixbuf);
 
         if (!notify_notification_show (n, NULL)) {
                 fprintf (stderr, "failed to send notification\n");
                 return 1;
         }
-
-        g_object_unref (G_OBJECT (n));
 
         return 0;
 }
