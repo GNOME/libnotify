@@ -627,8 +627,6 @@ notify_notification_set_urgency (NotifyNotification *notification,
  * Sets the icon in the notification from a #GdkPixbuf.
  * Deprecated: use notify_notification_set_image_from_pixbuf() instead.
  *
- * This will only work when libnotify is compiled against D-BUS 0.60 or
- * higher.
  */
 void
 notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
@@ -644,8 +642,6 @@ notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
  *
  * Sets the image in the notification from a #GdkPixbuf.
  *
- * This will only work when libnotify is compiled against D-BUS 0.60 or
- * higher.
  */
 void
 notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
