@@ -67,8 +67,10 @@ test_rtl_LDADD = $(common_ldflags)
 
 EXTRA_DIST = applet-critical.png
 
-INCLUDES = $(PACKAGE_CFLAGS)	\
-	$(GDK_CFLAGS)		\
-	-I$(top_srcdir)
+INCLUDES = \
+	-I$(top_srcdir) \
+	-I$(top_srcdir)/libnotify \
+	$(PACKAGE_CFLAGS)	\
+	$(GDK_CFLAGS)
 
 -include $(top_srcdir)/git.mk
