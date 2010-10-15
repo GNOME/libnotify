@@ -94,7 +94,7 @@ main (int argc, char *argv[])
                 return 1;
         }
 
-        notify_notification_set_icon_from_pixbuf (n, pixbuf);
+        notify_notification_set_image_from_pixbuf (n, pixbuf);
         g_object_unref (pixbuf);
 
         if (!notify_notification_show (n, NULL)) {
