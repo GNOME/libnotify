@@ -1,3 +1,13 @@
+NEW in 0.7.0:
+==============
+
+ - Remove the ability to attach notifications to widgets or positions
+ - Add a test for the persistence server capability
+ - Port to use GBus instead of dbus-glib (Christian Persch)
+ - Add a macro to get library version number
+ - Remove GTK+ dependency from library
+ - Port tests to GTK+ 3
+
 NEW in 0.6.0:
 ==============
 
