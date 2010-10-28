@@ -734,14 +734,6 @@
     </thead>
     <tbody valign="top">
      <row>
-      <entry><literal>"urgency"</literal></entry>
-      <entry>byte</entry>
-      <entry>
-       The urgency level.
-      </entry>
-      <entry/>
-     </row>
-     <row>
       <entry><literal>"category"</literal></entry>
       <entry>string</entry>
       <entry>
@@ -788,6 +780,18 @@
       <entry>&lt; 1.1</entry>
      </row>
      <row>
+      <entry><literal>"resident"</literal></entry>
+      <entry>boolean</entry>
+      <entry>
+       When set the server will not automatically remove the
+       notification when an action has been invoked.  The notification
+       will remain resident in the server until it is explicitly
+       removed by the user or by the sender.  This hint is likely only
+       useful when the server has the "persistence" capability.
+      </entry>
+      <entry/>
+     </row>
+     <row>
       <entry><literal>"sound-file"</literal></entry>
       <entry>string</entry>
       <entry>
@@ -831,6 +835,14 @@
       <entry>
        Specifies the Y location on the screen that the notification should
        point to. The <literal>"x"</literal> hint must also be specified.
+      </entry>
+      <entry/>
+     </row>
+     <row>
+      <entry><literal>"urgency"</literal></entry>
+      <entry>byte</entry>
+      <entry>
+       The urgency level.
       </entry>
       <entry/>
      </row>
