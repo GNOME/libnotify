@@ -39,9 +39,9 @@
  <sect1 id="introduction">
   <title>Introduction</title>
   <para>
-   This is a draft standard for a desktop notifications service, through
-   which applications can generate passive popups (sometimes known as
-   "poptarts") to notify the user in an asynchronous manner of events.
+   This is a draft standard for a desktop notifications service,
+   through which applications can generate passive popups to notify
+   the user in an asynchronous manner of events.
   </para>
   <para>
    This specification explicitly does not include other types of
@@ -52,13 +52,7 @@
    Example use cases include:
   </para>
   <itemizedlist>
-   <listitem>
-    <para>
-     Presence changes in IM programs: for instance, MSN Messenger on
-     Windows pioneered the use of passive popups to indicate presence
-     changes.
-    </para>
-   </listitem>
+   <listitem><para>Messages from chat programs</para> </listitem>
    <listitem><para>Scheduled alarm</para></listitem>
    <listitem><para>Completed file transfer</para></listitem>
    <listitem><para>New mail notification</para></listitem>
