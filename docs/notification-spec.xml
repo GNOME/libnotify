@@ -714,7 +714,7 @@
        removed by the user or by the sender.  This hint is likely only
        useful when the server has the "persistence" capability.
       </entry>
-      <entry/>
+      <entry>&gt;= 1.2</entry>
      </row>
      <row>
       <entry><literal>"sound-file"</literal></entry>
@@ -753,7 +753,7 @@
        and by-pass the server's persistence capability, if it should
        exist.
       </entry>
-      <entry/>
+      <entry>&gt;= 1.2</entry>
      </row>
      <row>
       <entry><literal>"x"</literal></entry>
