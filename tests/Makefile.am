@@ -13,8 +13,10 @@ noinst_PROGRAMS = \
 	test-error \
 	test-markup \
 	test-persistence \
+	test-resident \
 	test-rtl \
 	test-size-changes \
+	test-transient \
 	test-urgency \
 	test-xy \
 	test-xy-actions \
@@ -71,6 +73,12 @@ test_rtl_LDADD = $(common_ldflags)
 
 test_persistence_SOURCES = test-persistence.c
 test_persistence_LDADD = $(common_ldflags)
+
+test_resident_SOURCES = test-resident.c
+test_resident_LDADD = $(common_ldflags)
+
+test_transient_SOURCES = test-transient.c
+test_transient_LDADD = $(common_ldflags)
 
 EXTRA_DIST = applet-critical.png
 
