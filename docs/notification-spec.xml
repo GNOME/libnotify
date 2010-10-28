@@ -821,6 +821,16 @@
       <entry/>
      </row>
      <row>
+      <entry><literal>"transient"</literal></entry>
+      <entry>boolean</entry>
+      <entry>
+       When set the server will treat the notification as transient
+       and by-pass the server's persistence capability, if it should
+       exist.
+      </entry>
+      <entry/>
+     </row>
+     <row>
       <entry><literal>"x"</literal></entry>
       <entry>int</entry>
       <entry>
