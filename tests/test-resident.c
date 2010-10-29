@@ -23,35 +23,79 @@
 #include <string.h>
 
 static GMainLoop *loop;
+static int counter;
+static gboolean is_playing;
 
 static void
 prev_callback (NotifyNotification *n,
                const char         *action)
 {
+        char *body;
+
         g_assert (action != NULL);
         g_assert (strcmp (action, "previous") == 0);
 
         printf ("You clicked Previous\n");
+        body = g_strdup_printf ("Playing some fine song %d", --counter);
+        notify_notification_update (n,
+                                    "Music Player",
+                                    body,
+                                    "audio-x-generic");
+        g_free (body);
+
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send update\n");
+        }
 }
 
 static void
 pause_callback (NotifyNotification *n,
-                 const char         *action)
+                const char         *action)
 {
+        char *body;
+
         g_assert (action != NULL);
         g_assert (strcmp (action, "pause") == 0);
 
-        printf ("You clicked Pause\n");
+        printf ("You clicked Play/Pause\n");
+        is_playing = !is_playing;
+        if (is_playing) {
+                body = g_strdup_printf ("Playing some fine song %d", counter);
+        } else {
+                body = g_strdup_printf ("Not playing some fine song %d", counter);
+        }
+
+        notify_notification_update (n,
+                                    "Music Player",
+                                    body,
+                                    "audio-x-generic");
+        g_free (body);
+
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send update\n");
+        }
 }
 
 static void
 next_callback (NotifyNotification *n,
-                const char         *action)
+               const char         *action)
 {
+        char *body;
+
         g_assert (action != NULL);
         g_assert (strcmp (action, "next") == 0);
 
         printf ("You clicked Next\n");
+        body = g_strdup_printf ("Playing some fine song %d", ++counter);
+        notify_notification_update (n,
+                                    "Music Player",
+                                    body,
+                                    "audio-x-generic");
+        g_free (body);
+
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send update\n");
+        }
 }
 
 
@@ -65,6 +109,9 @@ main (int argc, char **argv)
                 exit (1);
 
         loop = g_main_loop_new (NULL, FALSE);
+
+        counter = 0;
+        is_playing = TRUE;
 
         n = notify_notification_new ("Music Player",
                                      "Playing some fine song",
