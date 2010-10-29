@@ -108,6 +108,25 @@ main (int argc, char **argv)
                 return 1;
         }
 
+
+        n = notify_notification_new ("Music Player",
+                                     "Shouldn't have icons",
+                                     NULL);
+
+        notify_notification_set_hint (n, "action-icons", g_variant_new_boolean (FALSE));
+
+        notify_notification_add_action (n,
+                                        "media-skip-backward",
+                                        "Previous",
+                                        (NotifyActionCallback) previous_callback,
+                                        NULL,
+                                        NULL);
+
+        if (!notify_notification_show (n, NULL)) {
+                fprintf (stderr, "failed to send notification\n");
+                return 1;
+        }
+
         g_main_loop_run (loop);
 
         return 0;
