@@ -653,6 +653,18 @@
     </thead>
     <tbody valign="top">
      <row>
+      <entry><literal>"action-icons"</literal></entry>
+      <entry>boolean</entry>
+      <entry>
+       When set, a server that has the "action-icons" capability will
+       attempt to interpret any action identifier as a named icon.
+       The localized display name will be used to annotate the icon
+       for accessibility purposes.  The icon name should be compliant
+       with the Freedesktop.org Icon Naming Specification.
+      </entry>
+      <entry>&gt;= 1.2</entry>
+     </row>
+     <row>
       <entry><literal>"category"</literal></entry>
       <entry>string</entry>
       <entry>
@@ -812,6 +824,14 @@
      <title>Server Capabilities</title>
      <tgroup cols="2">
       <tbody valign="top">
+       <row>
+        <entry><literal>"action-icons"</literal></entry>
+        <entry>
+         Supports using icons instead of text for displaying actions.
+         Using icons for actions must be enabled on a per-notification
+         basis using the "action-icons" hint.
+        </entry>
+       </row>
        <row>
         <entry><literal>"actions"</literal></entry>
         <entry>
