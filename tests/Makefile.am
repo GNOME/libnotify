@@ -8,6 +8,7 @@ noinst_PROGRAMS = \
 	test-server-info \
 	test-default-action \
 	test-multi-actions \
+	test-action-icons \
 	test-image \
 	test-basic \
 	test-error \
@@ -43,6 +44,9 @@ test_default_action_LDADD  = $(common_ldflags)
 
 test_multi_actions_SOURCES = test-multi-actions.c
 test_multi_actions_LDADD  = $(common_ldflags)
+
+test_action_icons_SOURCES = test-action-icons.c
+test_action_icons_LDADD  = $(common_ldflags)
 
 test_image_SOURCES = test-image.c
 test_image_LDADD  = $(common_ldflags)
