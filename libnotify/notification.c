@@ -695,7 +695,7 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
                                                         image_len,
                                                         TRUE,
                                                         (GDestroyNotify) g_object_unref,
-                                                        pixbuf));
+                                                        g_object_ref (pixbuf)));
         notify_notification_set_hint (notification, hint_name, value);
 }
 
