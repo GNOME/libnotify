@@ -29,7 +29,19 @@
 
 G_BEGIN_DECLS
 
+/**
+ * NOTIFY_EXPIRES_DEFAULT:
+ *
+ * The default expiration time on a notification.
+ */
 #define NOTIFY_EXPIRES_DEFAULT -1
+
+/**
+ * NOTIFY_EXPIRES_NEVER:
+ *
+ * The notification never expires. It stays open until closed by the calling API
+ * or the user.
+ */
 #define NOTIFY_EXPIRES_NEVER    0
 
 #define NOTIFY_TYPE_NOTIFICATION         (notify_notification_get_type ())
@@ -45,7 +57,9 @@ typedef struct _NotifyNotificationPrivate NotifyNotificationPrivate;
 
 struct _NotifyNotification
 {
+        /*< private >*/
         GObject                    parent_object;
+
         NotifyNotificationPrivate *priv;
 };
 
@@ -57,8 +71,14 @@ struct _NotifyNotificationClass
         void            (*closed) (NotifyNotification *notification);
 };
 
-/*
- * Notification urgency levels.
+
+/**
+ * NotifyUrgency:
+ * @NOTIFY_URGENCY_LOW: Low urgency. Used for unimportant notifications.
+ * @NOTIFY_URGENCY_NORMAL: Normal urgency. Used for most standard notifications.
+ * @NOTIFY_URGENCY_CRITICAL: Critical urgency. Used for very important notifications.
+ *
+ * The urgency level of the notification.
  */
 typedef enum
 {
@@ -68,10 +88,25 @@ typedef enum
 
 } NotifyUrgency;
 
+/**
+ * NotifyActionCallback:
+ * @notification:
+ * @action:
+ * @user_data:
+ *
+ * An action callback function.
+ */
 typedef void    (*NotifyActionCallback) (NotifyNotification *notification,
                                          char               *action,
                                          gpointer            user_data);
 
+/**
+ * NOTIFY_ACTION_CALLBACK:
+ * @func: The function to cast.
+ *
+ * A convenience macro for casting a function to a #NotifyActionCallback. This
+ * is much like G_CALLBACK().
+ */
 #define NOTIFY_ACTION_CALLBACK(func) ((NotifyActionCallback)(func))
 
 GType               notify_notification_get_type             (void);

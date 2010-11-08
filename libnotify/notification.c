@@ -28,6 +28,21 @@
 #include "notify.h"
 #include "internal.h"
 
+
+/**
+ * SECTION:notification
+ * @Short_description: A passive pop-up notification.
+ * @Title: NotifyNotification
+ *
+ * #NotifyNotification represents a passive pop-up notification. It can
+ * contain summary text, body text, and an icon, as well as hints specifying
+ * how the notification should be presented. The notification is rendered
+ * by a notification daemon, and may present the notification in any number
+ * of ways. As such, there is a clear separation of content and presentation,
+ * and this API enforces that.
+ */
+
+
 #if !defined(G_PARAM_STATIC_NAME) && !defined(G_PARAM_STATIC_NICK) && \
     !defined(G_PARAM_STATIC_BLURB)
 # define G_PARAM_STATIC_NAME 0
