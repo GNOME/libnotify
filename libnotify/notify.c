@@ -35,6 +35,12 @@
 #include "internal.h"
 #include "notify-marshal.h"
 
+/**
+ * SECTION:notify
+ * @Short_description: Notification API
+ * @Title: notify
+ */
+
 static gboolean         _initted = FALSE;
 static char            *_app_name = NULL;
 static GDBusProxy      *_proxy = NULL;
