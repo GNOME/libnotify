@@ -718,12 +718,12 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
  * notify_notification_set_hint:
  * @notification: a #NotifyNotification
  * @key: the hint key
- * @variant: (allow-none): the hint value, or %NULL to unset the hint
+ * @value: (allow-none): the hint value, or %NULL to unset the hint
  *
- * Sets a hint for @key with value @variant. If @value is %NULL,
+ * Sets a hint for @key with value @value. If @value is %NULL,
  * a previously set hint for @key is unset.
  *
- * If @variant is floating, it is consumed.
+ * If @value is floating, it is consumed.
  *
  * Since: 0.6
  */
