@@ -30,34 +30,10 @@
 
 G_BEGIN_DECLS
 
-/**
- * Initializes the notifications library.
- *
- * @param app_name The application name.
- *
- * @return TRUE if the library initialized properly.
- */
 gboolean        notify_init (const char *app_name);
-
-/**
- * Uninitializes the notifications library.
- *
- * This will be automatically called on exit unless previously called.
- */
 void            notify_uninit (void);
-
-/**
- * Returns whether or not the notification library is initialized.
- *
- * @return TRUE if the library is initialized, or FALSE.
- */
 gboolean        notify_is_initted (void);
 
-/**
- * Returns the name of the application set when notify_init() was called.
- *
- * @return The name of the application.
- */
 const char     *notify_get_app_name (void);
 
 GList          *notify_get_server_caps (void);
