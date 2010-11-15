@@ -613,9 +613,11 @@ notify_notification_set_category (NotifyNotification *notification,
         g_return_if_fail (notification != NULL);
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
-        notify_notification_set_hint_string (notification,
-                                             "category",
-                                             category);
+        if (category != NULL && category[0] != '\0') {
+                notify_notification_set_hint_string (notification,
+                                                     "category",
+                                                     category);
+        }
 }
 
 /**
@@ -873,8 +875,11 @@ notify_notification_set_hint_string (NotifyNotification *notification,
                                      const char         *key,
                                      const char         *value)
 {
-        notify_notification_set_hint (notification, key,
-                                      g_variant_new_string (value));
+        if (value != NULL && value[0] != '\0') {
+                notify_notification_set_hint (notification,
+                                              key,
+                                              g_variant_new_string (value));
+        }
 }
 
 static gboolean
