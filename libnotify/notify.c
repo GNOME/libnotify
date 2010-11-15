@@ -267,7 +267,8 @@ notify_get_server_caps (void)
 
         proxy = _notify_get_proxy (NULL);
         if (proxy == NULL) {
-                return FALSE;
+                g_warning ("Failed to connect to proxy");
+                return NULL;
         }
 
         result = g_dbus_proxy_call_sync (proxy,
@@ -278,11 +279,11 @@ notify_get_server_caps (void)
                                          NULL,
                                          NULL);
         if (result == NULL) {
-                return FALSE;
+                return NULL;
         }
         if (!g_variant_is_of_type (result, G_VARIANT_TYPE ("(as)"))) {
                 g_variant_unref (result);
-                return FALSE;
+                return NULL;
         }
 
         g_variant_get (result, "(^as)", &caps);
