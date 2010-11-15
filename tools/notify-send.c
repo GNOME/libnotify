@@ -170,6 +170,7 @@ main (int argc, char *argv[])
         g_type_init ();
 
         g_set_prgname (argv[0]);
+        g_log_set_always_fatal (G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL);
 
         opt_ctx = g_option_context_new (N_("<SUMMARY> [BODY] - "
                                            "create a notification"));
