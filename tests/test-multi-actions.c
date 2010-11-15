@@ -84,7 +84,8 @@ main (int argc, char **argv)
         n = notify_notification_new ("Low disk space",
                                      "You can free up some disk space by "
                                      "emptying the trash can.",
-                                     NULL);
+                                     "drive-harddisk-symbolic");
+        notify_notification_set_hint (n, "transient", g_variant_new_boolean (TRUE));
         notify_notification_set_urgency (n, NOTIFY_URGENCY_CRITICAL);
         notify_notification_set_timeout (n, NOTIFY_EXPIRES_DEFAULT);
         notify_notification_add_action (n,
