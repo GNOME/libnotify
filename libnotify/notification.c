@@ -509,6 +509,11 @@ notify_notification_show (NotifyNotification *notification,
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
         g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
+        if (notify_get_app_name () == NULL) {
+                g_warning ("you must call notify_init() before showing");
+                g_assert_not_reached ();
+        }
+
         priv = notification->priv;
         proxy = _notify_get_proxy (error);
         if (proxy == NULL) {
