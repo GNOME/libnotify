@@ -84,6 +84,6 @@ test_resident_LDADD = $(common_ldflags)
 test_transient_SOURCES = test-transient.c
 test_transient_LDADD = $(common_ldflags)
 
-EXTRA_DIST = applet-critical.png
+EXTRA_DIST = applet-critical.png test-gir.py
 
 -include $(top_srcdir)/git.mk
