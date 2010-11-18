@@ -937,9 +937,9 @@ notify_notification_clear_actions (NotifyNotification *notification)
  * @notification: The notification.
  * @action: The action ID.
  * @label: The human-readable action label.
- * @callback: The action's callback function.
+ * @callback: (scope async): The action's callback function.
  * @user_data: Optional custom data to pass to @callback.
- * @free_func: An optional function to free @user_data when the notification
+ * @free_func: (scope async): An optional function to free @user_data when the notification
  *             is destroyed.
  *
  * Adds an action to a notification. When the action is invoked, the

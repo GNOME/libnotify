@@ -254,7 +254,7 @@ _notify_get_proxy (GError **error)
  *
  * Synchronously queries the server for its capabilities and returns them in a #GList.
  *
- * Returns: (transfer full) (element-type utf-8): a #GList of server capability strings. Free
+ * Returns: (transfer full) (element-type utf8): a #GList of server capability strings. Free
  *   the list elements with g_free() and the list itself with g_list_free().
  */
 GList *
@@ -300,10 +300,10 @@ notify_get_server_caps (void)
 
 /**
  * notify_get_server_info:
- * @ret_name: (out) (allow-none): a location to store the server name, or %NULL
- * @ret_vendor: (out) (allow-none): a location to store the server vendor, or %NULL
- * @ret_version: (out) (allow-none): a location to store the server version, or %NULL
- * @ret_spec_version: (out) (allow-none): a location to store the version the service is compliant with, or %NULL
+ * @ret_name: (out) (allow-none) (transfer full): a location to store the server name, or %NULL
+ * @ret_vendor: (out) (allow-none) (transfer full): a location to store the server vendor, or %NULL
+ * @ret_version: (out) (allow-none) (transfer full): a location to store the server version, or %NULL
+ * @ret_spec_version: (out) (allow-none) (transfer full): a location to store the version the service is compliant with, or %NULL
  *
  * Synchronously queries the server for its information, specifically, the name, vendor,
  * server version, and the version of the notifications specification that it
