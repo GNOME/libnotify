@@ -105,9 +105,7 @@ AC_SUBST(TESTS_CFLAGS)
 GLIB_GENMARSHAL=`pkg-config --variable=glib_genmarshal glib-2.0`
 AC_SUBST(GLIB_GENMARSHAL)
 
-dnl
-dnl Check the D-BUS version.
-dnl
+GOBJECT_INTROSPECTION_CHECK([0.9.12])
 
 dnl ################################################################
 dnl # Set up gtk-doc

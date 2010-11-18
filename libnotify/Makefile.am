@@ -79,6 +79,28 @@ s-enum-types-c: $(notify_headers) Makefile
 	&& rm -f tmp-$(ENUM_FILE).c \
 	&& echo timestamp > $(@F)
 
+
+if HAVE_INTROSPECTION
+
+-include $(INTROSPECTION_MAKEFILE)
+INTROSPECTION_GIRS = Notify-0.7.gir
+INTROSPECTION_SCANNER_ARGS = --add-include-path=$(top_srcdir) --add-include-path=$(top_builddir) --warn-all -I$(top_srcdir)
+INTROSPECTION_COMPILER_ARGS = --includedir=$(top_srcdir)
+
+Notify-0.7.gir: libnotify.la
+Notify_0_7_gir_INCLUDES = GLib-2.0 GdkPixbuf-2.0
+Notify_0_7_gir_LIBS = libnotify.la
+Notify_0_7_gir_FILES = $(notify_headers) $(libnotify_la_SOURCES)
+Notify_0_7_gir_PACKAGES = glib-2.0 gobject-2.0 gdk-pixbuf-2.0
+
+girdir = $(datadir)/gir-1.0
+dist_gir_DATA = $(INTROSPECTION_GIRS)
+
+typelibdir = $(libdir)/girepository-1.0
+typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
+
+endif
+
 EXTRA_DIST = \
 	notify-marshal.list \
 	$(ENUM_FILE).h
@@ -90,5 +112,11 @@ CLEANFILES = \
 	$(ENUM_FILE).h \
 	s-enum-types-c \
 	s-enum-types-h
+
+if HAVE_INTROSPECTION
+CLEANFILES += \
+	$(dist_gir_DATA) \
+	$(typelib_DATA)
+endif
 
 -include $(top_srcdir)/git.mk
