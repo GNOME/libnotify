@@ -369,8 +369,8 @@ notify_notification_finalize (GObject *object)
 /**
  * notify_notification_new:
  * @summary: The required summary text.
- * @body: The optional body text.
- * @icon: The optional icon theme icon name or filename.
+ * @body: (allow-none): The optional body text.
+ * @icon: (allow-none): The optional icon theme icon name or filename.
  *
  * Creates a new #NotifyNotification. The summary text is required, but
  * all other parameters are optional.
@@ -393,8 +393,8 @@ notify_notification_new (const char *summary,
  * notify_notification_update:
  * @notification: The notification to update.
  * @summary: The new required summary text.
- * @body: The optional body text.
- * @icon: The optional icon theme icon name or filename.
+ * @body: (allow-none): The optional body text.
+ * @icon: (allow-none): The optional icon theme icon name or filename.
  *
  * Updates the notification text and icon. This won't send the update out
  * and display it on the screen. For that, you will need to call
@@ -938,8 +938,8 @@ notify_notification_clear_actions (NotifyNotification *notification)
  * @action: The action ID.
  * @label: The human-readable action label.
  * @callback: (scope async): The action's callback function.
- * @user_data: Optional custom data to pass to @callback.
- * @free_func: (scope async): An optional function to free @user_data when the notification
+ * @user_data: (allow-none): Optional custom data to pass to @callback.
+ * @free_func: (scope async) (allow-none): An optional function to free @user_data when the notification
  *             is destroyed.
  *
  * Adds an action to a notification. When the action is invoked, the
