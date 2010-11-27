@@ -42,7 +42,8 @@ libnotify_la_LIBADD = \
 	$(PACKAGE_LIBS)
 
 libnotify_la_LDFLAGS = \
-	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
+	-export-symbols-regex "^notify_.*"
 
 notify-marshal.h: notify-marshal.list
 	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
