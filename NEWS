@@ -1,3 +1,15 @@
+NEW in 0.7.1:
+==============
+
+ - Don't export private symbols (Emilio Pozuelo Monfort)
+ - Introspection support and annotations (Jonathan Matthew, Martin Pitt)
+ - Documentation cleanups and fixes (Javier Jardón)
+ - Ref the pixbuf passed to set_image_from_pixbuf (Guillaume Desmottes)
+ - Add tests for new capabilities and hints (William Jon McCann)
+ - Update spec to mention "persistence" and "action-icons" server
+   capability and "action-icons", "transient" and "resident" hints.
+   Bump spec version to 1.2  (William Jon McCann)
+
 NEW in 0.7.0:
 ==============
 
