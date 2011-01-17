@@ -714,7 +714,7 @@
       <entry><literal>"image_path"</literal></entry>
       <entry>string</entry>
       <entry>
-        Alternative way to define the notification image. See <xref linkend="icons-and-images"/>.
+        <emphasis>Deprecated</emphasis>. Use image-path instead.
       </entry>
       <entry>= 1.1</entry>
      </row>
