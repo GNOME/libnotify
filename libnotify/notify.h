@@ -35,6 +35,7 @@ void            notify_uninit (void);
 gboolean        notify_is_initted (void);
 
 const char     *notify_get_app_name (void);
+void            notify_set_app_name (const char *app_name);
 
 GList          *notify_get_server_caps (void);
 

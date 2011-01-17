@@ -119,6 +119,21 @@ _notify_update_spec_version (GError **error)
        return TRUE;
 }
 
+
+/**
+ * notify_set_app_name:
+ * @app_name: The name of the application
+ *
+ * Sets the application name.
+ *
+ */
+void
+notify_set_app_name (const char *app_name)
+{
+        g_free (_app_name);
+        _app_name = g_strdup (app_name);
+}
+
 /**
  * notify_init:
  * @app_name: The name of the application initializing libnotify.
@@ -136,8 +151,7 @@ notify_init (const char *app_name)
         if (_initted)
                 return TRUE;
 
-        g_free (_app_name);
-        _app_name = g_strdup (app_name);
+        notify_set_app_name (app_name);
 
         g_type_init ();
 
