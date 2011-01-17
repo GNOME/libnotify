@@ -682,7 +682,9 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
 
         g_return_if_fail (pixbuf == NULL || GDK_IS_PIXBUF (pixbuf));
 
-        if (_notify_check_spec_version(1, 1)) {
+        if (_notify_check_spec_version(1, 2)) {
+                hint_name = "image-data";
+        } else if (_notify_check_spec_version(1, 1)) {
                 hint_name = "image_data";
         } else {
                 hint_name = "icon_data";

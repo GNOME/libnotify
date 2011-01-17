@@ -349,7 +349,7 @@
   </para>
   <para>
    The icon is defined by the "app_icon" parameter.
-   The image can be defined by the "image_path", the "image_data" hint or the
+   The image can be defined by the "image-path", the "image-data" hint or the
    deprecated "icon_data" hint.
   </para>
   <sect2>
@@ -358,8 +358,8 @@
     An implementation which only displays one image or icon must choose which one
     to display using the following order:
     <orderedlist>
-     <listitem><para>"image_data"</para></listitem>
-     <listitem><para>"image_path"</para></listitem>
+     <listitem><para>"image-data"</para></listitem>
+     <listitem><para>"image-path"</para></listitem>
      <listitem><para>app_icon parameter</para></listitem>
      <listitem><para>for compatibility reason, "icon_data"</para></listitem>
     </orderedlist>
@@ -370,8 +370,8 @@
     icon from the "app_icon" parameter and choose which image to display using
     the following order:
     <orderedlist>
-     <listitem><para>"image_data"</para></listitem>
-     <listitem><para>"image_path"</para></listitem>
+     <listitem><para>"image-data"</para></listitem>
+     <listitem><para>"image-path"</para></listitem>
      <listitem><para>for compatibility reason, "icon_data"</para></listitem>
     </orderedlist>
    </para>
@@ -380,12 +380,12 @@
   <sect2 id="icons-and-images-formats" xreflabel="Icons and Images Formats">
    <title>Formats</title>
    <para>
-    The "image_data" and "icon_data" hints should be a raw image data structure
+    The "image-data" and "icon_data" hints should be a raw image data structure
     of signature (iiibiiay) which describes the width, height, rowstride, has
     alpha, bits per sample, channels and image data respectively.
   </para>
    <para>
-    The "app_icon" parameter and "image_path" hint should be either an URI
+    The "app_icon" parameter and "image-path" hint should be either an URI
     (file:// is the only URI schema supported right now) or a name in a
     freedesktop.org-compliant icon theme (not a GTK+ stock ID).
    </para>
@@ -685,14 +685,30 @@
       <entry/>
      </row>
      <row>
-      <entry><literal>"image_data"</literal></entry>
+      <entry><literal>"image-data"</literal></entry>
       <entry>(iiibiiay)</entry>
       <entry>
         This is a raw data image format which describes the width, height,
         rowstride, has alpha, bits per sample, channels and image data
         respectively.
       </entry>
-      <entry>&gt;= 1.1</entry>
+      <entry>&gt;= 1.2</entry>
+     </row>
+     <row>
+      <entry><literal>"image_data"</literal></entry>
+      <entry>(iiibiiay)</entry>
+      <entry>
+        <emphasis>Deprecated</emphasis>. Use image-data instead.
+      </entry>
+      <entry>= 1.1</entry>
+     </row>
+     <row>
+      <entry><literal>"image-path"</literal></entry>
+      <entry>string</entry>
+      <entry>
+        Alternative way to define the notification image. See <xref linkend="icons-and-images"/>.
+      </entry>
+      <entry>&gt;= 1.2</entry>
      </row>
      <row>
       <entry><literal>"image_path"</literal></entry>
@@ -700,13 +716,13 @@
       <entry>
         Alternative way to define the notification image. See <xref linkend="icons-and-images"/>.
       </entry>
-      <entry>&gt;= 1.1</entry>
+      <entry>= 1.1</entry>
      </row>
      <row>
       <entry><literal>"icon_data"</literal></entry>
       <entry>(iiibiiay)</entry>
       <entry>
-        <emphasis>Deprecated</emphasis>. Use image_data instead.
+        <emphasis>Deprecated</emphasis>. Use image-data instead.
       </entry>
       <entry>&lt; 1.1</entry>
      </row>
