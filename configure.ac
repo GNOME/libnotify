@@ -3,11 +3,16 @@ dnl Process this file with autoconf to create configure.
 dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
-AC_INIT([libnotify],[0.7.3],[https://bugzilla.gnome.org/enter_bug.cgi?product=libnotify],[libnotify])
-AC_PREREQ(2.50)
-AC_CONFIG_SRCDIR(config.h.in)
+AC_INIT([libnotify],
+        [0.7.3],
+        [https://bugzilla.gnome.org/enter_bug.cgi?product=libnotify],
+        [libnotify])
+AC_PREREQ([2.63])
 
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build-aux])
 
 dnl ################################################################
 dnl # Version information
@@ -61,22 +66,13 @@ AC_SUBST(LT_AGE)
 dnl ################################################################
 dnl # Initialize automake
 dnl ################################################################
-VERSION=$LIBNOTIFY_VERSION
-PACKAGE=libnotify
-
 AM_INIT_AUTOMAKE([1.10 no-dist-gzip dist-bzip2])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
-
-dnl ################################################################
-dnl # Specify a header configuration file
-dnl ################################################################
-AM_CONFIG_HEADER(config.h)
 
 dnl ################################################################
 dnl # Check for some standard stuff.
 dnl ################################################################
 AC_PROG_CC
-#AC_ARG_PROGRAM
 AC_PROG_CPP
 AC_PROG_MAKE_SET
 AC_PROG_LN_S
@@ -86,21 +82,18 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_EXEEXT
 
-AM_PROG_LIBTOOL
+# Initialize libtool
+LT_PREREQ([2.2])
+LT_INIT
 
 REQ_GTK_VERSION=2.90
 REQ_GLIB_VERSION=2.26.0
 
 pkg_modules="gdk-pixbuf-2.0 glib-2.0 >= $REQ_GLIB_VERSION gio-2.0 >= $REQ_GLIB_VERSION"
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
-AC_SUBST(PACKAGE_LIBS)
-AC_SUBST(PACKAGE_CFLAGS)
-AC_SUBST(pkg_modules)
 
 tests_modules="gtk+-3.0 >= $REQ_GTK_VERSION"
 PKG_CHECK_MODULES(TESTS, [$tests_modules])
-AC_SUBST(TESTS_LIBS)
-AC_SUBST(TESTS_CFLAGS)
 
 GLIB_GENMARSHAL=`pkg-config --variable=glib_genmarshal glib-2.0`
 AC_SUBST(GLIB_GENMARSHAL)
@@ -117,7 +110,7 @@ dnl - DocBook Documentation
 dnl ---------------------------------------------------------------------------
 
 AC_ARG_ENABLE(docbook-docs,
-	[AC_HELP_STRING([--enable-docbook-docs],
+	[AS_HELP_STRING([--enable-docbook-docs],
 	[build documentation (requires xmlto)])],
 	enable_docbook_docs=$enableval,enable_docbook_docs=no)
 AC_PATH_PROG(XMLTO, xmlto, no)
@@ -172,9 +165,9 @@ if test "$GCC" = "yes" -a "$set_more_warnings" != "no"; then
                 SAVE_CFLAGS="$CFLAGS"
                 CFLAGS="$CFLAGS $option"
                 AC_MSG_CHECKING([whether gcc understands $option])
-                AC_TRY_COMPILE([], [],
-                        has_option=yes,
-                        has_option=no,)
+                AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],
+                                  [has_option=yes],
+                                  [has_option=no])
                 if test $has_option = no; then
                         CFLAGS="$SAVE_CFLAGS"
                 fi
