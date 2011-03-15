@@ -67,7 +67,7 @@ main (int argc, char *argv[])
 
         n = notify_notification_new ("Software Updates Available",
                                      "Important updates for your apps are now available.",
-                                     "software-update-available");
+                                     "software-update-available-symbolic");
         notify_notification_add_action (n,
                                         "install",
                                         "Install now",
@@ -81,7 +81,7 @@ main (int argc, char *argv[])
         if (!server_has_persistence ()) {
                 GtkStatusIcon *icon;
                 g_message ("Server does not support persistence; using a status icon");
-                icon = gtk_status_icon_new_from_icon_name ("software-update-available");
+                icon = gtk_status_icon_new_from_icon_name ("software-update-available-symbolic");
                 gtk_status_icon_set_tooltip_markup (icon, "<b>Software Updates Available</b>\nImportant updates for your apps are now available.");
                 gtk_status_icon_set_visible (icon, TRUE);
         } else {
