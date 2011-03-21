@@ -3,7 +3,7 @@ dnl Process this file with autoconf to create configure.
 dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
-AC_INIT([libnotify],[0.7.1],[https://bugzilla.gnome.org/enter_bug.cgi?product=libnotify],[libnotify])
+AC_INIT([libnotify],[0.7.2],[https://bugzilla.gnome.org/enter_bug.cgi?product=libnotify],[libnotify])
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
 
