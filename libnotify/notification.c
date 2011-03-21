@@ -229,6 +229,12 @@ notify_notification_class_init (NotifyNotificationClass *klass)
 }
 
 static void
+notify_notification_update_internal (NotifyNotification *notification,
+                                     const char         *summary,
+                                     const char         *body,
+                                     const char         *icon);
+
+static void
 notify_notification_set_property (GObject      *object,
                                   guint         prop_id,
                                   const GValue *value,
@@ -243,24 +249,24 @@ notify_notification_set_property (GObject      *object,
                 break;
 
         case PROP_SUMMARY:
-                notify_notification_update (notification,
-                                            g_value_get_string (value),
-                                            priv->body,
-                                            priv->icon_name);
+                notify_notification_update_internal (notification,
+                                                     g_value_get_string (value),
+                                                     priv->body,
+                                                     priv->icon_name);
                 break;
 
         case PROP_BODY:
-                notify_notification_update (notification,
-                                            priv->summary,
-                                            g_value_get_string (value),
-                                            priv->icon_name);
+                notify_notification_update_internal (notification,
+                                                     priv->summary,
+                                                     g_value_get_string (value),
+                                                     priv->icon_name);
                 break;
 
         case PROP_ICON_NAME:
-                notify_notification_update (notification,
-                                            priv->summary,
-                                            priv->body,
-                                            g_value_get_string (value));
+                notify_notification_update_internal (notification,
+                                                     priv->summary,
+                                                     priv->body,
+                                                     g_value_get_string (value));
                 break;
 
         default:
@@ -389,6 +395,35 @@ notify_notification_new (const char *summary,
                              NULL);
 }
 
+static void
+notify_notification_update_internal (NotifyNotification *notification,
+                                     const char         *summary,
+                                     const char         *body,
+                                     const char         *icon)
+{
+        if (notification->priv->summary != summary) {
+                g_free (notification->priv->summary);
+                notification->priv->summary = g_strdup (summary);
+                g_object_notify (G_OBJECT (notification), "summary");
+        }
+
+        if (notification->priv->body != body) {
+                g_free (notification->priv->body);
+                notification->priv->body = (body != NULL
+                                            && *body != '\0' ? g_strdup (body) : NULL);
+                g_object_notify (G_OBJECT (notification), "body");
+        }
+
+        if (notification->priv->icon_name != icon) {
+                g_free (notification->priv->icon_name);
+                notification->priv->icon_name = (icon != NULL
+                                                 && *icon != '\0' ? g_strdup (icon) : NULL);
+                g_object_notify (G_OBJECT (notification), "icon-name");
+        }
+
+        notification->priv->updates_pending = TRUE;
+}
+
 /**
  * notify_notification_update:
  * @notification: The notification to update.
@@ -412,27 +447,7 @@ notify_notification_update (NotifyNotification *notification,
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
         g_return_val_if_fail (summary != NULL && *summary != '\0', FALSE);
 
-        if (notification->priv->summary != summary) {
-                g_free (notification->priv->summary);
-                notification->priv->summary = g_strdup (summary);
-                g_object_notify (G_OBJECT (notification), "summary");
-        }
-
-        if (notification->priv->body != body) {
-                g_free (notification->priv->body);
-                notification->priv->body = (body != NULL
-                                            && *body != '\0' ? g_strdup (body) : NULL);
-                g_object_notify (G_OBJECT (notification), "body");
-        }
-
-        if (notification->priv->icon_name != icon) {
-                g_free (notification->priv->icon_name);
-                notification->priv->icon_name = (icon != NULL
-                                                 && *icon != '\0' ? g_strdup (icon) : NULL);
-                g_object_notify (G_OBJECT (notification), "icon-name");
-        }
-
-        notification->priv->updates_pending = TRUE;
+        notify_notification_update_internal (notification, summary, body, icon);
 
         return TRUE;
 }
