@@ -380,9 +380,18 @@
   <sect2 id="icons-and-images-formats" xreflabel="Icons and Images Formats">
    <title>Formats</title>
    <para>
-    The "image-data" and "icon_data" hints should be a raw image data structure
-    of signature (iiibiiay) which describes the width, height, rowstride, has
-    alpha, bits per sample, channels and image data respectively.
+    The "image-data" and "icon_data" hints should be a DBus structure
+    of signature (iiibiiay).  The components of this structure are as follows:
+    <orderedlist>
+     <listitem><para>width (i): Width of image in pixels</para></listitem>
+     <listitem><para>height (i): Height of image in pixels</para></listitem>
+     <listitem><para>rowstride (i): Distance in bytes between row starts</para></listitem>
+     <listitem><para>has_alpha (b): Whether the image has an alpha channel</para></listitem>
+     <listitem><para>bits_per_sample (i): Must always be 8</para></listitem>
+     <listitem><para>channels (i): If has_alpha is TRUE, must be 4, otherwise 3</para></listitem>
+     <listitem><para>data (ay): The image data, in RGB byte order</para></listitem>
+    </orderedlist>
+    This image format is derived from <ulink url="http://developer.gnome.org/gdk-pixbuf/stable/">gdk-pixbuf</ulink>.
   </para>
    <para>
     The "app_icon" parameter and "image-path" hint should be either an URI
