@@ -65,6 +65,7 @@ typedef struct
 struct _NotifyNotificationPrivate
 {
         guint32         id;
+        char           *app_name;
         char           *summary;
         char           *body;
 
@@ -100,6 +101,7 @@ enum
 {
         PROP_0,
         PROP_ID,
+        PROP_APP_NAME,
         PROP_SUMMARY,
         PROP_BODY,
         PROP_ICON_NAME,
@@ -179,6 +181,17 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                            | G_PARAM_STATIC_BLURB));
 
         g_object_class_install_property (object_class,
+                                         PROP_APP_NAME,
+                                         g_param_spec_string ("app-name",
+                                                              "Application name",
+                                                              "The application name to use for this notification",
+                                                              NULL,
+                                                              G_PARAM_READWRITE
+                                                              | G_PARAM_STATIC_NAME
+                                                              | G_PARAM_STATIC_NICK
+                                                              | G_PARAM_STATIC_BLURB));
+
+        g_object_class_install_property (object_class,
                                          PROP_SUMMARY,
                                          g_param_spec_string ("summary",
                                                               "Summary",
@@ -230,6 +243,7 @@ notify_notification_class_init (NotifyNotificationClass *klass)
 
 static void
 notify_notification_update_internal (NotifyNotification *notification,
+                                     const char         *app_name,
                                      const char         *summary,
                                      const char         *body,
                                      const char         *icon);
@@ -248,8 +262,17 @@ notify_notification_set_property (GObject      *object,
                 priv->id = g_value_get_int (value);
                 break;
 
+        case PROP_APP_NAME:
+                notify_notification_update_internal (notification,
+                                                     g_value_get_string (value),
+                                                     priv->summary,
+                                                     priv->body,
+                                                     priv->icon_name);
+                break;
+
         case PROP_SUMMARY:
                 notify_notification_update_internal (notification,
+                                                     priv->app_name,
                                                      g_value_get_string (value),
                                                      priv->body,
                                                      priv->icon_name);
@@ -257,6 +280,7 @@ notify_notification_set_property (GObject      *object,
 
         case PROP_BODY:
                 notify_notification_update_internal (notification,
+                                                     priv->app_name,
                                                      priv->summary,
                                                      g_value_get_string (value),
                                                      priv->icon_name);
@@ -264,6 +288,7 @@ notify_notification_set_property (GObject      *object,
 
         case PROP_ICON_NAME:
                 notify_notification_update_internal (notification,
+                                                     priv->app_name,
                                                      priv->summary,
                                                      priv->body,
                                                      g_value_get_string (value));
@@ -291,6 +316,10 @@ notify_notification_get_property (GObject    *object,
 
         case PROP_SUMMARY:
                 g_value_set_string (value, priv->summary);
+                break;
+
+        case PROP_APP_NAME:
+                g_value_set_string (value, priv->app_name);
                 break;
 
         case PROP_BODY:
@@ -347,6 +376,7 @@ notify_notification_finalize (GObject *object)
 
         _notify_cache_remove_notification (obj);
 
+        g_free (priv->app_name);
         g_free (priv->summary);
         g_free (priv->body);
         g_free (priv->icon_name);
@@ -397,10 +427,17 @@ notify_notification_new (const char *summary,
 
 static void
 notify_notification_update_internal (NotifyNotification *notification,
+                                     const char         *app_name,
                                      const char         *summary,
                                      const char         *body,
                                      const char         *icon)
 {
+        if (notification->priv->app_name != app_name) {
+                g_free (notification->priv->app_name);
+                notification->priv->app_name = g_strdup (app_name);
+                g_object_notify (G_OBJECT (notification), "app-name");
+        }
+
         if (notification->priv->summary != summary) {
                 g_free (notification->priv->summary);
                 notification->priv->summary = g_strdup (summary);
@@ -447,7 +484,9 @@ notify_notification_update (NotifyNotification *notification,
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
         g_return_val_if_fail (summary != NULL && *summary != '\0', FALSE);
 
-        notify_notification_update_internal (notification, summary, body, icon);
+        notify_notification_update_internal (notification,
+                                             notification->priv->app_name,
+                                             summary, body, icon);
 
         return TRUE;
 }
@@ -524,7 +563,7 @@ notify_notification_show (NotifyNotification *notification,
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
         g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-        if (notify_get_app_name () == NULL) {
+        if (!notify_is_initted ()) {
                 g_warning ("you must call notify_init() before showing");
                 g_assert_not_reached ();
         }
@@ -557,7 +596,7 @@ notify_notification_show (NotifyNotification *notification,
         result = g_dbus_proxy_call_sync (proxy,
                                          "Notify",
                                          g_variant_new ("(susssasa{sv}i)",
-                                                        notify_get_app_name (),
+                                                        priv->app_name ? priv->app_name : notify_get_app_name (),
                                                         priv->id,
                                                         priv->icon_name ? priv->icon_name : "",
                                                         priv->summary ? priv->summary : "",
@@ -766,6 +805,30 @@ notify_notification_set_hint (NotifyNotification *notification,
         } else {
                 g_hash_table_remove (notification->priv->hints, key);
         }
+}
+
+/**
+ * notify_notification_set_app_name:
+ * @notification: a #NotifyNotification
+ * @app_name: the localised application name
+ *
+ * Sets the application name for the notification. If this function is
+ * not called or if @app_name is %NULL, the application name will be
+ * set from the value used in notify_init() or overridden with
+ * notify_set_app_name().
+ *
+ * Since: 0.7.3
+ */
+void
+notify_notification_set_app_name (NotifyNotification *notification,
+                                  const char         *app_name)
+{
+        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+
+        g_free (notification->priv->app_name);
+        notification->priv->app_name = g_strdup (app_name);
+
+        g_object_notify (G_OBJECT (notification), "app-name");
 }
 
 /**

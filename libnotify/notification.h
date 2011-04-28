@@ -165,6 +165,9 @@ void                notify_notification_set_hint              (NotifyNotificatio
                                                                const char         *key,
                                                                GVariant           *value);
 
+void                notify_notification_set_app_name          (NotifyNotification *notification,
+                                                               const char         *app_name);
+
 void                notify_notification_clear_hints           (NotifyNotification *notification);
 
 void                notify_notification_add_action            (NotifyNotification *notification,
