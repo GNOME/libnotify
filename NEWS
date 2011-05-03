@@ -1,7 +1,13 @@
+NEW in 0.7.3:
+==============
+
+- Add a way to change the application name for
+  individual notifications (Richard Hughes)
+
 NEW in 0.7.2:
 ==============
 
-- Add a way to change the applicaiton name (William Jon McCann)
+- Add a way to change the application name (William Jon McCann)
 - Mark image_path as deprecated (William Jon McCann)
 - Allow properties to be set in any order (Matthias Clasen)
 
