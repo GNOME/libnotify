@@ -90,6 +90,7 @@ REQ_GTK_VERSION=2.90
 REQ_GLIB_VERSION=2.26.0
 
 pkg_modules="gdk-pixbuf-2.0 glib-2.0 >= $REQ_GLIB_VERSION gio-2.0 >= $REQ_GLIB_VERSION"
+AC_SUBST([pkg_modules])
 PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 
 tests_modules="gtk+-3.0 >= $REQ_GTK_VERSION"
