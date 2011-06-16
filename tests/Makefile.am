@@ -14,6 +14,7 @@ noinst_PROGRAMS = \
 	test-error \
 	test-markup \
 	test-persistence \
+	test-removal \
 	test-resident \
 	test-rtl \
 	test-size-changes \
@@ -77,6 +78,9 @@ test_rtl_LDADD = $(common_ldflags)
 
 test_persistence_SOURCES = test-persistence.c
 test_persistence_LDADD = $(common_ldflags)
+
+test_removal_SOURCES = test-removal.c
+test_removal_LDADD = $(common_ldflags)
 
 test_resident_SOURCES = test-resident.c
 test_resident_LDADD = $(common_ldflags)
