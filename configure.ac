@@ -4,7 +4,7 @@ dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
 AC_INIT([libnotify],
-        [0.7.4],
+        [0.7.5],
         [https://bugzilla.gnome.org/enter_bug.cgi?product=libnotify],
         [libnotify])
 AC_PREREQ([2.63])
