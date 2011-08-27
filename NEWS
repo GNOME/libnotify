@@ -1,3 +1,11 @@
+New in 0.7.4
+============
+
+- Improve documentation of supported image data formats (Colin Walters)
+- Honor aclocal flags (Craig Keogh)
+- Update autotools configuration (Javier Jardón)
+- Test notification removal (William Jon McCann)
+
 NEW in 0.7.3:
 ==============
 
