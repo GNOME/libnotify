@@ -663,7 +663,7 @@
     <tbody valign="top">
      <row>
       <entry><literal>"action-icons"</literal></entry>
-      <entry>boolean</entry>
+      <entry>BOOLEAN</entry>
       <entry>
        When set, a server that has the "action-icons" capability will
        attempt to interpret any action identifier as a named icon.
@@ -675,7 +675,7 @@
      </row>
      <row>
       <entry><literal>"category"</literal></entry>
-      <entry>string</entry>
+      <entry>STRING</entry>
       <entry>
        The type of notification this is.
       </entry>
@@ -683,7 +683,7 @@
      </row>
      <row>
       <entry><literal>"desktop-entry"</literal></entry>
-      <entry>string</entry>
+      <entry>STRING</entry>
       <entry>
        This specifies the name of the desktop filename representing the
        calling program. This should be the same as the prefix used for the
@@ -713,7 +713,7 @@
      </row>
      <row>
       <entry><literal>"image-path"</literal></entry>
-      <entry>string</entry>
+      <entry>STRING</entry>
       <entry>
         Alternative way to define the notification image. See <xref linkend="icons-and-images"/>.
       </entry>
@@ -721,7 +721,7 @@
      </row>
      <row>
       <entry><literal>"image_path"</literal></entry>
-      <entry>string</entry>
+      <entry>STRING</entry>
       <entry>
         <emphasis>Deprecated</emphasis>. Use image-path instead.
       </entry>
@@ -737,7 +737,7 @@
      </row>
      <row>
       <entry><literal>"resident"</literal></entry>
-      <entry>boolean</entry>
+      <entry>BOOLEAN</entry>
       <entry>
        When set the server will not automatically remove the
        notification when an action has been invoked.  The notification
@@ -749,7 +749,7 @@
      </row>
      <row>
       <entry><literal>"sound-file"</literal></entry>
-      <entry>string</entry>
+      <entry>STRING</entry>
       <entry>
        The path to a sound file to play when the notification pops up.
       </entry>
@@ -757,7 +757,7 @@
      </row>
      <row>
       <entry><literal>"sound-name"</literal></entry>
-      <entry>string</entry>
+      <entry>STRING</entry>
       <entry>
        A themeable named sound from the freedesktop.org
        <ulink url="http://0pointer.de/public/sound-naming-spec.html">sound naming specification</ulink>
@@ -768,7 +768,7 @@
      </row>
      <row>
       <entry><literal>"suppress-sound"</literal></entry>
-      <entry>boolean</entry>
+      <entry>BOOLEAN</entry>
       <entry>
        Causes the server to suppress playing any sounds, if it has that
        ability. This is usually set when the client itself is going to
@@ -778,7 +778,7 @@
      </row>
      <row>
       <entry><literal>"transient"</literal></entry>
-      <entry>boolean</entry>
+      <entry>BOOLEAN</entry>
       <entry>
        When set the server will treat the notification as transient
        and by-pass the server's persistence capability, if it should
@@ -788,7 +788,7 @@
      </row>
      <row>
       <entry><literal>"x"</literal></entry>
-      <entry>int</entry>
+      <entry>INT32</entry>
       <entry>
        Specifies the X location on the screen that the notification should
        point to. The <literal>"y"</literal> hint must also be specified.
@@ -797,7 +797,7 @@
      </row>
      <row>
       <entry><literal>"y"</literal></entry>
-      <entry>int</entry>
+      <entry>INT32</entry>
       <entry>
        Specifies the Y location on the screen that the notification should
        point to. The <literal>"x"</literal> hint must also be specified.
@@ -806,7 +806,7 @@
      </row>
      <row>
       <entry><literal>"urgency"</literal></entry>
-      <entry>byte</entry>
+      <entry>BYTE</entry>
       <entry>
        The urgency level.
       </entry>
