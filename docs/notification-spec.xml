@@ -831,7 +831,7 @@
     <title><literal>org.freedesktop.Notifications.GetCapabilities</literal></title>
     <funcsynopsis>
      <funcprototype>
-      <funcdef>STRING_ARRAY
+      <funcdef>as
        <function>org.freedesktop.Notifications.GetCapabilities</function>
       </funcdef>
       <void/>
@@ -954,8 +954,8 @@
       <paramdef>STRING <parameter>app_icon</parameter></paramdef>
       <paramdef>STRING <parameter>summary</parameter></paramdef>
       <paramdef>STRING <parameter>body</parameter></paramdef>
-      <paramdef>ARRAY <parameter>actions</parameter></paramdef>
-      <paramdef>DICT <parameter>hints</parameter></paramdef>
+      <paramdef>as <parameter>actions</parameter></paramdef>
+      <paramdef>a{sv} <parameter>hints</parameter></paramdef>
       <paramdef>INT32 <parameter>expire_timeout</parameter></paramdef>
      </funcprototype>
     </funcsynopsis>
@@ -1013,7 +1013,7 @@
        </row>
        <row>
         <entry><parameter>actions</parameter></entry>
-        <entry>ARRAY</entry>
+        <entry>as</entry>
         <entry>
          Actions are sent over as a list of pairs. Each even element in
          the list (starting at index 0) represents the identifier for the
@@ -1023,7 +1023,7 @@
        </row>
        <row>
         <entry><parameter>hints</parameter></entry>
-        <entry>DICT</entry>
+        <entry>a{sv}</entry>
         <entry>
          Optional hints that can be passed to the server from the client
          program. Although clients and servers should never assume each other
