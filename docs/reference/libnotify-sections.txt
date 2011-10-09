@@ -10,6 +10,7 @@ NOTIFY_ACTION_CALLBACK
 notify_notification_new
 notify_notification_update
 notify_notification_show
+notify_notification_set_app_name
 notify_notification_set_timeout
 notify_notification_set_category
 notify_notification_set_urgency
@@ -17,6 +18,7 @@ notify_notification_set_icon_from_pixbuf
 notify_notification_set_image_from_pixbuf
 notify_notification_set_hint
 notify_notification_set_hint_int32
+notify_notification_set_hint_uint32
 notify_notification_set_hint_double
 notify_notification_set_hint_string
 notify_notification_set_hint_byte
@@ -25,6 +27,7 @@ notify_notification_clear_hints
 notify_notification_add_action
 notify_notification_clear_actions
 notify_notification_close
+notify_notification_get_closed_reason
 <SUBSECTION Standard>
 NotifyNotificationPrivate
 NOTIFY_NOTIFICATION
@@ -42,6 +45,7 @@ notify_init
 notify_uninit
 notify_is_initted
 notify_get_app_name
+notify_set_app_name
 notify_get_server_caps
 notify_get_server_info
 </SECTION>
