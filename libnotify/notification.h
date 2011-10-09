@@ -132,10 +132,12 @@ void                notify_notification_set_category          (NotifyNotificatio
 void                notify_notification_set_urgency           (NotifyNotification *notification,
                                                                NotifyUrgency       urgency);
 
-void                notify_notification_set_icon_from_pixbuf  (NotifyNotification *notification,
-                                                               GdkPixbuf          *icon);
 void                notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
                                                                GdkPixbuf          *pixbuf);
+
+#ifndef LIBNOTIFY_DISABLE_DEPRECATED
+void                notify_notification_set_icon_from_pixbuf  (NotifyNotification *notification,
+                                                               GdkPixbuf          *icon);
 
 void                notify_notification_set_hint_int32        (NotifyNotification *notification,
                                                                const char         *key,
@@ -160,6 +162,7 @@ void                notify_notification_set_hint_byte_array   (NotifyNotificatio
                                                                const char         *key,
                                                                const guchar       *value,
                                                                gsize               len);
+#endif
 
 void                notify_notification_set_hint              (NotifyNotification *notification,
                                                                const char         *key,
