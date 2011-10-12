@@ -125,6 +125,7 @@ main (int argc, char *argv[])
         static const char  *summary = NULL;
         char               *body;
         static const char  *type = NULL;
+        static char        *app_name = NULL;
         static char        *icon_str = NULL;
         static char        *icons = NULL;
         static char       **n_text = NULL;
@@ -146,6 +147,8 @@ main (int argc, char *argv[])
                  N_
                  ("Specifies the timeout in milliseconds at which to expire the "
                   "notification."), N_("TIME")},
+                {"app-name", 'a', 0, G_OPTION_ARG_STRING, &app_name,
+                 N_("Specifies the app name for the icon"), N_("APP_NAME")},
                 {"icon", 'i', 0, G_OPTION_ARG_FILENAME, &icons,
                  N_("Specifies an icon filename or stock icon to display."),
                  N_("ICON[,ICON...]")},
@@ -226,6 +229,7 @@ main (int argc, char *argv[])
         notify_notification_set_category (notify, type);
         notify_notification_set_urgency (notify, urgency);
         notify_notification_set_timeout (notify, expire_timeout);
+        notify_notification_set_app_name (notify, app_name);
 
         g_free (body);
 
