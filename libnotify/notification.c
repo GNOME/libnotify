@@ -914,7 +914,7 @@ notify_notification_set_hint_byte (NotifyNotification *notification,
  * notify_notification_set_hint_byte_array:
  * @notification: The notification.
  * @key: The hint.
- * @value: The hint's value.
+ * @value: (array length=len): The hint's value.
  * @len: The length of the byte array.
  *
  * Sets a hint with a byte array value. The length of @value must be passed
