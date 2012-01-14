@@ -94,6 +94,8 @@ Notify_0_7_gir_INCLUDES = GLib-2.0 GdkPixbuf-2.0
 Notify_0_7_gir_LIBS = libnotify.la
 Notify_0_7_gir_FILES = $(notify_headers) $(libnotify_la_SOURCES)
 Notify_0_7_gir_PACKAGES = glib-2.0 gobject-2.0 gdk-pixbuf-2.0
+Notify_0_7_gir_EXPORT_PACKAGES = libnotify
+Notify_0_7_gir_SCANNERFLAGS = --c-include "libnotify/notify.h"
 
 girdir = $(datadir)/gir-1.0
 dist_gir_DATA = $(INTROSPECTION_GIRS)
