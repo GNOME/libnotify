@@ -46,12 +46,12 @@ libnotify_la_LDFLAGS = \
 	-export-symbols-regex "^notify_.*"
 
 notify-marshal.h: notify-marshal.list
-	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
-		--header > notify-marshal.h
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) $(srcdir)/notify-marshal.list \
+		--header > $@.tmp && mv $@.tmp $@
 
 notify-marshal.c: notify-marshal.list
-	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) notify-marshal.list \
-		--header --body > notify-marshal.c
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=$(MARSHAL_PREFIX) $(srcdir)/notify-marshal.list \
+		--header --body > $@.tmp && mv $@.tmp $@
 
 $(ENUM_FILE).h: s-enum-types-h
 	@true
