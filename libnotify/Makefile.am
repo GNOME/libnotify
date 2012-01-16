@@ -8,6 +8,7 @@ AM_CPPFLAGS = \
 	-I.				\
 	-I..				\
 	-I$(top_srcdir)			\
+	-I$(top_builddir)		\
 	-DG_LOG_DOMAIN=\"libnotify\"	\
 	$(PACKAGE_CFLAGS)
 
