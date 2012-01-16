@@ -86,7 +86,7 @@ if HAVE_INTROSPECTION
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS = Notify-0.7.gir
-INTROSPECTION_SCANNER_ARGS = --add-include-path=$(top_srcdir) --add-include-path=$(top_builddir) --warn-all -I$(top_srcdir)
+INTROSPECTION_SCANNER_ARGS = --add-include-path=$(top_srcdir) --add-include-path=$(top_builddir) --warn-all -I$(top_srcdir) -I$(top_builddir)
 INTROSPECTION_COMPILER_ARGS = --includedir=$(top_srcdir)
 
 Notify-0.7.gir: libnotify.la
