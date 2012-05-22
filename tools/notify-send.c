@@ -130,6 +130,8 @@ main (int argc, char *argv[])
         static char        *icon_str = NULL;
         static char       **n_text = NULL;
         static char       **hints = NULL;
+        static gboolean     print_id = FALSE;
+        static gint         notification_id = 0;
         static gboolean     do_version = FALSE;
         static gboolean     hint_error = FALSE, show_error = FALSE;
         static glong        expire_timeout = NOTIFY_EXPIRES_DEFAULT;
@@ -159,6 +161,10 @@ main (int argc, char *argv[])
                  N_
                  ("Specifies basic extra data to pass. Valid types are int, double, string and byte."),
                  N_("TYPE:NAME:VALUE")},
+                {"print-id", 'p', 0, G_OPTION_ARG_NONE, &print_id,
+                 N_ ("Print the notification ID."), NULL},
+                {"replace-id", 'r', 0, G_OPTION_ARG_INT, &notification_id,
+                 N_ ("The ID of the notification to replace."), N_("REPLACE_ID")},
                 {"version", 'v', 0, G_OPTION_ARG_NONE, &do_version,
                  N_("Version of the package."),
                  NULL},
@@ -217,9 +223,13 @@ main (int argc, char *argv[])
         if (!notify_init ("notify-send"))
                 exit (1);
 
-        notify = notify_notification_new (summary,
-                                          body,
-                                          icon_str);
+        notify = g_object_new (NOTIFY_TYPE_NOTIFICATION,
+                               "summary", summary,
+                               "body", body,
+                               "icon-name", icon_str,
+                               "id", notification_id,
+                               NULL);
+
         notify_notification_set_category (notify, type);
         notify_notification_set_urgency (notify, urgency);
         notify_notification_set_timeout (notify, expire_timeout);
@@ -271,6 +281,11 @@ main (int argc, char *argv[])
                         g_error_free (error);
                         show_error = TRUE;
                 }
+        }
+
+        if (print_id) {
+                g_object_get (notify, "id", &notification_id, NULL);
+                g_printf ("%d\n", notification_id);
         }
 
         g_object_unref (G_OBJECT (notify));
