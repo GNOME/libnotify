@@ -632,6 +632,8 @@ notify_notification_show (NotifyNotification *notification,
  * Sets the timeout of the notification. To set the default time, pass
  * %NOTIFY_EXPIRES_DEFAULT as @timeout. To set the notification to never
  * expire, pass %NOTIFY_EXPIRES_NEVER.
+ *
+ * Note that the timeout may be ignored by the server.
  */
 void
 notify_notification_set_timeout (NotifyNotification *notification,
