@@ -1019,9 +1019,9 @@ notify_notification_clear_actions (NotifyNotification *notification)
  * @notification: The notification.
  * @action: The action ID.
  * @label: The human-readable action label.
- * @callback: (scope async): The action's callback function.
- * @user_data: (allow-none): Optional custom data to pass to @callback.
- * @free_func: (scope async) (allow-none): An optional function to free @user_data when the notification
+ * @callback: The action's callback function.
+ * @user_data: Optional custom data to pass to @callback.
+ * @free_func: (type GLib.DestroyNotify): An optional function to free @user_data when the notification
  *             is destroyed.
  *
  * Adds an action to a notification. When the action is invoked, the
