@@ -1,3 +1,9 @@
+New in 0.7.6
+============
+
+- Fix annotation for add_action (Giovanni Campagna)
+- Clarify documentation for set-timeout (Matthias Clasen)
+
 New in 0.7.5
 ============
 
