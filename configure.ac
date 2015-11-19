@@ -103,7 +103,7 @@ if test x$enable_tests = xyes ; then
 fi
 AM_CONDITIONAL(TESTS_ENABLED, test x$enable_tests = xyes)
 
-GLIB_GENMARSHAL=`pkg-config --variable=glib_genmarshal glib-2.0`
+GLIB_GENMARSHAL=`${PKG_CONFIG} --variable=glib_genmarshal glib-2.0`
 AC_SUBST(GLIB_GENMARSHAL)
 
 GOBJECT_INTROSPECTION_CHECK([0.9.12])
