@@ -1,6 +1,9 @@
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
-SUBDIRS = libnotify docs tools tests
+SUBDIRS = libnotify docs tools
+if TESTS_ENABLED
+SUBDIRS += tests
+endif
 
 pcdata_DATA = libnotify.pc
 pcdatadir = $(libdir)/pkgconfig
