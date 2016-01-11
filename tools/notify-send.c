@@ -21,6 +21,7 @@
 #include "config.h"
 
 #include <libnotify/notify.h>
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -169,6 +170,8 @@ main (int argc, char *argv[])
         };
 
         body = NULL;
+
+        setlocale (LC_ALL, "");
 
         g_type_init ();
 
