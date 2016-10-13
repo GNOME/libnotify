@@ -1,3 +1,9 @@
+New in 0.7.7
+============
+
+- Introspection fixes (Evan Nemerson)
+- Allow to disable tests at build time (Quentin Glidic)
+
 New in 0.7.6
 ============
 

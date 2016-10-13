@@ -4,7 +4,7 @@ dnl ################################################################
 dnl # Initialize autoconf
 dnl ################################################################
 AC_INIT([libnotify],
-        [0.7.6],
+        [0.7.7],
         [https://bugzilla.gnome.org/enter_bug.cgi?product=libnotify],
         [libnotify])
 AC_PREREQ([2.63])
@@ -19,7 +19,7 @@ dnl # Version information
 dnl ################################################################
 LIBNOTIFY_MAJOR_VERSION=0
 LIBNOTIFY_MINOR_VERSION=7
-LIBNOTIFY_MICRO_VERSION=6
+LIBNOTIFY_MICRO_VERSION=7
 LIBNOTIFY_DEVEL_VERSION=0
 
 AC_SUBST(LIBNOTIFY_MAJOR_VERSION)
