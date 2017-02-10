@@ -151,11 +151,11 @@ notify_notification_class_init (NotifyNotificationClass *klass)
         object_class->finalize = notify_notification_finalize;
 
         /**
-	 * NotifyNotification::closed:
-	 * @notification: The object which received the signal.
-	 *
-	 * Emitted when the notification is closed.
-	 */
+         * NotifyNotification::closed:
+         * @notification: The object which received the signal.
+         *
+         * Emitted when the notification is closed.
+         */
         signals[SIGNAL_CLOSED] =
                 g_signal_new ("closed",
                               G_TYPE_FROM_CLASS (object_class),
