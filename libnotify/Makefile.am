@@ -16,11 +16,11 @@ lib_LTLIBRARIES = libnotify.la
 
 notify_headers = \
 	notify.h \
-	notify-features.h \
 	notification.h
 
 notifyinc_HEADERS = \
 	$(notify_headers) \
+	notify-features.h \
 	$(ENUM_FILE).h
 
 noinst_HEADERS = \
@@ -92,7 +92,7 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(top_srcdir)
 Notify-0.7.gir: libnotify.la
 Notify_0_7_gir_INCLUDES = GLib-2.0 GdkPixbuf-2.0
 Notify_0_7_gir_LIBS = libnotify.la
-Notify_0_7_gir_FILES = $(notify_headers) $(libnotify_la_SOURCES)
+Notify_0_7_gir_FILES = $(notifyinc_HEADERS) $(libnotify_la_SOURCES)
 Notify_0_7_gir_PACKAGES = glib-2.0 gobject-2.0 gdk-pixbuf-2.0
 Notify_0_7_gir_EXPORT_PACKAGES = libnotify
 Notify_0_7_gir_SCANNERFLAGS = --c-include "libnotify/notify.h"
