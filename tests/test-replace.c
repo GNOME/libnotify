@@ -28,7 +28,9 @@ main ()
         GError             *error;
         error = NULL;
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
         g_type_init ();
+#endif
 
         notify_init ("Replace Test");
 
