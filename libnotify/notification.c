@@ -634,6 +634,9 @@ notify_notification_show (NotifyNotification *notification,
         GHashTableIter             iter;
         gpointer                   key, data;
         GVariant                  *result;
+#ifdef GLIB_VERSION_2_32
+        GApplication              *application;
+#endif
 
         g_return_val_if_fail (notification != NULL, FALSE);
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
@@ -667,6 +670,21 @@ notify_notification_show (NotifyNotification *notification,
         while (g_hash_table_iter_next (&iter, &key, &data)) {
                 g_variant_builder_add (&hints_builder, "{sv}", key, data);
         }
+
+#ifdef GLIB_VERSION_2_32
+        application = g_application_get_default ();
+
+        if (application != NULL) {
+            GVariant *desktop_entry = g_hash_table_lookup (priv->hints, "desktop-entry");
+
+            if (desktop_entry == NULL) {
+                const char *application_id = g_application_get_application_id (application);
+
+                g_variant_builder_add (&hints_builder, "{sv}", "desktop-entry",
+                                       g_variant_new_string (application_id));
+            }
+        }
+#endif
 
         /* TODO: make this nonblocking */
         result = g_dbus_proxy_call_sync (proxy,
