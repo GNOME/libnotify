@@ -132,7 +132,7 @@ main (int argc, char *argv[])
         static char       **n_text = NULL;
         static char       **hints = NULL;
         static gboolean     do_version = FALSE;
-        static gboolean     hint_error = FALSE;
+        static gboolean     has_error = FALSE;
         static glong        expire_timeout = NOTIFY_EXPIRES_DEFAULT;
         GOptionContext     *opt_ctx;
         NotifyNotification *notify;
@@ -253,7 +253,7 @@ main (int argc, char *argv[])
                                 fprintf (stderr, "%s\n",
                                          N_("Invalid hint syntax specified. "
                                             "Use TYPE:NAME:VALUE."));
-                                hint_error = TRUE;
+                                has_error = TRUE;
                         } else {
                                 retval = notify_notification_set_hint_variant (notify,
                                                                                tokens[0],
@@ -264,22 +264,25 @@ main (int argc, char *argv[])
                                 if (!retval) {
                                         fprintf (stderr, "%s\n", error->message);
                                         g_error_free (error);
-                                        hint_error = TRUE;
+                                        has_error = TRUE;
                                 }
                         }
 
                         g_strfreev (tokens);
-                        if (hint_error)
+                        if (has_error)
                                 break;
                 }
         }
 
-        if (!hint_error)
-                notify_notification_show (notify, NULL);
+        if (!has_error && !notify_notification_show (notify, &error)) {
+                fprintf (stderr, "%s\n", error->message);
+                g_error_free (error);
+                has_error = TRUE;
+        }
 
         g_object_unref (G_OBJECT (notify));
 
         notify_uninit ();
 
-        exit (hint_error);
+        exit (has_error);
 }
