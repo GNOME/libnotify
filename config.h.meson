@@ -1,0 +1,58 @@
+/* config.h.meson */
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#mesondefine HAVE_DLFCN_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#mesondefine HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <memory.h> header file. */
+#mesondefine HAVE_MEMORY_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#mesondefine HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#mesondefine HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#mesondefine HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#mesondefine HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#mesondefine HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#mesondefine HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#mesondefine HAVE_UNISTD_H
+
+/* libnotify major version. */
+#mesondefine LIBNOTIFY_MAJOR_VERSION
+
+/* libnotify micro version. */
+#mesondefine LIBNOTIFY_MICRO_VERSION
+
+/* libnotify minor version. */
+#mesondefine LIBNOTIFY_MINOR_VERSION
+
+/* libnotify version. */
+#mesondefine LIBNOTIFY_VERSION
+
+/* Name of package */
+#mesondefine PACKAGE
+
+/* Define to the full name of this package. */
+#mesondefine PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#mesondefine PACKAGE_STRING
+
+/* Define to the version of this package. */
+#mesondefine PACKAGE_VERSION
+
+/* Version number of package */
+#mesondefine VERSION
