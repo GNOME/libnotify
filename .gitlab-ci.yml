@@ -1,0 +1,42 @@
+stages:
+  - build
+
+.base_build_template: &base_build
+  stage: build
+  image: ubuntu:devel
+
+.ubuntu_deps_install_template: &ubuntu_deps_install
+    apt-get update &&
+    apt-get install -q -y --no-install-recommends
+      gobject-introspection
+      gtk-doc-tools
+      libgdk-pixbuf2.0-dev
+      libgirepository1.0-dev
+      libglib2.0-dev
+      libgtk-3-dev
+      libpopt-dev
+      xmlto
+
+build:ubuntu:autogen:
+  <<: *base_build
+  before_script:
+    - *ubuntu_deps_install
+    - apt-get install -q -y --no-install-recommends
+        gnome-common
+  script:
+    - ./autogen.sh --enable-gtk-doc=yes
+    - make
+    - make distcheck
+
+build:ubuntu:meson:
+  <<: *base_build
+  before_script:
+    - *ubuntu_deps_install
+    - apt-get install -q -y --no-install-recommends
+        ninja-build
+        python3-pip
+        python3-setuptools
+    - pip3 install meson
+  script:
+    - meson _build -Denable-gtk-doc=true -Ddocbook-docs=enabled
+    - ninja -C _build
