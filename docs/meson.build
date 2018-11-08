@@ -1,0 +1,25 @@
+if not get_option('docbook-docs').disabled()
+  xmlto = find_program('xmlto', required: get_option('docbook-docs').enabled())
+
+  if xmlto.found()
+    spec_files = ['notification-spec']
+
+    foreach spec: spec_files
+      custom_target('targetname',
+        output: spec + '.html',
+        input: spec + '.xml',
+        command: [xmlto,
+          'xhtml-nochunks',
+          '-m', join_paths(meson.current_source_dir(), 'config.xsl'),
+          '-o', '@OUTDIR@',
+          '@INPUT@'
+        ],
+        install: true,
+        install_dir: join_paths(docdir, 'spec'))
+    endforeach
+  endif
+endif
+
+if get_option('enable-gtk-doc')
+  subdir('reference')
+endif
