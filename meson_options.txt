@@ -1,0 +1,16 @@
+option('tests',
+  type: 'boolean',
+  value: true,
+  description: 'Do not build tests')
+option('introspection',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Enable GObject introspection')
+option('gtk_doc',
+  type: 'boolean',
+  value: true,
+  description: 'Enable generating the API reference (depends on GTK-Doc)')
+option('docbook_docs',
+  type: 'feature',
+  value: 'auto',
+  description: 'Build DocBook documentation (requires xmlto)')
