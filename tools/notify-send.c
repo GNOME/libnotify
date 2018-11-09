@@ -246,7 +246,7 @@ main (int argc, char *argv[])
                 char         **tokens = NULL;
 
                 while ((hint = hints[i++])) {
-                        tokens = g_strsplit (hint, ":", -1);
+                        tokens = g_strsplit (hint, ":", 3);
                         l = g_strv_length (tokens);
 
                         if (l != 3) {
