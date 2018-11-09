@@ -456,23 +456,25 @@ append_snap_prefix (const gchar *path)
                 path = NULL;
         }
 
-        if (path &&
-                (g_str_has_prefix (path, snap) ||
-                 g_str_has_prefix (path, g_get_home_dir ()) ||
-                 g_str_has_prefix (path, g_get_user_cache_dir ()) ||
-                 g_str_has_prefix (path, g_get_user_config_dir ()) ||
-                 g_str_has_prefix (path, g_get_user_data_dir ()) ||
-                 g_str_has_prefix (path, g_get_user_runtime_dir ()))) {
+        if (path != NULL &&
+            (g_str_has_prefix (path, snap) ||
+             g_str_has_prefix (path, g_get_home_dir ()) ||
+             g_str_has_prefix (path, g_get_user_cache_dir ()) ||
+             g_str_has_prefix (path, g_get_user_config_dir ()) ||
+             g_str_has_prefix (path, g_get_user_data_dir ()) ||
+             g_str_has_prefix (path, g_get_user_runtime_dir ()))) {
                 path = NULL;
         }
 
         for (i = 0; path != NULL && i < G_USER_N_DIRECTORIES; ++i) {
-                if (g_str_has_prefix (path, g_get_user_special_dir (i))) {
+                const gchar *dir = g_get_user_special_dir (i);
+                if (dir && g_str_has_prefix (path, dir)) {
                         path = NULL;
                 }
         }
 
-        if (path != NULL) {
+        if (path != NULL &&
+            !g_file_test (path, G_FILE_TEST_IS_REGULAR)) {
                 snapped_path = g_build_filename (snap, path, NULL);
                 if (path_filename != NULL) {
                         gchar *snapped_path_tmp = snapped_path;
@@ -480,6 +482,8 @@ append_snap_prefix (const gchar *path)
                                                           NULL, NULL);
                         g_free (snapped_path_tmp);
                 }
+                g_debug ("Impossible to read file %s, trying with snap "
+                         "namespace: '%s'", path, snapped_path);
         }
 
         g_free (path_filename);
@@ -490,35 +494,15 @@ append_snap_prefix (const gchar *path)
 static gchar *
 get_snap_desktop_name (const gchar *desktop)
 {
-        const gchar *snap_path;
         const gchar *snap_name = g_getenv ("SNAP_NAME");
         gchar *real_snap_desktop = NULL;
-        gchar *desktop_filename;
 
         if (snap_name == NULL || *snap_name == '\0') {
                 return NULL;
         }
 
-        snap_path = g_getenv ("SNAP");
-        desktop_filename = g_filename_from_uri (desktop, NULL, NULL);
-
-        if (desktop_filename != NULL) {
-                desktop = desktop_filename;
-        }
-
-        if (desktop[0] == '/') {
-                if (!g_str_has_prefix (desktop, snap_path) &&
-                    !g_file_test (desktop, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR)) {
-                        real_snap_desktop = g_build_filename (snap_path, desktop, NULL);
-                        if (desktop_filename != NULL) {
-                                gchar *snap_desktop = real_snap_desktop;
-                                real_snap_desktop = g_filename_to_uri (snap_desktop,
-                                                                       NULL, NULL);
-                                g_free (snap_desktop);
-                        }
-                        g_debug ("Impossible to read file %s, trying with snap "
-                                 "namepsace: '%s'", desktop, real_snap_desktop);
-                }
+        if (strchr (desktop, G_DIR_SEPARATOR) != NULL) {
+                real_snap_desktop = append_snap_prefix (desktop);
         }
         else {
                 gchar *snap_app_prefix = g_strdup_printf ("%s_", snap_name);
@@ -530,8 +514,6 @@ get_snap_desktop_name (const gchar *desktop)
                 }
                 g_free (snap_app_prefix);
         }
-
-        g_free (desktop_filename);
 
         return real_snap_desktop;
 }
