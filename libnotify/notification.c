@@ -450,8 +450,12 @@ append_snap_prefix (const gchar *path)
                 path = real_path;
         }
 
-        if (g_str_has_prefix (path, "/tmp/")) {
-                g_warning ("Using '/tmp' paths in SNAP environment will "
+        if (path == NULL) {
+                goto out;
+        }
+
+        if (g_str_has_prefix (path, "/tmp/snap.")) {
+                g_warning ("Using '/tmp/snap.*' paths in SNAP environment will "
                            "lead to unreadable resources: '%s'", path);
                 goto out;
         }
