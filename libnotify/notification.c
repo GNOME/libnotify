@@ -460,6 +460,18 @@ append_snap_prefix (const gchar *path)
                 goto out;
         }
 
+        if (g_str_has_prefix (path, g_get_tmp_dir ())) {
+                gchar *contents = NULL;
+                if (!g_file_get_contents ("/proc/self/attr/current", &contents,
+                                          NULL, NULL)) {
+                        g_warning ("Using '%s' paths in confined SNAP "
+                                   "environment will lead to unreadable "
+                                   "resources: '%s'", g_get_tmp_dir (), path);
+                        goto out;
+                }
+                g_free (contents);
+        }
+
         if (g_str_has_prefix (path, snap) ||
             g_str_has_prefix (path, g_get_home_dir ()) ||
             g_str_has_prefix (path, g_get_user_cache_dir ()) ||
