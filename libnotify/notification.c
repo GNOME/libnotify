@@ -453,28 +453,26 @@ append_snap_prefix (const gchar *path)
         if (g_str_has_prefix (path, "/tmp/")) {
                 g_warning ("Using '/tmp' paths in SNAP environment will "
                            "lead to unreadable resources: '%s'", path);
-                path = NULL;
+                goto out;
         }
 
-        if (path != NULL &&
-            (g_str_has_prefix (path, snap) ||
-             g_str_has_prefix (path, g_get_home_dir ()) ||
-             g_str_has_prefix (path, g_get_user_cache_dir ()) ||
-             g_str_has_prefix (path, g_get_user_config_dir ()) ||
-             g_str_has_prefix (path, g_get_user_data_dir ()) ||
-             g_str_has_prefix (path, g_get_user_runtime_dir ()))) {
-                path = NULL;
+        if (g_str_has_prefix (path, snap) ||
+            g_str_has_prefix (path, g_get_home_dir ()) ||
+            g_str_has_prefix (path, g_get_user_cache_dir ()) ||
+            g_str_has_prefix (path, g_get_user_config_dir ()) ||
+            g_str_has_prefix (path, g_get_user_data_dir ()) ||
+            g_str_has_prefix (path, g_get_user_runtime_dir ())) {
+                goto out;
         }
 
-        for (i = 0; path != NULL && i < G_USER_N_DIRECTORIES; ++i) {
+        for (i = 0; i < G_USER_N_DIRECTORIES; ++i) {
                 const gchar *dir = g_get_user_special_dir (i);
                 if (dir && g_str_has_prefix (path, dir)) {
-                        path = NULL;
+                        goto out;
                 }
         }
 
-        if (path != NULL &&
-            !g_file_test (path, G_FILE_TEST_IS_REGULAR)) {
+        if (!g_file_test (path, G_FILE_TEST_IS_REGULAR)) {
                 snapped_path = g_build_filename (snap, path, NULL);
                 if (path_filename != NULL) {
                         gchar *snapped_path_tmp = snapped_path;
@@ -486,6 +484,7 @@ append_snap_prefix (const gchar *path)
                          "namespace: '%s'", path, snapped_path);
         }
 
+out:
         g_free (path_filename);
 
         return snapped_path;
