@@ -3,6 +3,7 @@ NULL =
 SUBDIRS = reference
 
 SPEC_XML_FILES =		\
+	config.xsl		\
 	notification-spec.xml	\
 	$(NULL)
 
@@ -12,7 +13,7 @@ htmldocdir = $(docdir)/spec
 htmldoc_DATA = notification-spec.html
 
 notification-spec.html: $(SPEC_XML_FILES)
-	$(XMLTO) $(XMLTO_FLAGS) xhtml-nochunks -m $(top_srcdir)/docs/config.xsl notification-spec.xml
+	$(XMLTO) $(XMLTO_FLAGS) xhtml-nochunks -m config.xsl notification-spec.xml
 
 endif # DOCBOOK_DOCS_ENABLED
 
