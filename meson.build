@@ -31,6 +31,7 @@ default_includes = include_directories('.')
 prefix = get_option('prefix')
 includedir = join_paths(prefix, get_option('includedir'))
 docdir = join_paths(prefix, get_option('datadir'), 'doc', meson.project_name())
+man1dir = join_paths(prefix, get_option('mandir'), 'man1')
 
 libnotify_deps = []
 extra_deps = []
@@ -50,6 +51,27 @@ conf.set_quoted('VERSION', meson.project_version())
 configure_file(input: 'config.h.meson',
   output : 'config.h',
   configuration : conf)
+
+if get_option('man')
+  xsltproc = find_program('xsltproc', required: true)
+  stylesheet = 'http://docbook.sourceforge.net/release/xsl-ns/current/manpages/docbook.xsl'
+  xsltproc_command = [
+    xsltproc,
+    '--nonet',
+    '--stringparam', 'man.output.quietly', '1',
+    '--stringparam', 'funcsynopsis.style', 'ansi',
+    '--stringparam', 'man.th.extra1.suppress', '1',
+    '-o', '@OUTPUT@',
+    stylesheet,
+    '@INPUT@',
+  ]
+
+  testrun = run_command(xsltproc, '--nonet', stylesheet)
+
+  if testrun.returncode() != 0
+    error('DocBook stylesheet for generating man pages not found, you need to install docbook-xsl-ns or similar package.')
+  endif
+endif
 
 subdir('libnotify')
 subdir('tools')
