@@ -25,3 +25,16 @@ endif
 if get_option('gtk_doc')
   subdir('reference')
 endif
+
+if get_option('man')
+  manpages = ['notify-send']
+
+  foreach page : manpages
+    custom_target(page + '-man',
+      input: page + '.xml',
+      output: page + '.1',
+      command: xsltproc_command,
+      install: true,
+      install_dir: man1dir)
+  endforeach
+endif
