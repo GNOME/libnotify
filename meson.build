@@ -33,9 +33,11 @@ docdir = join_paths(prefix, get_option('datadir'), 'doc', meson.project_name())
 libnotify_deps = []
 extra_deps = []
 
+glib_req_version = '>= 2.26.0'
+
 gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0')
-glib_dep = dependency('glib-2.0', version: '>= 2.26.0')
-gio_dep = dependency('gio-2.0', version: glib_dep.version())
+glib_dep = dependency('glib-2.0', version: glib_req_version)
+gio_dep = dependency('gio-2.0', version: glib_req_version)
 gtk_dep = dependency('gtk+-3.0', version: '>= 2.90', required: get_option('tests'))
 
 libnotify_deps = [gdk_pixbuf_dep, gio_dep, glib_dep]
