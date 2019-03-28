@@ -1,4 +1,5 @@
-libnotify_includedir = join_paths(includedir, meson.project_name())
+libnotify_includesubdir = meson.project_name()
+libnotify_includedir = join_paths(includedir, libnotify_includesubdir)
 
 headers = [
   'notify.h',
@@ -81,4 +82,4 @@ if not introspection.disabled()
   )
 endif
 
-install_headers(headers, subdir: libnotify_includedir)
+install_headers(headers, subdir: libnotify_includesubdir)
