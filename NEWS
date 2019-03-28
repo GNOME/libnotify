@@ -1,3 +1,13 @@
+New in 0.7.8
+============
+* Support meson build system [Marco; !3]
+* notify-send: Support full URLs as hint values [Marco; !4]
+* Mic. bug fixes [Ting-Wei, Florian; #760438, !8]
+
+Contributors:
+  Emmanuele Bassi, Abderrahim Kitouni, Ting-Wei Lan, Iain Lane, Florian Müllner,
+  Jan Tojnar, Marco Trevisan (Treviño), Marco Trevisan
+
 New in 0.7.7
 ============
 
