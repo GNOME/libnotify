@@ -6,6 +6,8 @@ project('libnotify',
 gnome = import('gnome')
 pkgconfig = import('pkgconfig')
 
+cc = meson.get_compiler('c')
+
 ################################################################
 # libtool versioning
 ################################################################

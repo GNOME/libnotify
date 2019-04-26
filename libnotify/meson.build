@@ -37,9 +37,9 @@ libnotify_cflags = [
 ]
 
 mapfile = meson.project_name() + '.map'
-libnotify_ldflags = [
+libnotify_ldflags = cc.get_supported_link_arguments([
   '-Wl,--version-script,'+join_paths(meson.current_source_dir(), mapfile),
-]
+])
 
 notify_dep = declare_dependency(
   include_directories: default_includes,
