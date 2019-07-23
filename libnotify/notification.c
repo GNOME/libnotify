@@ -558,6 +558,7 @@ notify_notification_show (NotifyNotification *notification,
         GHashTableIter             iter;
         gpointer                   key, data;
         GVariant                  *result;
+        GApplication              *application;
 
         g_return_val_if_fail (notification != NULL, FALSE);
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
@@ -590,6 +591,15 @@ notify_notification_show (NotifyNotification *notification,
         g_hash_table_iter_init (&iter, priv->hints);
         while (g_hash_table_iter_next (&iter, &key, &data)) {
                 g_variant_builder_add (&hints_builder, "{sv}", key, data);
+        }
+
+        application = g_application_get_default ();
+        if (application != NULL) {
+            GVariant *desktop_entry = g_hash_table_lookup (priv->hints, "desktop-entry");
+            if (desktop_entry == NULL) {
+                g_variant_builder_add (&hints_builder, "{sv}", "desktop-entry",
+                                     g_variant_new_string (g_application_get_application_id (application)));
+            }
         }
 
         /* TODO: make this nonblocking */
