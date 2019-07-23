@@ -425,6 +425,114 @@ notify_notification_new (const char *summary,
                              NULL);
 }
 
+static gchar *
+append_snap_prefix (const gchar *path)
+{
+        gint i;
+        gchar real_path[PATH_MAX];
+        const gchar *snap;
+        gchar *path_filename;
+        gchar *snapped_path;
+
+        if (path == NULL || strchr (path, G_DIR_SEPARATOR) == NULL) {
+                return NULL;
+        }
+
+        snap = g_getenv ("SNAP");
+        snapped_path = NULL;
+        path_filename = g_filename_from_uri (path, NULL, NULL);
+
+        if (path_filename != NULL) {
+                path = path_filename;
+        }
+
+        if (realpath (path, real_path) != NULL) {
+                path = real_path;
+        }
+
+        if (path == NULL) {
+                goto out;
+        }
+
+        if (g_str_has_prefix (path, "/tmp/snap.")) {
+                g_warning ("Using '/tmp/snap.*' paths in SNAP environment will "
+                           "lead to unreadable resources: '%s'", path);
+                goto out;
+        }
+
+        if (g_str_has_prefix (path, g_get_tmp_dir ())) {
+                gchar *contents = NULL;
+                if (!g_file_get_contents ("/proc/self/attr/current", &contents,
+                                          NULL, NULL)) {
+                        g_warning ("Using '%s' paths in confined SNAP "
+                                   "environment will lead to unreadable "
+                                   "resources: '%s'", g_get_tmp_dir (), path);
+                        goto out;
+                }
+                g_free (contents);
+        }
+
+        if (g_str_has_prefix (path, snap) ||
+            g_str_has_prefix (path, g_get_home_dir ()) ||
+            g_str_has_prefix (path, g_get_user_cache_dir ()) ||
+            g_str_has_prefix (path, g_get_user_config_dir ()) ||
+            g_str_has_prefix (path, g_get_user_data_dir ()) ||
+            g_str_has_prefix (path, g_get_user_runtime_dir ())) {
+                goto out;
+        }
+
+        for (i = 0; i < G_USER_N_DIRECTORIES; ++i) {
+                const gchar *dir = g_get_user_special_dir (i);
+                if (dir && g_str_has_prefix (path, dir)) {
+                        goto out;
+                }
+        }
+
+        if (!g_file_test (path, G_FILE_TEST_IS_REGULAR)) {
+                snapped_path = g_build_filename (snap, path, NULL);
+                if (path_filename != NULL) {
+                        gchar *snapped_path_tmp = snapped_path;
+                        snapped_path = g_filename_to_uri (snapped_path,
+                                                          NULL, NULL);
+                        g_free (snapped_path_tmp);
+                }
+                g_debug ("Impossible to read file %s, trying with snap "
+                         "namespace: '%s'", path, snapped_path);
+        }
+
+out:
+        g_free (path_filename);
+
+        return snapped_path;
+}
+
+static gchar *
+get_snap_desktop_name (const gchar *desktop)
+{
+        const gchar *snap_name = g_getenv ("SNAP_NAME");
+        gchar *real_snap_desktop = NULL;
+
+        if (snap_name == NULL || *snap_name == '\0') {
+                return NULL;
+        }
+
+        if (strchr (desktop, G_DIR_SEPARATOR) != NULL) {
+                real_snap_desktop = append_snap_prefix (desktop);
+        }
+        else {
+                gchar *snap_app_prefix = g_strdup_printf ("%s_", snap_name);
+                if (!g_str_has_prefix (desktop, snap_app_prefix)) {
+                        real_snap_desktop = g_strconcat (snap_app_prefix,
+                                                         desktop, NULL);
+                        g_debug ("Desktop file does not contain the snap prefix, "
+                                 "fixed: '%s'", real_snap_desktop);
+                }
+                g_free (snap_app_prefix);
+        }
+
+        return real_snap_desktop;
+}
+
 static void
 notify_notification_update_internal (NotifyNotification *notification,
                                      const char         *app_name,
@@ -452,9 +560,17 @@ notify_notification_update_internal (NotifyNotification *notification,
         }
 
         if (notification->priv->icon_name != icon) {
+                gchar *snapped_icon;
                 g_free (notification->priv->icon_name);
                 notification->priv->icon_name = (icon != NULL
                                                  && *icon != '\0' ? g_strdup (icon) : NULL);
+                snapped_icon = append_snap_prefix (notification->priv->icon_name);
+                if (snapped_icon != NULL) {
+                        g_debug ("Icon updated in snap environment: '%s' -> '%s'\n",
+                                 notification->priv->icon_name, snapped_icon);
+                        g_free (notification->priv->icon_name);
+                        notification->priv->icon_name = snapped_icon;
+                }
                 g_object_notify (G_OBJECT (notification), "icon-name");
         }
 
@@ -779,6 +895,44 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         notify_notification_set_hint (notification, hint_name, value);
 }
 
+static GVariant *
+get_parsed_variant (GVariant *variant,
+                    gchar    *(*str_parser)(const gchar *))
+{
+        gchar *parsed = str_parser (g_variant_get_string (variant, NULL));
+
+        if (parsed != NULL) {
+                g_variant_unref (variant);
+                variant = g_variant_new_take_string (parsed);
+        }
+
+        return variant;
+}
+
+static GVariant *
+maybe_parse_snap_hint_value (const gchar *key,
+                             GVariant    *value)
+{
+        const gchar *snap_path = g_getenv ("SNAP");
+        if (snap_path == NULL || *snap_path == '\0' ||
+            !g_variant_is_of_type (value, G_VARIANT_TYPE_STRING)) {
+                return value;
+        }
+
+        if (g_strcmp0 (key, "desktop-entry") == 0) {
+                value = get_parsed_variant (value, get_snap_desktop_name);
+        } else if (g_strcmp0 (key, "image-path") == 0 ||
+                   g_strcmp0 (key, "image_path") == 0 ||
+                   g_strcmp0 (key, "sound-file") == 0) {
+                value = get_parsed_variant (value, append_snap_prefix);
+        }
+
+        g_debug ("Setting hint '%s' under snap environment: '%s'", key,
+                 g_variant_get_string (value, NULL));
+
+        return value;
+}
+
 /**
  * notify_notification_set_hint:
  * @notification: a #NotifyNotification
@@ -801,6 +955,7 @@ notify_notification_set_hint (NotifyNotification *notification,
         g_return_if_fail (key != NULL && *key != '\0');
 
         if (value != NULL) {
+                value = maybe_parse_snap_hint_value (key, value);
                 g_hash_table_insert (notification->priv->hints,
                                     g_strdup (key),
                                     g_variant_ref_sink (value));
