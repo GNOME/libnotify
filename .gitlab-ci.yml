@@ -36,7 +36,9 @@ build:ubuntu:meson:
         ninja-build
         python3-pip
         python3-setuptools
+        xsltproc
+        docbook-xsl-ns
     - pip3 install meson
   script:
-    - meson _build -Dgtk_doc=true -Ddocbook_docs=enabled -Dtests=true
+    - meson _build -Dgtk_doc=true -Dman=true -Ddocbook_docs=enabled -Dtests=true
     - ninja -C _build

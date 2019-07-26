@@ -6,6 +6,10 @@ option('introspection',
   type: 'feature',
   value: 'enabled',
   description: 'Enable GObject introspection')
+option('man',
+  type: 'boolean',
+  value: true,
+  description: 'Enable generating the manual page (depends on xsltproc)')
 option('gtk_doc',
   type: 'boolean',
   value: true,
