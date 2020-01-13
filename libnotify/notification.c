@@ -425,6 +425,74 @@ notify_notification_new (const char *summary,
                              NULL);
 }
 
+static gchar *
+try_prepend_path (const char *base_path,
+                  const char *path)
+{
+        gchar *path_filename;
+        gchar *path_ret;
+
+        if (!path || *path == '\0')
+                return NULL;
+
+        path_ret = NULL;
+        path_filename = g_filename_from_uri (base_path, NULL, NULL);
+
+        if (path_filename == NULL) {
+                if (base_path && base_path[0] == G_DIR_SEPARATOR) {
+                        path_filename = g_strdup (base_path);
+                } else {
+                        path_filename = realpath (base_path, NULL);
+                }
+        }
+
+        g_debug ("Trying to look at file '%s' in the '%s' prefix.",
+                 base_path,
+                 path);
+
+        path_ret = g_build_filename (path, path_filename, NULL);
+
+        if (!g_file_test (path_ret, G_FILE_TEST_EXISTS)) {
+                g_free (path_ret);
+                path_ret = NULL;
+        }
+
+        g_free (path_filename);
+
+        return path_ret;
+}
+
+static gchar *
+try_prepend_desktop (const gchar *desktop)
+{
+        gchar *ret;
+
+        /*
+         * if it's an absolute path, try prepending $SNAP, otherwise try
+         * $SNAP_NAME_; snap .desktop files are in the format
+         * ${SNAP_NAME}_desktop_file_name
+         */
+        ret = try_prepend_path (desktop, g_getenv ("SNAP"));
+
+        if (ret == NULL) {
+                const gchar *snap_name = g_getenv ("SNAP_NAME");
+
+                if (snap_name != NULL && snap_name[0] != '\0') {
+                        ret = g_strdup_printf ("%s_%s", snap_name, desktop);
+                }
+        }
+
+        return ret;
+}
+
+static gchar *
+try_prepend_snap (const gchar *value)
+{
+        /* hardcoded paths to icons might be relocated under $SNAP */
+        return try_prepend_path (value, g_getenv ("SNAP"));
+}
+
+
 static void
 notify_notification_update_internal (NotifyNotification *notification,
                                      const char         *app_name,
@@ -452,9 +520,17 @@ notify_notification_update_internal (NotifyNotification *notification,
         }
 
         if (notification->priv->icon_name != icon) {
+                gchar *snapped_icon;
                 g_free (notification->priv->icon_name);
                 notification->priv->icon_name = (icon != NULL
                                                  && *icon != '\0' ? g_strdup (icon) : NULL);
+                snapped_icon = try_prepend_desktop (notification->priv->icon_name);
+                if (snapped_icon != NULL) {
+                        g_debug ("Icon updated in snap environment: '%s' -> '%s'\n",
+                                 notification->priv->icon_name, snapped_icon);
+                        g_free (notification->priv->icon_name);
+                        notification->priv->icon_name = snapped_icon;
+                }
                 g_object_notify (G_OBJECT (notification), "icon-name");
         }
 
@@ -779,6 +855,35 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         notify_notification_set_hint (notification, hint_name, value);
 }
 
+static GVariant *
+get_parsed_variant (GVariant *variant,
+                    gchar    *(*str_parser)(const gchar *))
+{
+        gchar *parsed = str_parser (g_variant_get_string (variant, NULL));
+
+        if (parsed != NULL) {
+                g_variant_unref (variant);
+                variant = g_variant_new_take_string (parsed);
+        }
+
+        return variant;
+}
+
+static GVariant *
+maybe_parse_snap_hint_value (const gchar *key,
+                             GVariant    *value)
+{
+        if (g_strcmp0 (key, "desktop-entry") == 0) {
+                value = get_parsed_variant (value, try_prepend_desktop);
+        } else if (g_strcmp0 (key, "image-path") == 0 ||
+                   g_strcmp0 (key, "image_path") == 0 ||
+                   g_strcmp0 (key, "sound-file") == 0) {
+                value = get_parsed_variant (value, try_prepend_snap);
+        }
+
+        return value;
+}
+
 /**
  * notify_notification_set_hint:
  * @notification: a #NotifyNotification
@@ -801,6 +906,7 @@ notify_notification_set_hint (NotifyNotification *notification,
         g_return_if_fail (key != NULL && *key != '\0');
 
         if (value != NULL) {
+                value = maybe_parse_snap_hint_value (key, value);
                 g_hash_table_insert (notification->priv->hints,
                                     g_strdup (key),
                                     g_variant_ref_sink (value));
