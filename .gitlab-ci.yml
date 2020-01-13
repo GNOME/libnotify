@@ -18,6 +18,8 @@ build:ubuntu:
         ninja-build
         python3-pip
         python3-setuptools
+        xsltproc
+        docbook-xsl-ns
     - pip3 install meson
   script:
     - meson _build -Ddocbook_docs=enabled

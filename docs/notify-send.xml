@@ -1,0 +1,102 @@
+<refentry xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <info>
+    <date>November 2005</date>
+    <productname>libnotify</productname>
+    <authorgroup>
+      <author>
+        <personname>Andre Filipe de Assuncao e Brito</personname>
+        <email>decko@noisemakers.org</email>
+        <contrib>Original author</contrib>
+      </author>
+      <author>
+        <personname>Paul van Tilburg</personname>
+        <email>paulvt@debian.org</email>
+        <contrib>Original author</contrib>
+      </author>
+      <author>
+        <personname>Riccardo Setti</personname>
+        <email>giskard@debian.org</email>
+        <contrib>Original author</contrib>
+      </author>
+    </authorgroup>
+  </info>
+  <refmeta>
+    <refentrytitle>notify-send</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="manual">User Commands</refmiscinfo>
+  </refmeta>
+  <refnamediv>
+    <refname>notify-send</refname>
+    <refpurpose>a program to send desktop notifications</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>notify-send</command>
+      <arg choice="opt">
+        <replaceable>OPTIONS</replaceable>
+      </arg>
+      <arg choice="req">
+        <replaceable>summary</replaceable>
+      </arg>
+      <arg choice="opt">
+        <replaceable>body</replaceable>
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsection>
+    <info><title>Description</title></info>
+
+    <para>With <command>notify-send</command> you can send desktop notifications to the user via a notification daemon from the command line. These notifications can be used to inform the user about an event or display some form of information without getting in the user’s way.</para>
+  </refsection>
+  <refsection>
+    <info><title>Options</title></info>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>-?</option>, <option>--help</option></term>
+        <listitem>
+          <para>Show help and exit.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-u</option>, <option>--urgency</option>=<replaceable>LEVEL</replaceable></term>
+        <listitem>
+          <para>Specifies the urgency level (<literal>low</literal>, <literal>normal</literal>, <literal>critical</literal>).</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-t</option>, <option>--expire-time</option>=<replaceable>TIME</replaceable>
+        </term>
+        <listitem>
+          <para>The duration, in milliseconds, for the notification to appear on screen.</para>
+          <para>(Ubuntu's Notify OSD and GNOME Shell both ignore this parameter.)</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-i</option>, <option>--icon</option>=<replaceable>ICON</replaceable>[,<replaceable>ICON</replaceable>…]
+        </term>
+        <listitem>
+          <para>Specifies an icon filename or stock icon to display.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-c</option>, <option>--category</option>=<replaceable>TYPE</replaceable>[,<replaceable>TYPE</replaceable>…]
+        </term>
+        <listitem>
+          <para>Specifies the notification category.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-h</option>, <option>--hint</option>=<replaceable>TYPE</replaceable>:<replaceable>NAME</replaceable>:<replaceable>VALUE</replaceable> </term>
+        <listitem>
+          <para>Specifies basic extra data to pass. Valid types are <literal>INT</literal>, <literal>DOUBLE</literal>, <literal>STRING</literal> and <literal>BYTE</literal>.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+  <refsection>
+    <info><title>See also</title></info>
+
+    <para>The Desktop Notification Spec on <link xlink:href="http://www.galago-project.org/specs/notification/">http://www.galago-project.org/specs/notification/</link>.</para>
+  </refsection>
+</refentry>
