@@ -20,5 +20,5 @@ build:ubuntu:
         python3-setuptools
     - pip3 install meson
   script:
-    - meson _build -Dgtk_doc=true -Ddocbook_docs=enabled -Dtests=true
+    - meson _build -Ddocbook_docs=enabled
     - ninja -C _build
