@@ -1,3 +1,12 @@
+New in 0.7.9
+============
+* Fixed linking in darwin [Iain, Marco; !5]
+* Added man page for notify-send [Jan; !6]
+* Dropped autotools [Jan; !11]
+
+Contributors:
+  Iain Lane, Jan Tojnar, Marco Trevisan
+
 New in 0.7.8
 ============
 * Support meson build system [Marco; !3]
