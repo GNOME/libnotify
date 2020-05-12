@@ -131,7 +131,7 @@ main (int argc, char *argv[])
         static char       **n_text = NULL;
         static char       **hints = NULL;
         static gboolean     do_version = FALSE;
-        static gboolean     hint_error = FALSE;
+        static gboolean     hint_error = FALSE, show_error = FALSE;
         static glong        expire_timeout = NOTIFY_EXPIRES_DEFAULT;
         GOptionContext     *opt_ctx;
         NotifyNotification *notify;
@@ -263,12 +263,22 @@ main (int argc, char *argv[])
                 }
         }
 
-        if (!hint_error)
-                notify_notification_show (notify, NULL);
+        if (!hint_error) {
+                retval = notify_notification_show (notify, &error);
+
+                if (!retval) {
+                        fprintf (stderr, "%s\n", error->message);
+                        g_error_free (error);
+                        show_error = TRUE;
+                }
+        }
 
         g_object_unref (G_OBJECT (notify));
 
         notify_uninit ();
 
-        exit (hint_error);
+        if (hint_error || show_error)
+                exit (1);
+
+        return 0;
 }
