@@ -69,7 +69,7 @@
         </term>
         <listitem>
           <para>The duration, in milliseconds, for the notification to appear on screen.</para>
-          <para>(Ubuntu's Notify OSD and GNOME Shell both ignore this parameter.)</para>
+          <para>Ubuntu's Notify OSD and GNOME Shell always ignore it, while Plasma ignores it for notifications with the critical urgency level.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
