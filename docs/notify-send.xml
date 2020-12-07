@@ -73,7 +73,7 @@
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>-i</option>, <option>--icon</option>=<replaceable>ICON</replaceable>[,<replaceable>ICON</replaceable>…]
+        <term><option>-i</option>, <option>--icon</option>=<replaceable>ICON</replaceable>
         </term>
         <listitem>
           <para>Specifies an icon filename or stock icon to display.</para>

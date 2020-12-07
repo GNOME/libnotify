@@ -128,7 +128,6 @@ main (int argc, char *argv[])
         static const char  *type = NULL;
         static char        *app_name = NULL;
         static char        *icon_str = NULL;
-        static char        *icons = NULL;
         static char       **n_text = NULL;
         static char       **hints = NULL;
         static gboolean     do_version = FALSE;
@@ -150,9 +149,9 @@ main (int argc, char *argv[])
                   "notification."), N_("TIME")},
                 {"app-name", 'a', 0, G_OPTION_ARG_STRING, &app_name,
                  N_("Specifies the app name for the icon"), N_("APP_NAME")},
-                {"icon", 'i', 0, G_OPTION_ARG_FILENAME, &icons,
+                {"icon", 'i', 0, G_OPTION_ARG_FILENAME, &icon_str,
                  N_("Specifies an icon filename or stock icon to display."),
-                 N_("ICON[,ICON...]")},
+                 N_("ICON")},
                 {"category", 'c', 0, G_OPTION_ARG_FILENAME, &type,
                  N_("Specifies the notification category."),
                  N_("TYPE[,TYPE...]")},
@@ -213,16 +212,6 @@ main (int argc, char *argv[])
                                  N_("Invalid number of options."));
                         exit (1);
                 }
-        }
-
-        if (icons != NULL) {
-                char           *c;
-
-                /* XXX */
-                if ((c = strchr (icons, ',')) != NULL)
-                        *c = '\0';
-
-                icon_str = icons;
         }
 
         if (!notify_init ("notify-send"))
