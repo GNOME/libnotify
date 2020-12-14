@@ -92,6 +92,18 @@
           <para>Specifies basic extra data to pass. Valid types are <literal>INT</literal>, <literal>DOUBLE</literal>, <literal>STRING</literal> and <literal>BYTE</literal>.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term><option>-p</option>, <option>--print-id</option></term>
+        <listitem>
+          <para>Print the notification ID.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-r</option>, <option>--replace-id</option>=<replaceable>REPLACE_ID</replaceable></term>
+        <listitem>
+          <para>The ID of the notification to replace.</para>
+        </listitem>
+      </varlistentry>
     </variablelist>
   </refsection>
   <refsection>
