@@ -32,6 +32,7 @@
 #define GETTEXT_PACKAGE NULL
 
 static NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
+static GMainLoop *loop = NULL;
 
 static gboolean
 g_option_arg_urgency_cb (const char *option_name,
@@ -120,6 +121,22 @@ notify_notification_set_hint_variant (NotifyNotification *notification,
         return TRUE;
 }
 
+static void
+handle_closed (NotifyNotification *notify,
+               gpointer            user_data)
+{
+        g_main_loop_quit (loop);
+}
+
+static gboolean
+on_wait_timeout (gpointer data)
+{
+        fprintf (stderr, "Wait timeout expired\n");
+        g_main_loop_quit (loop);
+
+        return FALSE;
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -134,6 +151,7 @@ main (int argc, char *argv[])
         static gint         notification_id = 0;
         static gboolean     do_version = FALSE;
         static gboolean     hint_error = FALSE, show_error = FALSE;
+        static gboolean     wait = FALSE;
         static glong        expire_timeout = NOTIFY_EXPIRES_DEFAULT;
         GOptionContext     *opt_ctx;
         NotifyNotification *notify;
@@ -165,6 +183,9 @@ main (int argc, char *argv[])
                  N_ ("Print the notification ID."), NULL},
                 {"replace-id", 'r', 0, G_OPTION_ARG_INT, &notification_id,
                  N_ ("The ID of the notification to replace."), N_("REPLACE_ID")},
+                {"wait", 'w', 0, G_OPTION_ARG_NONE, &wait,
+                 N_("Wait for the notification to be closed before exiting."),
+                 NULL},
                 {"version", 'v', 0, G_OPTION_ARG_NONE, &do_version,
                  N_("Version of the package."),
                  NULL},
@@ -273,6 +294,17 @@ main (int argc, char *argv[])
                 }
         }
 
+        if (wait) {
+                g_signal_connect (G_OBJECT (notify),
+                                  "closed",
+                                  G_CALLBACK (handle_closed),
+                                  NULL);
+
+                if (expire_timeout > 0) {
+                        g_timeout_add (expire_timeout, on_wait_timeout, NULL);
+                }
+        }
+
         if (!hint_error) {
                 retval = notify_notification_show (notify, &error);
 
@@ -286,6 +318,13 @@ main (int argc, char *argv[])
         if (print_id) {
                 g_object_get (notify, "id", &notification_id, NULL);
                 g_printf ("%d\n", notification_id);
+        }
+
+        if (wait) {
+                loop = g_main_loop_new (NULL, FALSE);
+                g_main_loop_run (loop);
+                g_main_loop_unref (loop);
+                loop = NULL;
         }
 
         g_object_unref (G_OBJECT (notify));

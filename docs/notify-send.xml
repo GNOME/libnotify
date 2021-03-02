@@ -104,6 +104,12 @@
           <para>The ID of the notification to replace.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term><option>-w</option>, <option>--wait</option></term>
+          <listitem>
+            <para>Wait for the notification to be closed before exiting. If the <option>expire-time</option> is set, it will be used as the maximum waiting time.</para>
+        </listitem>
+      </varlistentry>
     </variablelist>
   </refsection>
   <refsection>
