@@ -59,6 +59,12 @@
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><option>-a</option>, <option>--app-name</option>=<replaceable>APP_NAME</replaceable></term>
+        <listitem>
+          <para>Specifies the app name for the notification.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term><option>-A</option>, <option>--action</option>=[<replaceable>NAME</replaceable>=]<replaceable>Text...</replaceable></term>
         <listitem>
           <para>Specifies the actions to display to the user. Implies <option>--wait</option> to wait for user input. May be set multiple times. The <replaceable>NAME</replaceable> of the action is output to <literal>stdout</literal>. If <replaceable>NAME</replaceable> is not specified, the numerical index of the option is used (starting with <literal>1</literal>).</para>
