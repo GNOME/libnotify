@@ -313,11 +313,27 @@ main (int argc, char *argv[])
         }
 
         if (actions != NULL) {
+                GList *server_caps = notify_get_server_caps ();
                 gint i = 0;
                 char *action = NULL;
                 gchar **spl = NULL;
+                gboolean have_actions;
 
-                while ((action = actions[i++])) {
+                have_actions =
+                        !!g_list_find_custom (server_caps,
+                                              "actions",
+                                              (GCompareFunc) g_ascii_strcasecmp);
+                g_list_foreach (server_caps, (GFunc) g_free, NULL);
+                g_list_free (server_caps);
+
+                if (!have_actions) {
+                        g_printerr (N_("Actions are not supported by this "
+                                       "notifications server. "
+                                       "Displaying non-interactively.\n"));
+                        show_error = TRUE;
+                }
+
+                while (have_actions && (action = actions[i++])) {
                         gchar *name;
                         const gchar *label;
 
