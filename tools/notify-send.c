@@ -128,6 +128,17 @@ handle_closed (NotifyNotification *notify,
         g_main_loop_quit (loop);
 }
 
+static void
+handle_action (NotifyNotification *notify,
+               char               *action,
+               gpointer            user_data)
+{
+        const char *action_name = user_data;
+
+        g_printf ("%s\n", action_name);
+        notify_notification_close (notify, NULL);
+}
+
 static gboolean
 on_wait_timeout (gpointer data)
 {
@@ -147,6 +158,7 @@ main (int argc, char *argv[])
         static char        *icon_str = NULL;
         static char       **n_text = NULL;
         static char       **hints = NULL;
+        static char       **actions = NULL;
         static gboolean     print_id = FALSE;
         static gint         notification_id = 0;
         static gboolean     do_version = FALSE;
@@ -186,6 +198,12 @@ main (int argc, char *argv[])
                 {"wait", 'w', 0, G_OPTION_ARG_NONE, &wait,
                  N_("Wait for the notification to be closed before exiting."),
                  NULL},
+                {"action", 'A', 0, G_OPTION_ARG_FILENAME_ARRAY, &actions,
+                 N_
+                 ("Specifies the actions to display to the user. Implies --wait to wait for user input."
+                 " May be set multiple times. The name of the action is output to stdout. If NAME is "
+                 "not specified, the numerical index of the option is used (starting with 0)."),
+                 N_("[NAME=]Text...")},
                 {"version", 'v', 0, G_OPTION_ARG_NONE, &do_version,
                  N_("Version of the package."),
                  NULL},
@@ -292,6 +310,41 @@ main (int argc, char *argv[])
                         if (hint_error)
                                 break;
                 }
+        }
+
+        if (actions != NULL) {
+                gint i = 0;
+                char *action = NULL;
+                gchar **spl = NULL;
+
+                while ((action = actions[i++])) {
+                        gchar *name;
+                        const gchar *label;
+
+                        spl = g_strsplit (action, "=", 2);
+
+                        if (g_strv_length (spl) == 1) {
+                                name = g_strdup_printf ("%d", i - 1);
+                                label = g_strstrip (spl[0]);
+                        } else {
+                                name = g_strdup (g_strstrip (spl[0]));
+                                label = g_strstrip (spl[1]);
+                        }
+
+                        if (*label != '\0' && *name != '\0') {
+                                notify_notification_add_action (notify,
+                                                                name,
+                                                                label,
+                                                                handle_action,
+                                                                name,
+                                                                g_free);
+                                wait = TRUE;
+                        }
+
+                        g_strfreev (spl);
+                }
+
+                g_strfreev (actions);
         }
 
         if (wait) {
