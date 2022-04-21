@@ -69,8 +69,9 @@ pkgconfig.generate(libnotify_lib,
 )
 
 introspection = get_option('introspection')
-if not introspection.disabled()
-  find_program('g-ir-scanner', required: introspection.enabled())
+g_ir_scanner = find_program('g-ir-scanner', required: introspection.enabled())
+
+if g_ir_scanner.found() and not introspection.disabled()
   gnome.generate_gir(libnotify_lib,
     sources: headers + sources + enum_types,
     namespace: 'Notify',
