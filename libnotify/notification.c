@@ -71,6 +71,7 @@ struct _NotifyNotificationPrivate
 
         const char     *snap_path;
         const char     *snap_name;
+        char           *snap_app;
 
         /* NULL to use icon data. Anything else to have server lookup icon */
         char           *icon_name;
@@ -357,6 +358,7 @@ static void
 maybe_initialize_snap (NotifyNotification *obj)
 {
         NotifyNotificationPrivate *priv = obj->priv;
+        gchar *cgroup_contents = NULL;
 
         priv->snap_path = g_getenv ("SNAP");
         if (priv->snap_path == NULL)
@@ -373,8 +375,81 @@ maybe_initialize_snap (NotifyNotification *obj)
                 priv->snap_name = NULL;
         }
 
+        if (g_file_get_contents ("/proc/self/cgroup", &cgroup_contents,
+                                 NULL, NULL)) {
+                gchar **lines = g_strsplit (cgroup_contents, "\n", -1);
+                gchar *found_snap_name = NULL;
+                gint i;
+
+                for (i = 0; lines[i]; ++i) {
+                        gchar **parts = g_strsplit (lines[i], ":", 3);
+                        gchar *basename;
+                        gchar **ns;
+                        guint ns_length;
+
+                        if (g_strv_length (parts) != 3) {
+                                g_strfreev (parts);
+                                continue;
+                        }
+
+                        basename = g_path_get_basename (parts[2]);
+                        g_strfreev (parts);
+
+                        if (!basename) {
+                                continue;
+                        }
+
+                        ns = g_strsplit (basename, ".", -1);
+                        ns_length = g_strv_length (ns);
+                        g_free (basename);
+
+                        if (ns_length < 2 || !g_str_equal (ns[0], "snap")) {
+                                g_strfreev (ns);
+                                continue;
+                        }
+
+                        if (priv->snap_name == NULL) {
+                                g_free (found_snap_name);
+                                found_snap_name = g_strdup (ns[1]);
+                        }
+
+                        if (ns_length < 3) {
+                                g_strfreev (ns);
+                                continue;
+                        }
+
+                        if (priv->snap_name == NULL) {
+                                priv->snap_name = found_snap_name;
+                                found_snap_name = NULL;
+                        }
+
+                        if (g_str_equal (ns[1], priv->snap_name)) {
+                                priv->snap_app = g_strdup (ns[2]);
+                                g_strfreev (ns);
+                                break;
+                        }
+
+                        g_strfreev (ns);
+                }
+
+                if (priv->snap_name == NULL && found_snap_name != NULL) {
+                        priv->snap_name = found_snap_name;
+                        found_snap_name = NULL;
+                }
+
+                g_strfreev (lines);
+                g_free (found_snap_name);
+        }
+
+        if (priv->snap_app == NULL) {
+                priv->snap_app = g_strdup (priv->snap_name);
+        }
+
         g_debug ("SNAP path: %s", priv->snap_path);
         g_debug ("SNAP name: %s", priv->snap_name);
+        g_debug ("SNAP app: %s", priv->snap_app);
+
+        g_free (cgroup_contents);
 }
 
 static void
@@ -409,6 +484,7 @@ notify_notification_finalize (GObject *object)
         g_free (priv->summary);
         g_free (priv->body);
         g_free (priv->icon_name);
+        g_free (priv->snap_app);
 
         if (priv->actions != NULL) {
                 g_slist_foreach (priv->actions, (GFunc) g_free, NULL);
@@ -680,7 +756,7 @@ notify_notification_show (NotifyNotification *notification,
         gpointer                   key, data;
         GVariant                  *result;
 #ifdef GLIB_VERSION_2_32
-        GApplication              *application;
+        GApplication              *application = NULL;
 #endif
 
         g_return_val_if_fail (notification != NULL, FALSE);
@@ -716,8 +792,24 @@ notify_notification_show (NotifyNotification *notification,
                 g_variant_builder_add (&hints_builder, "{sv}", key, data);
         }
 
+        if (priv->snap_app &&
+            g_hash_table_lookup (priv->hints, "desktop-entry") == NULL) {
+                gchar *snap_desktop;
+
+                snap_desktop = g_strdup_printf ("%s_%s",
+                                                priv->snap_name,
+                                                priv->snap_app);
+
+                g_debug ("Using desktop entry: %s", snap_desktop);
+                g_variant_builder_add (&hints_builder, "{sv}",
+                                       "desktop-entry",
+                                       g_variant_new_take_string (snap_desktop));
+        }
+
 #ifdef GLIB_VERSION_2_32
-        application = g_application_get_default ();
+        if (!priv->snap_app) {
+                application = g_application_get_default ();
+        }
 
         if (application != NULL) {
             GVariant *desktop_entry = g_hash_table_lookup (priv->hints, "desktop-entry");
@@ -725,6 +817,7 @@ notify_notification_show (NotifyNotification *notification,
             if (desktop_entry == NULL) {
                 const char *application_id = g_application_get_application_id (application);
 
+                g_debug ("Using desktop entry: %s", application_id);
                 g_variant_builder_add (&hints_builder, "{sv}", "desktop-entry",
                                        g_variant_new_string (application_id));
             }
