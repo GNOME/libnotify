@@ -1056,7 +1056,11 @@ notify_notification_set_hint_byte_array (NotifyNotification *notification,
 
         g_return_if_fail (value != NULL || len == 0);
 
+#ifdef GLIB_VERSION_2_68
+        value_dup = g_memdup2 (value, len);
+#else
         value_dup = g_memdup (value, len);
+#endif
         notify_notification_set_hint (notification, key,
                                       g_variant_new_from_data (G_VARIANT_TYPE ("ay"),
                                                                value_dup,
