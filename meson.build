@@ -66,7 +66,7 @@ if get_option('man')
     '@INPUT@',
   ]
 
-  testrun = run_command(xsltproc, '--nonet', stylesheet)
+  testrun = run_command(xsltproc, '--nonet', stylesheet, check: false)
 
   if testrun.returncode() != 0
     error('DocBook stylesheet for generating man pages not found, you need to install docbook-xsl-ns or similar package.')
