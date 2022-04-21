@@ -1033,24 +1033,24 @@ maybe_parse_snap_hint_value (NotifyNotification *notification,
                              const gchar *key,
                              GVariant    *value)
 {
+        StringParserFunc parse_func = NULL;
+
         if (!notification->priv->snap_path)
                 return value;
 
         if (g_strcmp0 (key, "desktop-entry") == 0) {
-                value = get_parsed_variant (notification,
-                                            key,
-                                            value,
-                                            try_prepend_snap_desktop);
+                parse_func = try_prepend_snap_desktop;
         } else if (g_strcmp0 (key, "image-path") == 0 ||
                    g_strcmp0 (key, "image_path") == 0 ||
                    g_strcmp0 (key, "sound-file") == 0) {
-                value = get_parsed_variant (notification,
-                                            key,
-                                            value,
-                                            try_prepend_snap);
+                parse_func = try_prepend_snap;
         }
 
-        return value;
+        if (parse_func == NULL) {
+                return value;
+        }
+
+        return get_parsed_variant (notification, key, value, parse_func);
 }
 
 /**
