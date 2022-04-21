@@ -485,7 +485,7 @@ try_prepend_desktop (const gchar *desktop)
          */
         ret = try_prepend_path (desktop, g_getenv ("SNAP"));
 
-        if (ret == NULL) {
+        if (ret == NULL && strchr (desktop, G_DIR_SEPARATOR) == NULL) {
                 const gchar *snap_name = g_getenv ("SNAP_NAME");
 
                 if (snap_name != NULL && snap_name[0] != '\0') {
