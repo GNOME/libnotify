@@ -601,7 +601,7 @@ notify_notification_show (NotifyNotification *notification,
             GVariant *desktop_entry = g_hash_table_lookup (priv->hints, "desktop-entry");
             if (desktop_entry == NULL) {
                 g_variant_builder_add (&hints_builder, "{sv}", "desktop-entry",
-                                     g_variant_new_string (g_application_get_application_id (application)));
+                                       g_variant_new_string (g_application_get_application_id (application)));
             }
         }
 #endif
