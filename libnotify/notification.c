@@ -597,10 +597,6 @@ try_prepend_snap_desktop (NotifyNotification *notification,
                 ret = g_strdup_printf ("%s_%s", priv->snap_name, desktop);
         }
 
-        if (ret) {
-                g_debug ("Using snap ID: %s", ret);
-        }
-
         return ret;
 }
 
@@ -1015,6 +1011,7 @@ typedef gchar * (*StringParserFunc) (NotifyNotification *, const gchar *);
 
 static GVariant *
 get_parsed_variant (NotifyNotification *notification,
+                    const char         *key,
                     GVariant           *variant,
                     StringParserFunc    str_parser)
 {
@@ -1022,6 +1019,8 @@ get_parsed_variant (NotifyNotification *notification,
         gchar *parsed = str_parser (notification, str);
 
         if (parsed != NULL && g_strcmp0 (str, parsed) != 0) {
+                g_debug ("Hint %s updated in snap environment: '%s' -> '%s'\n",
+                         key, str, parsed);
                 g_variant_unref (variant);
                 variant = g_variant_new_take_string (parsed);
         }
@@ -1039,12 +1038,14 @@ maybe_parse_snap_hint_value (NotifyNotification *notification,
 
         if (g_strcmp0 (key, "desktop-entry") == 0) {
                 value = get_parsed_variant (notification,
+                                            key,
                                             value,
                                             try_prepend_snap_desktop);
         } else if (g_strcmp0 (key, "image-path") == 0 ||
                    g_strcmp0 (key, "image_path") == 0 ||
                    g_strcmp0 (key, "sound-file") == 0) {
                 value = get_parsed_variant (notification,
+                                            key,
                                             value,
                                             try_prepend_snap);
         }
