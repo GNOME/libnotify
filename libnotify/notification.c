@@ -1021,7 +1021,7 @@ get_parsed_variant (NotifyNotification *notification,
         const char *str = g_variant_get_string (variant, NULL);
         gchar *parsed = str_parser (notification, str);
 
-        if (parsed != NULL) {
+        if (parsed != NULL && g_strcmp0 (str, parsed) != 0) {
                 g_variant_unref (variant);
                 variant = g_variant_new_take_string (parsed);
         }
