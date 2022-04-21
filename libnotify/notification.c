@@ -443,16 +443,27 @@ try_prepend_path (const char *base_path,
                         path_filename = g_strdup (base_path);
                 } else {
                         path_filename = realpath (base_path, NULL);
+
+                        if (path_filename == NULL) {
+                                /* File path is not existing, but let's check
+                                 * if it's under the base path before giving up
+                                 */
+                                path_filename = g_strdup (base_path);
+                        }
                 }
         }
 
-        g_debug ("Trying to look at file '%s' in the '%s' prefix.",
-                 base_path,
-                 path);
-
-        path_ret = g_build_filename (path, path_filename, NULL);
+        if (g_str_has_prefix (path_filename, path)) {
+                path_ret = g_strdup (path_filename);
+        } else {
+                g_debug ("Trying to look at file '%s' in the '%s' prefix.",
+                         base_path,
+                         path);
+                path_ret = g_build_filename (path, path_filename, NULL);
+        }
 
         if (!g_file_test (path_ret, G_FILE_TEST_EXISTS)) {
+                g_debug ("Nothing found at %s", path_ret);
                 g_free (path_ret);
                 path_ret = NULL;
         }
