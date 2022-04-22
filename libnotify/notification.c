@@ -536,14 +536,18 @@ try_prepend_path (const char *base_path,
 {
         gchar *path_filename;
         gchar *path_ret;
+        gboolean was_uri;
 
         if (!path || *path == '\0')
                 return NULL;
 
+        was_uri = TRUE;
         path_ret = NULL;
         path_filename = g_filename_from_uri (base_path, NULL, NULL);
 
         if (path_filename == NULL) {
+                was_uri = FALSE;
+
                 if (base_path && base_path[0] == G_DIR_SEPARATOR) {
                         path_filename = g_strdup (base_path);
                 } else {
@@ -571,6 +575,13 @@ try_prepend_path (const char *base_path,
                 g_debug ("Nothing found at %s", path_ret);
                 g_free (path_ret);
                 path_ret = NULL;
+        } else if (was_uri) {
+                gchar *uri = g_filename_to_uri (path_ret, NULL, NULL);
+
+                if (uri != NULL) {
+                        g_free (path_ret);
+                        path_ret = uri;
+                }
         }
 
         g_free (path_filename);
