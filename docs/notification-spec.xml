@@ -1272,6 +1272,65 @@
      </para>
     </note>
    </sect3>
+
+   <sect3 id="signal-activation-token">
+    <title><literal>org.freedesktop.Notifications.ActivationToken</literal></title>
+    <funcsynopsis>
+     <funcprototype>
+      <funcdef>
+       <function>org.freedesktop.Notifications.ActivationToken</function>
+      </funcdef>
+      <paramdef>UINT32 <parameter>id</parameter></paramdef>
+      <paramdef>STRING <parameter>activation_token</parameter></paramdef>
+     </funcprototype>
+    </funcsynopsis>
+    <para>
+     This signal can be emitted before a <literal>ActionInvoked</literal>
+     signal. It carries an activation token that can be used to activate a
+     toplevel.
+    </para>
+    <table>
+     <title>ActivationToken Parameters</title>
+     <tgroup cols="2">
+      <thead>
+       <row>
+        <entry>Name</entry>
+        <entry>Type</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody valign="top">
+       <row>
+        <entry><parameter>id</parameter></entry>
+        <entry>UINT32</entry>
+        <entry>
+         The ID of the notification emitting the <literal>ActionInvoked</literal>
+         signal.
+        </entry>
+       </row>
+       <row>
+        <entry><parameter>activation_token</parameter></entry>
+        <entry>STRING</entry>
+        <entry>
+         An activation token. This can be either an X11-style startup ID (see
+         <ulink url="https://specifications.freedesktop.org/startup-notification-spec/startup-notification-latest.txt">Startup notification protocol</ulink>)
+         or a
+         <ulink url="https://gitlab.freedesktop.org/wayland/wayland-protocols/-/tree/main/staging/xdg-activation">Wayland xdg-activation</ulink>
+         token.
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+    <note>
+     <para>
+      Clients should not assume the server will generate this signal. Some
+      servers may not support user interaction at all, or may not support
+      the concept of being able to generate an activation token for a
+      notification.
+     </para>
+    </note>
+   </sect3>
   </sect2>
  </sect1>
 </article>

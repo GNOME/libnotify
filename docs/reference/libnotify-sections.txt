@@ -27,6 +27,7 @@ notify_notification_clear_hints
 notify_notification_add_action
 notify_notification_clear_actions
 notify_notification_close
+notify_notification_get_activation_token
 notify_notification_get_closed_reason
 <SUBSECTION Standard>
 NotifyNotificationPrivate

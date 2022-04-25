@@ -134,8 +134,16 @@ handle_action (NotifyNotification *notify,
                gpointer            user_data)
 {
         const char *action_name = user_data;
+        const char *activation_token;
+
+        activation_token = notify_notification_get_activation_token (notify);
 
         g_printf ("%s\n", action_name);
+
+        if (activation_token) {
+                g_debug ("Activation Token: %s", activation_token);
+        }
+
         notify_notification_close (notify, NULL);
 }
 

@@ -180,6 +180,8 @@ void                notify_notification_add_action            (NotifyNotificatio
                                                                gpointer            user_data,
                                                                GFreeFunc           free_func);
 
+const char         *notify_notification_get_activation_token  (NotifyNotification *notification);
+
 void                notify_notification_clear_actions         (NotifyNotification *notification);
 gboolean            notify_notification_close                 (NotifyNotification *notification,
                                                                GError            **error);

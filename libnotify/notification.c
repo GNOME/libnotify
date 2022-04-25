@@ -68,6 +68,7 @@ struct _NotifyNotificationPrivate
         char           *app_name;
         char           *summary;
         char           *body;
+        char           *activation_token;
 
         const char     *snap_path;
         const char     *snap_name;
@@ -88,6 +89,7 @@ struct _NotifyNotificationPrivate
         GHashTable     *hints;
 
         gboolean        has_nondefault_actions;
+        gboolean        activating;
         gboolean        updates_pending;
 
         gulong          proxy_signal_handler;
@@ -484,6 +486,7 @@ notify_notification_finalize (GObject *object)
         g_free (priv->summary);
         g_free (priv->body);
         g_free (priv->icon_name);
+        g_free (priv->activation_token);
         g_free (priv->snap_app);
 
         if (priv->actions != NULL) {
@@ -736,8 +739,25 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                                 g_warning ("Received unknown action %s", action);
                         }
                 } else {
+                        notification->priv->activating = TRUE;
                         pair->cb (notification, (char *) action, pair->user_data);
+                        notification->priv->activating = FALSE;
+
+                        g_free (notification->priv->activation_token);
+                        notification->priv->activation_token = NULL;
                 }
+        } else if (g_strcmp0 (signal_name, "ActivationToken") == 0 &&
+                   g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(us)"))) {
+                guint32 id;
+                const char *activation_token;
+
+                g_variant_get (parameters, "(u&s)", &id, &activation_token);
+
+                if (id != notification->priv->id)
+                        return;
+
+                g_free (notification->priv->activation_token);
+                notification->priv->activation_token = g_strdup (activation_token);
         }
 }
 
@@ -1349,6 +1369,29 @@ notify_notification_add_action (NotifyNotification  *notification,
             g_ascii_strcasecmp (action, "default") != 0) {
                 notification->priv->has_nondefault_actions = TRUE;
         }
+}
+
+/**
+ * notify_notification_get_activation_token:
+ *
+ * If an an action is currently being activated, return the activation token.
+ * This function is intended to be used in a #NotifyActionCallback to get
+ * the activation token for the activated action, if the notification daemon
+ * supports it.
+ *
+ * Return value: (transfer none): The current activation token, or %NULL if none
+ *
+ * Since: 0.7.10
+ */
+const char *
+notify_notification_get_activation_token (NotifyNotification *notification)
+{
+        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), NULL);
+
+        if (notification->priv->activating)
+                return notification->priv->activation_token;
+
+        return NULL;
 }
 
 gboolean
