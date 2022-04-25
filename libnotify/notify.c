@@ -151,6 +151,14 @@ notify_init (const char *app_name)
         if (_initted)
                 return TRUE;
 
+#ifdef GLIB_VERSION_2_32
+        if (app_name == NULL && g_application_get_default ()) {
+                GApplication *application = g_application_get_default ();
+
+                app_name = g_application_get_application_id (application);
+        }
+#endif
+
         notify_set_app_name (app_name);
 
 #if !GLIB_CHECK_VERSION (2, 36, 0)
