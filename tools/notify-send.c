@@ -301,7 +301,7 @@ main (int argc, char *argv[])
 
                                 if (!retval) {
                                         fprintf (stderr, "%s\n", error->message);
-                                        g_error_free (error);
+                                        g_clear_error (&error);
                                         hint_error = TRUE;
                                 }
                         }
@@ -379,7 +379,7 @@ main (int argc, char *argv[])
 
                 if (!retval) {
                         fprintf (stderr, "%s\n", error->message);
-                        g_error_free (error);
+                        g_clear_error (&error);
                         show_error = TRUE;
                 }
         }
