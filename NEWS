@@ -3,6 +3,7 @@ New in 0.7.10
 * notify-send: Support commas in icon filenames [Thorsten; !15]
 * notify-send: Give failing exit code if showing notification fails [Ray, !13]
 * notify-send: Support for replacing an existing notification [Paul; !17]
+* notify-send: Add option to wait until notification has been closed [Ben; !18]
 * notify-send: Add support for notification actions and responses [Ben; !18]
 * notification: Send the application ID when possible [Corentin; !1]
 * notification: Use g_memdup2 when available [Marco; !22]
