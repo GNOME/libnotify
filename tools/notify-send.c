@@ -176,6 +176,22 @@ on_wait_timeout (gpointer data)
         return FALSE;
 }
 
+static gboolean
+server_has_capability (const gchar *capability)
+{
+        GList *server_caps = notify_get_server_caps ();
+        gboolean supported;
+
+        supported = !!g_list_find_custom (server_caps,
+                                          capability,
+                                          (GCompareFunc) g_ascii_strcasecmp);
+
+        g_list_foreach (server_caps, (GFunc) g_free, NULL);
+        g_list_free (server_caps);
+
+        return supported;
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -350,19 +366,12 @@ main (int argc, char *argv[])
         }
 
         if (actions != NULL) {
-                GList *server_caps = notify_get_server_caps ();
                 gint i = 0;
                 char *action = NULL;
                 gchar **spl = NULL;
                 gboolean have_actions;
 
-                have_actions =
-                        !!g_list_find_custom (server_caps,
-                                              "actions",
-                                              (GCompareFunc) g_ascii_strcasecmp);
-                g_list_foreach (server_caps, (GFunc) g_free, NULL);
-                g_list_free (server_caps);
-
+                have_actions = server_has_capability ("actions");
                 if (!have_actions) {
                         g_printerr (N_("Actions are not supported by this "
                                        "notifications server. "
