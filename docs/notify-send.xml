@@ -122,6 +122,12 @@
             <para>Wait for the notification to be closed before exiting. If the <option>expire-time</option> is set, it will be used as the maximum waiting time.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term><option>-e</option>, <option>--transient</option></term>
+          <listitem>
+            <para>Show a transient notification. Transient notifications by-pass the server's persistence capability, if any. And so it won't be preserved until the user acknowledges it.</para>
+        </listitem>
+      </varlistentry>
     </variablelist>
   </refsection>
   <refsection>
