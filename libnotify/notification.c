@@ -819,6 +819,11 @@ notify_notification_show (NotifyNotification *notification,
                 g_variant_builder_add (&hints_builder, "{sv}", key, data);
         }
 
+        if (g_hash_table_lookup (priv->hints, "sender-pid") == NULL) {
+                g_variant_builder_add (&hints_builder, "{sv}", "sender-pid",
+                                       g_variant_new_int64 (getpid ()));
+        }
+
         if (priv->snap_app &&
             g_hash_table_lookup (priv->hints, "desktop-entry") == NULL) {
                 gchar *snap_desktop;
