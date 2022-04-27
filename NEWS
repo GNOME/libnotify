@@ -1,3 +1,13 @@
+New in 0.7.11
+=============
+* Fix potential build errors with old glib version we require
+* notify-send: Add support for boolean hints
+* notify-send: Support passing any hint value, by parsing variant strings
+* notify-send: Add explicit option to create transient notifications
+
+Contributors:
+  Marco Trevisan
+
 New in 0.7.10
 =============
 * notify-send: Support commas in icon filenames [Thorsten; !15]
