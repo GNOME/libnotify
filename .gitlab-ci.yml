@@ -26,4 +26,12 @@ build:ubuntu:
     - pip3 install meson
   script:
     - meson _build -Ddocbook_docs=enabled
-    - ninja -C _build
+    - ninja -C _build install
+  artifacts:
+    expose_as: "Build artifacts"
+    paths:
+      - _build/docs/notification-spec.html
+      - _build/docs/reference/html
+      - _build/docs/reference/html/index.html
+      - _build/meson-logs
+
