@@ -191,6 +191,7 @@ main (int argc, char *argv[])
         static gint         notification_id = 0;
         static gboolean     do_version = FALSE;
         static gboolean     hint_error = FALSE, show_error = FALSE;
+        static gboolean     transient = FALSE;
         static gboolean     wait = FALSE;
         static glong        expire_timeout = NOTIFY_EXPIRES_DEFAULT;
         GOptionContext     *opt_ctx;
@@ -215,6 +216,9 @@ main (int argc, char *argv[])
                 {"category", 'c', 0, G_OPTION_ARG_FILENAME, &type,
                  N_("Specifies the notification category."),
                  N_("TYPE[,TYPE...]")},
+                {"transient", 'e', 0, G_OPTION_ARG_NONE, &transient,
+                 N_("Create a transient notification"),
+                 NULL},
                 {"hint", 'h', 0, G_OPTION_ARG_FILENAME_ARRAY, &hints,
                  N_
                  ("Specifies basic extra data to pass. Valid types are boolean, int, double, string, byte and variant."),
@@ -301,6 +305,11 @@ main (int argc, char *argv[])
         notify_notification_set_urgency (notify, urgency);
         notify_notification_set_timeout (notify, expire_timeout);
         notify_notification_set_app_name (notify, app_name);
+
+        if (transient) {
+                notify_notification_set_hint (notify, "transient",
+                                              g_variant_new_boolean (TRUE));
+        }
 
         g_free (body);
 
