@@ -325,6 +325,12 @@ main (int argc, char *argv[])
         if (transient) {
                 notify_notification_set_hint (notify, "transient",
                                               g_variant_new_boolean (TRUE));
+
+                if (!server_has_capability ("persistence")) {
+                        g_debug ("Persistence is not supported by the "
+                                 "notifications server. "
+                                 "All notifications are transient.");
+                }
         }
 
         g_free (body);
