@@ -101,7 +101,7 @@
       <varlistentry>
         <term><option>-h</option>, <option>--hint</option>=<replaceable>TYPE</replaceable>:<replaceable>NAME</replaceable>:<replaceable>VALUE</replaceable> </term>
         <listitem>
-          <para>Specifies basic extra data to pass. Valid types are <literal>INT</literal>, <literal>DOUBLE</literal>, <literal>STRING</literal> and <literal>BYTE</literal>.</para>
+          <para>Specifies basic extra data to pass. Valid types are <literal>BOOLEAN</literal>, <literal>INT</literal>, <literal>DOUBLE</literal>, <literal>STRING</literal> and <literal>BYTE</literal>.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

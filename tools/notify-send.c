@@ -100,6 +100,17 @@ notify_notification_set_hint_variant (NotifyNotification *notification,
                                                            key,
                                                            (guchar) h_byte);
                 }
+        } else if (g_ascii_strcasecmp (type, "boolean") == 0) {
+                gboolean h_boolean = FALSE;
+
+                if (g_ascii_strcasecmp (value, "true") == 0) {
+                        h_boolean = TRUE;
+                } else if (g_ascii_isdigit (*value)) {
+                        h_boolean = !!g_ascii_strtoull (value, NULL, 10);
+                }
+
+                notify_notification_set_hint (notification, key,
+                                              g_variant_new_boolean (h_boolean));
         } else {
                 *error = g_error_new (G_OPTION_ERROR,
                                       G_OPTION_ERROR_BAD_VALUE,
@@ -197,7 +208,7 @@ main (int argc, char *argv[])
                  N_("TYPE[,TYPE...]")},
                 {"hint", 'h', 0, G_OPTION_ARG_FILENAME_ARRAY, &hints,
                  N_
-                 ("Specifies basic extra data to pass. Valid types are int, double, string and byte."),
+                 ("Specifies basic extra data to pass. Valid types are boolean, int, double, string and byte."),
                  N_("TYPE:NAME:VALUE")},
                 {"print-id", 'p', 0, G_OPTION_ARG_NONE, &print_id,
                  N_ ("Print the notification ID."), NULL},
