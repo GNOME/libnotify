@@ -111,6 +111,15 @@ notify_notification_set_hint_variant (NotifyNotification *notification,
 
                 notify_notification_set_hint (notification, key,
                                               g_variant_new_boolean (h_boolean));
+        } else if (g_ascii_strcasecmp (type, "variant") == 0) {
+                GVariant *variant = g_variant_parse (NULL, value, NULL, NULL, NULL);
+
+                if (variant != NULL) {
+                        notify_notification_set_hint (notification, key, variant);
+                } else {
+                        conv_error = TRUE;
+                }
+
         } else {
                 *error = g_error_new (G_OPTION_ERROR,
                                       G_OPTION_ERROR_BAD_VALUE,
@@ -208,7 +217,7 @@ main (int argc, char *argv[])
                  N_("TYPE[,TYPE...]")},
                 {"hint", 'h', 0, G_OPTION_ARG_FILENAME_ARRAY, &hints,
                  N_
-                 ("Specifies basic extra data to pass. Valid types are boolean, int, double, string and byte."),
+                 ("Specifies basic extra data to pass. Valid types are boolean, int, double, string, byte and variant."),
                  N_("TYPE:NAME:VALUE")},
                 {"print-id", 'p', 0, G_OPTION_ARG_NONE, &print_id,
                  N_ ("Print the notification ID."), NULL},
