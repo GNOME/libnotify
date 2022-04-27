@@ -225,7 +225,7 @@ main (int argc, char *argv[])
 
         setlocale (LC_ALL, "");
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
+#ifndef GLIB_VERSION_2_36
         g_type_init ();
 #endif
 

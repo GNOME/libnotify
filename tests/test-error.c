@@ -29,7 +29,7 @@ main ()
 {
         NotifyNotification *n;
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
+#ifndef GLIB_VERSION_2_36
         g_type_init ();
 #endif
 

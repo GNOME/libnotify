@@ -161,7 +161,7 @@ notify_init (const char *app_name)
 
         notify_set_app_name (app_name);
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
+#ifndef GLIB_VERSION_2_36
         g_type_init ();
 #endif
 
