@@ -1,3 +1,22 @@
+New in 0.7.10
+=============
+* notify-send: Support commas in icon filenames [Thorsten; !15]
+* notify-send: Give failing exit code if showing notification fails [Ray, !13]
+* notify-send: Support for replacing an existing notification [Paul; !17]
+* notify-send: Add support for notification actions and responses [Ben; !18]
+* notification: Send the application ID when possible [Corentin; !1]
+* notification: Use g_memdup2 when available [Marco; !22]
+* notification: Improve SNAP detection and confined desktop ID [Marco; !23]
+* notification: Add support for getting actions activation token [Marco; !24]
+* notify: Use application ID if any to set the fallback app name [Marco; !18]
+* Build fixes and improvements [Marco; !22]
+* Docs updates [Boris, David; !14, !20]
+
+Contributors:
+  Marco Trevisan, Boris Shtrasman, Matthias Sweertvaegher, Thorsten Wißmann,
+  Ray Strode, Maximiliano Sandoval R, David King, Corentin Noël, Paul Collins,
+  Matthias Sweertvaegher, Ben Blain
+
 New in 0.7.9
 ============
 * Fixed linking in darwin [Iain, Marco; !5]
