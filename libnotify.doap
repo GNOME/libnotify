@@ -25,5 +25,12 @@ specifications:
       <gnome:userid>mccann</gnome:userid>
     </foaf:Person>
   </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Marco Trevisan</foaf:name>
+      <foaf:mbox rdf:resource="mailto:mail@3v1n0.net" />
+      <gnome:userid>marcotrevi</gnome:userid>
+    </foaf:Person>
+  </maintainer>
 </Project>
 
