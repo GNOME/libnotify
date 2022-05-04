@@ -8,6 +8,9 @@
   <category rdf:resource="http://api.gnome.org/doap-extensions#core" />
   <programming-language>C</programming-language>
   <shortdesc xml:lang="en">libnotify is a library for sending desktop notifications</shortdesc>
+  <description>Library to send desktop notifications that follows the FDO
+specifications:
+  https://gitlab.freedesktop.org/xdg/xdg-specs/-/blob/master/notification/notification-spec.xml</description>
   <maintainer>
     <foaf:Person>
       <foaf:name>Christian Hammond</foaf:name>
