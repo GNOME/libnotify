@@ -739,12 +739,19 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                                 g_warning ("Received unknown action %s", action);
                         }
                 } else {
+                        /* Some clients have assumed it is safe to unref the
+                         * Notification at the end of their NotifyActionCallback
+                         * so we add a temporary ref until we're done with it.
+                         */
+                        g_object_ref (notification);
+
                         notification->priv->activating = TRUE;
                         pair->cb (notification, (char *) action, pair->user_data);
                         notification->priv->activating = FALSE;
-
                         g_free (notification->priv->activation_token);
                         notification->priv->activation_token = NULL;
+
+                        g_object_unref (notification);
                 }
         } else if (g_strcmp0 (signal_name, "ActivationToken") == 0 &&
                    g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(us)"))) {
