@@ -1,3 +1,18 @@
+New in 0.7.12
+============
+
+* docs/notify-send: Add --transient option to manpage [Marco]
+* notify-send: Move server capabilities check to a separate function [Marco]
+* notify-send: Add debug message about server not supporting persistence
+  [Marco]
+* notification: Include sender-pid hint by default if not provided [Marco] 
+* Delete unused notifynotification.xml [Patrick; !25]
+* notification: Bookend calling NotifyActionCallback with temporary ref
+  [Logan; #25, !26]
+
+Contributors:
+  Marco Trevisan, Patrick Griffis, Logan Rathbone
+
 New in 0.7.11
 =============
 * Fix potential build errors with old glib version we require
