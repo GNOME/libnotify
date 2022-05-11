@@ -36,6 +36,10 @@ gint            _notify_notification_get_timeout            (const NotifyNotific
 gboolean        _notify_notification_has_nondefault_actions (const NotifyNotification *n);
 gboolean        _notify_check_spec_version                  (int major, int minor);
 
+const char     * _notify_get_snap_name                      (void);
+const char     * _notify_get_snap_path                      (void);
+const char     * _notify_get_snap_app                       (void);
+
 G_END_DECLS
 
 #endif /* _LIBNOTIFY_INTERNAL_H_ */

@@ -43,6 +43,8 @@
 
 static gboolean         _initted = FALSE;
 static char            *_app_name = NULL;
+static char            *_snap_name = NULL;
+static char            *_snap_app = NULL;
 static GDBusProxy      *_proxy = NULL;
 static GList           *_active_notifications = NULL;
 static int              _spec_version_major = 0;
@@ -151,13 +153,20 @@ notify_init (const char *app_name)
         if (_initted)
                 return TRUE;
 
+        if (app_name == NULL) {
 #ifdef GLIB_VERSION_2_32
-        if (app_name == NULL && g_application_get_default ()) {
-                GApplication *application = g_application_get_default ();
-
-                app_name = g_application_get_application_id (application);
-        }
+                GApplication *application;
 #endif
+
+                app_name = _notify_get_snap_app ();
+
+#ifdef GLIB_VERSION_2_32
+                if (app_name == NULL &&
+                    (application = g_application_get_default ())) {
+                        app_name = g_application_get_application_id (application);
+                }
+#endif
+        }
 
         notify_set_app_name (app_name);
 
@@ -168,6 +177,148 @@ notify_init (const char *app_name)
         _initted = TRUE;
 
         return TRUE;
+}
+
+static void
+_initialize_snap_names (void)
+{
+        gchar *cgroup_contents = NULL;
+        gchar *found_snap_name = NULL;
+        gchar **lines;
+        gint i;
+
+        if (!g_file_get_contents ("/proc/self/cgroup", &cgroup_contents,
+                                  NULL, NULL)) {
+                g_free (cgroup_contents);
+                return;
+        }
+
+        lines = g_strsplit (cgroup_contents, "\n", -1);
+        g_free (cgroup_contents);
+
+        for (i = 0; lines[i]; ++i) {
+                gchar **parts = g_strsplit (lines[i], ":", 3);
+                gchar *basename;
+                gchar **ns;
+                guint ns_length;
+
+                if (g_strv_length (parts) != 3) {
+                        g_strfreev (parts);
+                        continue;
+                }
+
+                basename = g_path_get_basename (parts[2]);
+                g_strfreev (parts);
+
+                if (!basename) {
+                        continue;
+                }
+
+                ns = g_strsplit (basename, ".", -1);
+                ns_length = g_strv_length (ns);
+                g_free (basename);
+
+                if (ns_length < 2 || !g_str_equal (ns[0], "snap")) {
+                        g_strfreev (ns);
+                        continue;
+                }
+
+                if (_snap_name == NULL) {
+                        g_free (found_snap_name);
+                        found_snap_name = g_strdup (ns[1]);
+                }
+
+                if (ns_length < 3) {
+                        g_strfreev (ns);
+                        continue;
+                }
+
+                if (_snap_name == NULL) {
+                        _snap_name = found_snap_name;
+                        found_snap_name = NULL;
+                        g_debug ("SNAP name: %s", _snap_name);
+                }
+
+                if (g_str_equal (ns[1], _snap_name)) {
+                        _snap_app = g_strdup (ns[2]);
+                        g_strfreev (ns);
+                        break;
+                }
+
+                g_strfreev (ns);
+        }
+
+        if (_snap_name == NULL && found_snap_name != NULL) {
+                _snap_name = found_snap_name;
+                found_snap_name = NULL;
+                g_debug ("SNAP name: %s", _snap_name);
+        }
+
+        if (_snap_app == NULL) {
+                _snap_app = g_strdup (_snap_name);
+        }
+
+        g_debug ("SNAP app: %s", _snap_app);
+
+        g_strfreev (lines);
+        g_free (found_snap_name);
+}
+
+const char *
+_notify_get_snap_path (void)
+{
+        static const char *snap_path = NULL;
+        static gsize snap_path_set = FALSE;
+
+        if (g_once_init_enter (&snap_path_set)) {
+                snap_path = g_getenv ("SNAP");
+
+                if (!snap_path || *snap_path == '\0' ||
+                    !strchr (snap_path, G_DIR_SEPARATOR)) {
+                        snap_path = NULL;
+                } else {
+                        g_debug ("SNAP path: %s", snap_path);
+                }
+
+                g_once_init_leave (&snap_path_set, TRUE);
+        }
+
+        return snap_path;
+}
+
+const char *
+_notify_get_snap_name (void)
+{
+        static gsize snap_name_set = FALSE;
+
+        if (g_once_init_enter (&snap_name_set)) {
+                if (!_snap_name) {
+                        const char *snap_name_env = g_getenv ("SNAP_NAME");
+
+                        if (!snap_name_env || *snap_name_env == '\0')
+                                snap_name_env = NULL;
+
+                        _snap_name = g_strdup (snap_name_env);
+                        g_debug ("SNAP name: %s", _snap_name);
+                }
+
+                g_once_init_leave (&snap_name_set, TRUE);
+        }
+
+        return _snap_name;
+}
+
+const char *
+_notify_get_snap_app (void)
+{
+        static gsize snap_app_set = FALSE;
+
+        if (g_once_init_enter (&snap_app_set)) {
+                _initialize_snap_names ();
+                g_once_init_leave (&snap_app_set, TRUE);
+        }
+
+        return _snap_app;
 }
 
 /**
@@ -218,6 +369,12 @@ notify_uninit (void)
             g_object_unref (_proxy);
             _proxy = NULL;
         }
+
+        g_free (_snap_name);
+        _snap_name = NULL;
+
+        g_free (_snap_app);
+        _snap_app = NULL;
 
         _initted = FALSE;
 }
