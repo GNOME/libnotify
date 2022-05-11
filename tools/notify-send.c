@@ -283,10 +283,6 @@ main (int argc, char *argv[])
 
         setlocale (LC_ALL, "");
 
-#ifndef GLIB_VERSION_2_36
-        g_type_init ();
-#endif
-
         g_set_prgname (argv[0]);
         g_log_set_always_fatal (G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL);
 

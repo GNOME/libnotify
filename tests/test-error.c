@@ -29,10 +29,6 @@ main ()
 {
         NotifyNotification *n;
 
-#ifndef GLIB_VERSION_2_36
-        g_type_init ();
-#endif
-
         notify_init ("Error Handling");
 
         n = notify_notification_new ("Summary", "Content", NULL);

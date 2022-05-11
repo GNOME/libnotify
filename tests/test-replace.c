@@ -28,10 +28,6 @@ main ()
         GError             *error;
         error = NULL;
 
-#ifndef GLIB_VERSION_2_36
-        g_type_init ();
-#endif
-
         notify_init ("Replace Test");
 
         n = notify_notification_new ("Summary",

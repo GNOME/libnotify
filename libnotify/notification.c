@@ -707,9 +707,7 @@ notify_notification_show (NotifyNotification *notification,
         GHashTableIter             iter;
         gpointer                   key, data;
         GVariant                  *result;
-#ifdef GLIB_VERSION_2_32
         GApplication              *application = NULL;
-#endif
 
         g_return_val_if_fail (notification != NULL, FALSE);
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
@@ -763,7 +761,6 @@ notify_notification_show (NotifyNotification *notification,
                                        g_variant_new_take_string (snap_desktop));
         }
 
-#ifdef GLIB_VERSION_2_32
         if (!_notify_get_snap_app ()) {
                 application = g_application_get_default ();
         }
@@ -779,7 +776,6 @@ notify_notification_show (NotifyNotification *notification,
                                        g_variant_new_string (application_id));
             }
         }
-#endif
 
         /* TODO: make this nonblocking */
         result = g_dbus_proxy_call_sync (proxy,

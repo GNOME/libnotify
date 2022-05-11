@@ -166,27 +166,19 @@ notify_init (const char *app_name)
                 return TRUE;
 
         if (app_name == NULL) {
-#ifdef GLIB_VERSION_2_32
                 GApplication *application;
-#endif
 
                 app_name = _notify_get_snap_app ();
 
-#ifdef GLIB_VERSION_2_32
                 if (app_name == NULL &&
                     (application = g_application_get_default ())) {
                         app_name = g_application_get_application_id (application);
                 }
-#endif
         }
 
         if (!set_app_name (app_name)) {
                 return FALSE;
         }
-
-#ifndef GLIB_VERSION_2_36
-        g_type_init ();
-#endif
 
         _initted = TRUE;
 
