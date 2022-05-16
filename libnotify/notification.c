@@ -592,6 +592,53 @@ notify_notification_update (NotifyNotification *notification,
         return TRUE;
 }
 
+static gboolean
+activate_action (NotifyNotification *notification,
+                 const gchar        *action)
+{
+        CallbackPair *pair;
+
+        pair = g_hash_table_lookup (notification->priv->action_map, action);
+
+        if (!pair) {
+                return FALSE;
+        }
+
+        /* Some clients have assumed it is safe to unref the
+         * Notification at the end of their NotifyActionCallback
+         * so we add a temporary ref until we're done with it.
+         */
+        g_object_ref (notification);
+
+        notification->priv->activating = TRUE;
+        pair->cb (notification, (char *) action, pair->user_data);
+        notification->priv->activating = FALSE;
+        g_free (notification->priv->activation_token);
+        notification->priv->activation_token = NULL;
+
+        g_object_unref (notification);
+
+        return TRUE;
+}
+
+static gboolean
+close_notification (NotifyNotification *notification,
+                    NotifyClosedReason  reason)
+{
+        if (notification->priv->closed_reason != NOTIFY_CLOSED_REASON_UNSET ||
+            reason == NOTIFY_CLOSED_REASON_UNSET) {
+                return FALSE;
+        }
+
+        g_object_ref (G_OBJECT (notification));
+        notification->priv->closed_reason = reason;
+        g_signal_emit (notification, signals[SIGNAL_CLOSED], 0);
+        notification->priv->id = 0;
+        g_object_unref (G_OBJECT (notification));
+
+        return TRUE;
+}
+
 static void
 proxy_g_signal_cb (GDBusProxy *proxy,
                    const char *sender_name,
@@ -609,43 +656,20 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                 if (id != notification->priv->id)
                         return;
 
-                g_object_ref (G_OBJECT (notification));
-                notification->priv->closed_reason = reason;
-                g_signal_emit (notification, signals[SIGNAL_CLOSED], 0);
-                notification->priv->id = 0;
-                g_object_unref (G_OBJECT (notification));
+                close_notification (notification, reason);
         } else if (g_strcmp0 (signal_name, "ActionInvoked") == 0 &&
                    g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(us)"))) {
                 guint32 id;
                 const char *action;
-                CallbackPair *pair;
 
                 g_variant_get (parameters, "(u&s)", &id, &action);
 
                 if (id != notification->priv->id)
                         return;
 
-                pair = (CallbackPair *) g_hash_table_lookup (notification->priv->action_map,
-                                                            action);
-
-                if (pair == NULL) {
-                        if (g_ascii_strcasecmp (action, "default")) {
-                                g_warning ("Received unknown action %s", action);
-                        }
-                } else {
-                        /* Some clients have assumed it is safe to unref the
-                         * Notification at the end of their NotifyActionCallback
-                         * so we add a temporary ref until we're done with it.
-                         */
-                        g_object_ref (notification);
-
-                        notification->priv->activating = TRUE;
-                        pair->cb (notification, (char *) action, pair->user_data);
-                        notification->priv->activating = FALSE;
-                        g_free (notification->priv->activation_token);
-                        notification->priv->activation_token = NULL;
-
-                        g_object_unref (notification);
+                if (!activate_action (notification, action) &&
+                    g_ascii_strcasecmp (action, "default")) {
+                        g_warning ("Received unknown action %s", action);
                 }
         } else if (g_strcmp0 (signal_name, "ActivationToken") == 0 &&
                    g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(us)"))) {
