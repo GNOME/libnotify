@@ -234,9 +234,9 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                          g_param_spec_int ("closed-reason",
                                                            "Closed Reason",
                                                            "The reason code for why the notification was closed",
-                                                           -1,
+                                                           NOTIFY_CLOSED_REASON_UNSET,
                                                            G_MAXINT32,
-                                                           -1,
+                                                           NOTIFY_CLOSED_REASON_UNSET,
                                                            G_PARAM_READABLE
                                                            | G_PARAM_STATIC_NAME
                                                            | G_PARAM_STATIC_NICK
@@ -357,7 +357,7 @@ notify_notification_init (NotifyNotification *obj)
 {
         obj->priv = g_new0 (NotifyNotificationPrivate, 1);
         obj->priv->timeout = NOTIFY_EXPIRES_DEFAULT;
-        obj->priv->closed_reason = -1;
+        obj->priv->closed_reason = NOTIFY_CLOSED_REASON_UNSET;
         obj->priv->hints = g_hash_table_new_full (g_str_hash,
                                                   g_str_equal,
                                                   g_free,
@@ -1361,13 +1361,17 @@ notify_notification_close (NotifyNotification *notification,
  * Returns the closed reason code for the notification. This is valid only
  * after the "closed" signal is emitted.
  *
- * Returns: The closed reason code.
+ * Since version 0.8.0 the returned value is of type #NotifyClosedReason.
+ *
+ * Returns: An integer representing the closed reason code
+ *  (Since 0.8.0 it's also a #NotifyClosedReason).
  */
 gint
 notify_notification_get_closed_reason (const NotifyNotification *notification)
 {
-        g_return_val_if_fail (notification != NULL, -1);
-        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), -1);
+        g_return_val_if_fail (notification != NULL, NOTIFY_CLOSED_REASON_UNSET);
+        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification),
+                              NOTIFY_CLOSED_REASON_UNSET);
 
         return notification->priv->closed_reason;
 }

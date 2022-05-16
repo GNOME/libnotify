@@ -4,6 +4,7 @@ NOTIFY_EXPIRES_DEFAULT
 NOTIFY_EXPIRES_NEVER
 <TITLE>NotifyNotification</TITLE>
 NotifyNotification
+NotifyClosedReason
 NotifyUrgency
 NotifyActionCallback
 NOTIFY_ACTION_CALLBACK

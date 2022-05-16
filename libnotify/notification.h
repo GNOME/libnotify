@@ -93,6 +93,29 @@ typedef enum
 
 } NotifyUrgency;
 
+
+/**
+ * NotifyClosedReason:
+ * @NOTIFY_CLOSED_REASON_UNSET: Notification not closed.
+ * @NOTIFY_CLOSED_REASON_EXPIRED: Timeout has expired.
+ * @NOTIFY_CLOSED_REASON_DISMISSED: It has been dismissed by the user.
+ * @NOTIFY_CLOSED_REASON_API_REQUEST: It has been closed by a call to
+ *   notify_notification_close().
+ * @NOTIFY_CLOSED_REASON_UNDEFIEND: Closed by undefined/reserved reasons.
+ *
+ * The reason for which the notification has been closed.
+ *
+ * Since: 0.8.0
+ */
+typedef enum
+{
+        NOTIFY_CLOSED_REASON_UNSET = -1,
+        NOTIFY_CLOSED_REASON_EXPIRED = 1,
+        NOTIFY_CLOSED_REASON_DISMISSED = 2,
+        NOTIFY_CLOSED_REASON_API_REQUEST = 3,
+        NOTIFY_CLOSED_REASON_UNDEFIEND = 4,
+} NotifyClosedReason;
+
 /**
  * NotifyActionCallback:
  * @notification: a #NotifyActionCallback notification
