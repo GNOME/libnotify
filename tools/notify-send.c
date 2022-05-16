@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
+#include <glib-unix.h>
 #include <glib/gprintf.h>
 
 #define N_(x) (x)
@@ -146,6 +147,19 @@ handle_closed (NotifyNotification *notify,
                gpointer            user_data)
 {
         g_main_loop_quit (loop);
+}
+
+static gboolean
+on_sigint (gpointer data)
+{
+        NotifyNotification *notification = data;
+
+        g_printerr ("Wait cancelled, closing notification\n");
+
+        notify_notification_close (notification, NULL);
+        g_main_loop_quit (loop);
+
+        return FALSE;
 }
 
 static void
@@ -458,6 +472,7 @@ main (int argc, char *argv[])
         }
 
         if (wait) {
+                g_unix_signal_add (SIGINT, on_sigint, notify);
                 loop = g_main_loop_new (NULL, FALSE);
                 g_main_loop_run (loop);
                 g_main_loop_unref (loop);
