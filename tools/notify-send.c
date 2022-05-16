@@ -203,6 +203,10 @@ main (int argc, char *argv[])
         static char       **n_text = NULL;
         static char       **hints = NULL;
         static char       **actions = NULL;
+        static char        *server_name = NULL;
+        static char        *server_vendor = NULL;
+        static char        *server_version = NULL;
+        static char        *server_spec_version = NULL;
         static gboolean     print_id = FALSE;
         static gint         notification_id = 0;
         static gboolean     do_version = FALSE;
@@ -309,6 +313,18 @@ main (int argc, char *argv[])
 
         if (!notify_init ("notify-send"))
                 exit (1);
+
+        notify_get_server_info (&server_name,
+                                &server_vendor,
+                                &server_version,
+                                &server_spec_version);
+
+        g_debug ("Using sever %s %s, v%s - Supporting Notification Spec %s",
+                 server_name, server_vendor, server_version, server_spec_version);
+        g_free (server_name);
+        g_free (server_vendor);
+        g_free (server_version);
+        g_free (server_spec_version);
 
         notify = g_object_new (NOTIFY_TYPE_NOTIFICATION,
                                "summary", summary,
