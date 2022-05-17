@@ -121,6 +121,18 @@ _notify_update_spec_version (GError **error)
        return TRUE;
 }
 
+static gboolean
+set_app_name (const char *app_name)
+{
+        g_return_val_if_fail (app_name != NULL, FALSE);
+        g_return_val_if_fail (*app_name != '\0', FALSE);
+
+        g_free (_app_name);
+        _app_name = g_strdup (app_name);
+
+        return TRUE;
+}
+
 
 /**
  * notify_set_app_name:
@@ -132,24 +144,24 @@ _notify_update_spec_version (GError **error)
 void
 notify_set_app_name (const char *app_name)
 {
-        g_free (_app_name);
-        _app_name = g_strdup (app_name);
+        set_app_name (app_name);
 }
 
 /**
  * notify_init:
- * @app_name: The name of the application initializing libnotify.
+ * @app_name: (nullable): The name of the application initializing libnotify.
  *
  * Initialized libnotify. This must be called before any other functions.
+ *
+ * Starting from 0.8, if the provided @app_name is %NULL, libnotify will
+ * try to figure it out from the running application.
+ * Before it was not allowed, and was causing libnotify not to be initialized.
  *
  * Returns: %TRUE if successful, or %FALSE on error.
  */
 gboolean
 notify_init (const char *app_name)
 {
-        g_return_val_if_fail (app_name != NULL, FALSE);
-        g_return_val_if_fail (*app_name != '\0', FALSE);
-
         if (_initted)
                 return TRUE;
 
@@ -168,7 +180,9 @@ notify_init (const char *app_name)
 #endif
         }
 
-        notify_set_app_name (app_name);
+        if (!set_app_name (app_name)) {
+                return FALSE;
+        }
 
 #ifndef GLIB_VERSION_2_36
         g_type_init ();
