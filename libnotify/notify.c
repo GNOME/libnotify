@@ -191,6 +191,9 @@ notify_init (const char *app_name)
                 GApplication *application;
 
                 app_name = _notify_get_snap_app ();
+                if (app_name == NULL) {
+                        app_name = _notify_get_flatpak_app ();
+                }
 
                 if (app_name == NULL &&
                     (application = g_application_get_default ())) {
