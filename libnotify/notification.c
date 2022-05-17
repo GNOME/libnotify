@@ -53,6 +53,7 @@
 static void     notify_notification_class_init (NotifyNotificationClass *klass);
 static void     notify_notification_init       (NotifyNotification *sp);
 static void     notify_notification_finalize   (GObject            *object);
+static void     notify_notification_dispose    (GObject            *object);
 
 typedef struct
 {
@@ -72,6 +73,7 @@ struct _NotifyNotificationPrivate
 
         /* NULL to use icon data. Anything else to have server lookup icon */
         char           *icon_name;
+        GdkPixbuf      *icon_pixbuf;
 
         /*
          * -1   = use server default
@@ -79,6 +81,7 @@ struct _NotifyNotificationPrivate
          *  > 0 = Number of milliseconds before we timeout
          */
         gint            timeout;
+        guint           portal_timeout_id;
 
         GSList         *actions;
         GHashTable     *action_map;
@@ -150,6 +153,7 @@ notify_notification_class_init (NotifyNotificationClass *klass)
         object_class->constructor = notify_notification_constructor;
         object_class->get_property = notify_notification_get_property;
         object_class->set_property = notify_notification_set_property;
+        object_class->dispose = notify_notification_dispose;
         object_class->finalize = notify_notification_finalize;
 
         /**
@@ -370,6 +374,22 @@ notify_notification_init (NotifyNotification *obj)
 }
 
 static void
+notify_notification_dispose (GObject *object)
+{
+        NotifyNotification        *obj = NOTIFY_NOTIFICATION (object);
+        NotifyNotificationPrivate *priv = obj->priv;
+
+        if (priv->portal_timeout_id) {
+                g_source_remove (priv->portal_timeout_id);
+                priv->portal_timeout_id = 0;
+        }
+
+        g_clear_object (&priv->icon_pixbuf);
+
+        G_OBJECT_CLASS (parent_class)->dispose (object);
+}
+
+static void
 notify_notification_finalize (GObject *object)
 {
         NotifyNotification        *obj = NOTIFY_NOTIFICATION (object);
@@ -403,6 +423,18 @@ notify_notification_finalize (GObject *object)
         g_free (obj->priv);
 
         G_OBJECT_CLASS (parent_class)->finalize (object);
+}
+
+static gboolean
+maybe_warn_portal_unsupported_feature (const char *feature_name)
+{
+        if (!_notify_uses_portal_notifications ()) {
+                return FALSE;
+        }
+
+        g_message ("%s is not available when using Portal Notifications",
+                   feature_name);
+        return TRUE;
 }
 
 /**
@@ -592,6 +624,33 @@ notify_notification_update (NotifyNotification *notification,
         return TRUE;
 }
 
+static char *
+get_portal_notification_id (NotifyNotification *notification)
+{
+        char *app_id;
+        char *notification_id;
+
+        g_assert (_notify_uses_portal_notifications ());
+
+        if (_notify_get_snap_name ()) {
+                app_id = g_strdup_printf ("snap.%s_%s",
+                                          _notify_get_snap_name (),
+                                          _notify_get_snap_app ());
+        } else {
+                app_id = g_strdup_printf ("flatpak.%s",
+                                          _notify_get_flatpak_app ());
+        }
+
+        notification_id = g_strdup_printf ("libnotify-%s-%s-%u",
+                                           app_id,
+                                           notify_get_app_name (),
+                                           notification->priv->id);
+
+        g_free (app_id);
+
+        return notification_id;
+}
+
 static gboolean
 activate_action (NotifyNotification *notification,
                  const gchar        *action)
@@ -646,7 +705,11 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                    GVariant   *parameters,
                    NotifyNotification *notification)
 {
+        const char *interface;
+
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+
+        interface = g_dbus_proxy_get_interface_name (proxy);
 
         if (g_strcmp0 (signal_name, "NotificationClosed") == 0 &&
             g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(uu)"))) {
@@ -658,6 +721,7 @@ proxy_g_signal_cb (GDBusProxy *proxy,
 
                 close_notification (notification, reason);
         } else if (g_strcmp0 (signal_name, "ActionInvoked") == 0 &&
+                   g_str_equal (interface, NOTIFY_DBUS_CORE_INTERFACE) &&
                    g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(us)"))) {
                 guint32 id;
                 const char *action;
@@ -683,7 +747,304 @@ proxy_g_signal_cb (GDBusProxy *proxy,
 
                 g_free (notification->priv->activation_token);
                 notification->priv->activation_token = g_strdup (activation_token);
+        } else if (g_str_equal (signal_name, "ActionInvoked") &&
+                   g_str_equal (interface, NOTIFY_PORTAL_DBUS_CORE_INTERFACE) &&
+                   g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(ssav)"))) {
+                char *notification_id;
+                const char *id;
+                const char *action;
+                GVariant *parameter;
+
+                g_variant_get (parameters, "(&s&s@av)", &id, &action, &parameter);
+                g_variant_unref (parameter);
+
+                notification_id = get_portal_notification_id (notification);
+
+                if (!g_str_equal (notification_id, id)) {
+                        g_free (notification_id);
+                        return;
+                }
+
+                if (!activate_action (notification, action) &&
+                    g_str_equal (action, "default-action") &&
+                    !_notify_get_snap_app ()) {
+                        g_warning ("Received unknown action %s", action);
+                }
+
+                close_notification (notification, NOTIFY_CLOSED_REASON_DISMISSED);
+
+                g_free (notification_id);
+        } else {
+                g_debug ("Unhandled signal '%s.%s'", interface, signal_name);
         }
+}
+
+static gboolean
+remove_portal_notification (GDBusProxy         *proxy,
+                            NotifyNotification *notification,
+                            NotifyClosedReason  reason,
+                            GError            **error)
+{
+        GVariant *ret;
+        gchar *notification_id;
+
+        if (notification->priv->portal_timeout_id) {
+                g_source_remove (notification->priv->portal_timeout_id);
+                notification->priv->portal_timeout_id = 0;
+        }
+
+        notification_id = get_portal_notification_id (notification);
+
+        ret = g_dbus_proxy_call_sync (proxy,
+                                      "RemoveNotification",
+                                      g_variant_new ("(s)", notification_id),
+                                      G_DBUS_CALL_FLAGS_NONE,
+                                      -1,
+                                      NULL,
+                                      error);
+
+        g_free (notification_id);
+
+        if (!ret) {
+                return FALSE;
+        }
+
+        close_notification (notification, reason);
+
+        g_variant_unref (ret);
+
+        return TRUE;
+}
+
+static gboolean
+on_portal_timeout (gpointer data)
+{
+        NotifyNotification *notification = data;
+        GDBusProxy *proxy;
+
+        notification->priv->portal_timeout_id = 0;
+
+        proxy = _notify_get_proxy (NULL);
+        if (proxy == NULL) {
+                return FALSE;
+        }
+
+        remove_portal_notification (proxy, notification,
+                                    NOTIFY_CLOSED_REASON_EXPIRED, NULL);
+        return FALSE;
+}
+
+static GIcon *
+get_notification_gicon (NotifyNotification  *notification,
+                        GError             **error)
+{
+        NotifyNotificationPrivate *priv = notification->priv;
+        GFileInputStream *input;
+        GFile *file = NULL;
+        GIcon *gicon = NULL;
+
+        if (priv->icon_pixbuf) {
+                return G_ICON (g_object_ref (priv->icon_pixbuf));
+        }
+
+        if (!priv->icon_name) {
+                return NULL;
+        }
+
+        if (strstr (priv->icon_name, "://")) {
+                file = g_file_new_for_uri (priv->icon_name);
+        } else if (g_file_test (priv->icon_name, G_FILE_TEST_EXISTS)) {
+                file = g_file_new_for_path (priv->icon_name);
+        } else {
+                gicon = g_themed_icon_new (priv->icon_name);
+        }
+
+        if (!file) {
+                return gicon;
+        }
+
+        input = g_file_read (file, NULL, error);
+
+        if (input) {
+                GByteArray *bytes_array = g_byte_array_new ();
+                guint8 buf[1024];
+
+                while (TRUE) {
+                        gssize read;
+
+                        read = g_input_stream_read (G_INPUT_STREAM (input),
+                                                    buf,
+                                                    G_N_ELEMENTS (buf),
+                                                    NULL, NULL);
+
+                        if (read > 0) {
+                                g_byte_array_append (bytes_array, buf, read);
+                        } else {
+                                if (read < 0) {
+                                        g_byte_array_unref (bytes_array);
+                                        bytes_array = NULL;
+                                }
+
+                                break;
+                        }
+                }
+
+                if (bytes_array && bytes_array->len) {
+                        GBytes *bytes;
+
+                        bytes = g_byte_array_free_to_bytes (bytes_array);
+                        bytes_array = NULL;
+
+                        gicon = g_bytes_icon_new (bytes);
+                } else if (bytes_array) {
+                        g_byte_array_unref (bytes_array);
+                }
+        }
+
+        g_clear_object (&input);
+        g_clear_object (&file);
+
+        return gicon;
+}
+
+static gboolean
+add_portal_notification (GDBusProxy         *proxy,
+                         NotifyNotification *notification,
+                         GError            **error)
+{
+        GIcon *icon;
+        GVariant *urgency;
+        GVariant *ret;
+        GVariantBuilder builder;
+        NotifyNotificationPrivate *priv = notification->priv;
+        GError *local_error = NULL;
+        static guint32 portal_notification_count = 0;
+        char *notification_id;
+
+        g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
+
+        g_variant_builder_add (&builder, "{sv}", "title",
+                               g_variant_new_string (priv->summary ? priv->summary : ""));
+        g_variant_builder_add (&builder, "{sv}", "body",
+                               g_variant_new_string (priv->body ? priv->body : ""));
+
+        if (g_hash_table_lookup (priv->action_map, "default")) {
+                g_variant_builder_add (&builder, "{sv}", "default-action",
+                                       g_variant_new_string ("default"));
+        } else if (g_hash_table_lookup (priv->action_map, "DEFAULT")) {
+                g_variant_builder_add (&builder, "{sv}", "default-action",
+                                       g_variant_new_string ("DEFAULT"));
+        } else if (_notify_get_snap_app ()) {
+                /* In the snap case we may need to ensure that a default-action
+                 * is set to ensure that we will use the FDO notification daemon
+                 * and won't fallback to GTK one, as app-id won't match.
+                 * See: https://github.com/flatpak/xdg-desktop-portal/issues/769
+                 */
+                g_variant_builder_add (&builder, "{sv}", "default-action",
+                                       g_variant_new_string ("snap-fake-default-action"));
+        }
+
+        if (priv->has_nondefault_actions) {
+                GVariantBuilder buttons;
+                GSList *l;
+
+                g_variant_builder_init (&buttons, G_VARIANT_TYPE ("aa{sv}"));
+
+                for (l = priv->actions; l && l->next; l = l->next->next) {
+                        GVariantBuilder button;
+                        const char *action;
+                        const char *label;
+
+                        g_variant_builder_init (&button, G_VARIANT_TYPE_VARDICT);
+
+                        action = l->data;
+                        label = l->next->data;
+
+                        g_variant_builder_add (&button, "{sv}", "action",
+                                               g_variant_new_string (action));
+                        g_variant_builder_add (&button, "{sv}", "label",
+                                               g_variant_new_string (label));
+
+                        g_variant_builder_add (&buttons, "@a{sv}",
+                                               g_variant_builder_end (&button));
+                }
+
+                g_variant_builder_add (&builder, "{sv}", "buttons",
+                                       g_variant_builder_end (&buttons));
+        }
+
+        urgency = g_hash_table_lookup (notification->priv->hints, "urgency");
+        if (urgency) {
+                switch (g_variant_get_byte (urgency)) {
+                case NOTIFY_URGENCY_LOW:
+                        g_variant_builder_add (&builder, "{sv}", "priority",
+                                               g_variant_new_string ("low"));
+                        break;
+                case NOTIFY_URGENCY_NORMAL:
+                        g_variant_builder_add (&builder, "{sv}", "priority",
+                                               g_variant_new_string ("normal"));
+                        break;
+                case NOTIFY_URGENCY_CRITICAL:
+                        g_variant_builder_add (&builder, "{sv}", "priority",
+                                               g_variant_new_string ("urgent"));
+                        break;
+                default:
+                        g_warn_if_reached ();
+                }
+        }
+
+        icon = get_notification_gicon (notification, &local_error);
+        if (icon) {
+                GVariant *serialized_icon = g_icon_serialize (icon);
+
+                g_variant_builder_add (&builder, "{sv}", "icon",
+                                       serialized_icon);
+                g_variant_unref (serialized_icon);
+                g_clear_object (&icon);
+        } else if (local_error) {
+                g_propagate_error (error, local_error);
+                return FALSE;
+        }
+
+        if (!priv->id) {
+                priv->id = ++portal_notification_count;
+        } else if (priv->closed_reason == NOTIFY_CLOSED_REASON_UNSET) {
+                remove_portal_notification (proxy, notification,
+                                            NOTIFY_CLOSED_REASON_UNSET, NULL);
+        }
+
+        notification_id = get_portal_notification_id (notification);
+
+        ret = g_dbus_proxy_call_sync (proxy,
+                                      "AddNotification",
+                                      g_variant_new ("(s@a{sv})",
+                                                     notification_id,
+                                                     g_variant_builder_end (&builder)),
+                                      G_DBUS_CALL_FLAGS_NONE,
+                                      -1,
+                                      NULL,
+                                      error);
+
+        if (priv->portal_timeout_id) {
+                g_source_remove (priv->portal_timeout_id);
+                priv->portal_timeout_id = 0;
+        }
+
+        g_free (notification_id);
+
+        if (!ret) {
+                return FALSE;
+        }
+
+        if (priv->timeout > 0) {
+                priv->portal_timeout_id = g_timeout_add (priv->timeout,
+                                                         on_portal_timeout,
+                                                         notification);
+        }
+
+        g_variant_unref (ret);
+
+        return TRUE;
 }
 
 /**
@@ -729,6 +1090,10 @@ notify_notification_show (NotifyNotification *notification,
                                                                "g-signal",
                                                                G_CALLBACK (proxy_g_signal_cb),
                                                                notification);
+        }
+
+        if (_notify_uses_portal_notifications ()) {
+                return add_portal_notification (proxy, notification, error);
         }
 
         g_variant_builder_init (&actions_builder, G_VARIANT_TYPE ("as"));
@@ -854,6 +1219,10 @@ notify_notification_set_category (NotifyNotification *notification,
         g_return_if_fail (notification != NULL);
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
+        if (maybe_warn_portal_unsupported_feature ("Category")) {
+                return;
+        }
+
         if (category != NULL && category[0] != '\0') {
                 notify_notification_set_hint_string (notification,
                                                      "category",
@@ -931,8 +1300,15 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
                 hint_name = "icon_data";
         }
 
+        g_clear_object (&notification->priv->icon_pixbuf);
+
         if (pixbuf == NULL) {
                 notify_notification_set_hint (notification, hint_name, NULL);
+                return;
+        }
+
+        if (_notify_uses_portal_notifications ()) {
+                notification->priv->icon_pixbuf = g_object_ref (pixbuf);
                 return;
         }
 
@@ -1058,6 +1434,10 @@ notify_notification_set_app_name (NotifyNotification *notification,
                                   const char         *app_name)
 {
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+
+        if (maybe_warn_portal_unsupported_feature ("App Name")) {
+                return;
+        }
 
         g_free (notification->priv->app_name);
         notification->priv->app_name = g_strdup (app_name);
@@ -1355,6 +1735,12 @@ notify_notification_close (NotifyNotification *notification,
         proxy = _notify_get_proxy (error);
         if (proxy == NULL) {
                 return FALSE;
+        }
+
+        if (_notify_uses_portal_notifications ()) {
+                return remove_portal_notification (proxy, notification,
+                                                   NOTIFY_CLOSED_REASON_API_REQUEST,
+                                                   error);
         }
 
         /* FIXME: make this nonblocking! */

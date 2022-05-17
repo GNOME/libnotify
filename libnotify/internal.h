@@ -26,6 +26,10 @@
 #define NOTIFY_DBUS_CORE_INTERFACE "org.freedesktop.Notifications"
 #define NOTIFY_DBUS_CORE_OBJECT    "/org/freedesktop/Notifications"
 
+#define NOTIFY_PORTAL_DBUS_NAME           "org.freedesktop.portal.Desktop"
+#define NOTIFY_PORTAL_DBUS_CORE_INTERFACE "org.freedesktop.portal.Notification"
+#define NOTIFY_PORTAL_DBUS_CORE_OBJECT    "/org/freedesktop/portal/desktop"
+
 G_BEGIN_DECLS
 
 GDBusProxy      * _notify_get_proxy                         (GError **error);
@@ -39,6 +43,10 @@ gboolean        _notify_check_spec_version                  (int major, int mino
 const char     * _notify_get_snap_name                      (void);
 const char     * _notify_get_snap_path                      (void);
 const char     * _notify_get_snap_app                       (void);
+
+const char     * _notify_get_flatpak_app                    (void);
+
+gboolean        _notify_uses_portal_notifications           (void);
 
 G_END_DECLS
 

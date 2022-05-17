@@ -45,10 +45,12 @@ static gboolean         _initted = FALSE;
 static char            *_app_name = NULL;
 static char            *_snap_name = NULL;
 static char            *_snap_app = NULL;
+static char            *_flatpak_app = NULL;
 static GDBusProxy      *_proxy = NULL;
 static GList           *_active_notifications = NULL;
 static int              _spec_version_major = 0;
 static int              _spec_version_minor = 0;
+static int              _portal_version = 0;
 
 gboolean
 _notify_check_spec_version (int major,
@@ -74,6 +76,26 @@ _notify_get_server_info (char **ret_name,
         proxy = _notify_get_proxy (error);
         if (proxy == NULL) {
                 return FALSE;
+        }
+
+        if (_notify_uses_portal_notifications ()) {
+                if (ret_name) {
+                        *ret_name = g_strdup ("Portal Notification");
+                }
+
+                if (ret_vendor) {
+                        *ret_vendor = g_strdup ("Freedesktop");
+                }
+
+                if (ret_version) {
+                        *ret_version = g_strdup_printf ("%u", _portal_version);
+                }
+
+                if (ret_spec_version) {
+                        *ret_spec_version = g_strdup ("1.2");
+                }
+
+                return TRUE;
         }
 
         result = g_dbus_proxy_call_sync (proxy,
@@ -327,6 +349,81 @@ _notify_get_snap_app (void)
         return _snap_app;
 }
 
+const char *
+_notify_get_flatpak_app (void)
+{
+        static gsize flatpak_app_set = FALSE;
+
+        if (g_once_init_enter (&flatpak_app_set)) {
+                GKeyFile *info = g_key_file_new ();
+
+                if (g_key_file_load_from_file (info, "/.flatpak-info",
+                                               G_KEY_FILE_NONE, NULL)) {
+                        const char *group = "Application";
+
+                        if (g_key_file_has_group (info, "Runtime")) {
+                                group = "Runtime";
+                        }
+
+                        _flatpak_app = g_key_file_get_string (info, group,
+                                                              "name", NULL);
+                }
+
+                g_key_file_free (info);
+                g_once_init_leave (&flatpak_app_set, TRUE);
+        }
+
+        return _flatpak_app;
+}
+
+static gboolean
+_notify_is_running_under_flatpak (void)
+{
+        return !!_notify_get_flatpak_app ();
+}
+
+static gboolean
+_notify_is_running_under_snap (void)
+{
+        return !!_notify_get_snap_app ();
+}
+
+static gboolean
+_notify_is_running_in_sandbox (void)
+{
+        static gsize use_portal = 0;
+        enum {
+                IGNORE_PORTAL = 1,
+                TRY_USE_PORTAL = 2,
+                FORCE_PORTAL = 3
+        };
+
+        if (g_once_init_enter (&use_portal)) {
+                if (G_UNLIKELY (g_getenv ("NOTIFY_IGNORE_PORTAL"))) {
+                        g_once_init_leave (&use_portal, IGNORE_PORTAL);
+                } else if (G_UNLIKELY (g_getenv ("NOTIFY_FORCE_PORTAL"))) {
+                        g_once_init_leave (&use_portal, FORCE_PORTAL);
+                } else {
+                        g_once_init_leave (&use_portal, TRY_USE_PORTAL);
+                }
+        }
+
+        if (use_portal == IGNORE_PORTAL) {
+                return FALSE;
+        }
+
+        return use_portal == FORCE_PORTAL ||
+               _notify_is_running_under_flatpak () ||
+               _notify_is_running_under_snap ();
+}
+
+gboolean
+_notify_uses_portal_notifications (void)
+{
+        return _portal_version != 0;
+}
+
+
 /**
  * notify_get_app_name:
  *
@@ -382,6 +479,9 @@ notify_uninit (void)
         g_free (_snap_app);
         _snap_app = NULL;
 
+        g_free (_flatpak_app);
+        _flatpak_app = NULL;
+
         _initted = FALSE;
 }
 
@@ -396,6 +496,46 @@ gboolean
 notify_is_initted (void)
 {
         return _initted;
+}
+
+GDBusProxy *
+_get_portal_proxy (GError **error)
+{
+        GError *local_error = NULL;
+        GDBusProxy *proxy;
+        GVariant *res;
+
+        proxy = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+                                               G_DBUS_PROXY_FLAGS_NONE,
+                                               NULL,
+                                               NOTIFY_PORTAL_DBUS_NAME,
+                                               NOTIFY_PORTAL_DBUS_CORE_OBJECT,
+                                               NOTIFY_PORTAL_DBUS_CORE_INTERFACE,
+                                               NULL,
+                                               &local_error);
+
+        if (proxy == NULL) {
+                g_debug ("Failed to get portal proxy: %s", local_error->message);
+                g_clear_error (&local_error);
+
+                return NULL;
+        }
+
+        res = g_dbus_proxy_get_cached_property (proxy, "version");
+        if (!res) {
+                g_object_unref (proxy);
+                return NULL;
+        }
+
+        _portal_version = g_variant_get_uint32 (res);
+        g_assert (_portal_version > 0);
+
+        g_warning ("Running in confined mode, using Portal notifications. "
+                   "Some features and hints won't be supported");
+
+        g_variant_unref (res);
+
+        return proxy;
 }
 
 /*
@@ -413,6 +553,14 @@ _notify_get_proxy (GError **error)
         if (_proxy != NULL)
                 return _proxy;
 
+        if (_notify_is_running_in_sandbox ()) {
+                _proxy = _get_portal_proxy (error);
+
+                if (_proxy != NULL) {
+                        goto out;
+                }
+        }
+
         _proxy = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
                                                 G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
                                                 NULL,
@@ -421,6 +569,8 @@ _notify_get_proxy (GError **error)
                                                 NOTIFY_DBUS_CORE_INTERFACE,
                                                 NULL,
                                                 error);
+
+out:
         if (_proxy == NULL) {
                 return NULL;
         }
@@ -456,6 +606,15 @@ notify_get_server_caps (void)
         if (proxy == NULL) {
                 g_warning ("Failed to connect to proxy");
                 return NULL;
+        }
+
+        if (_notify_uses_portal_notifications ()) {
+                list = g_list_prepend (list, g_strdup ("actions"));
+                list = g_list_prepend (list, g_strdup ("body"));
+                list = g_list_prepend (list, g_strdup ("body-images"));
+                list = g_list_prepend (list, g_strdup ("icon-static"));
+
+                return list;
         }
 
         result = g_dbus_proxy_call_sync (proxy,
