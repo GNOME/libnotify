@@ -1694,11 +1694,9 @@ const char *
 notify_notification_get_activation_token (NotifyNotification *notification)
 {
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), NULL);
+        g_return_val_if_fail (notification->priv->activating, NULL);
 
-        if (notification->priv->activating)
-                return notification->priv->activation_token;
-
-        return NULL;
+        return notification->priv->activation_token;
 }
 
 gboolean
