@@ -1385,6 +1385,7 @@ notify_notification_add_action (NotifyNotification  *notification,
 
 /**
  * notify_notification_get_activation_token:
+ * @notification: The notification.
  *
  * If an an action is currently being activated, return the activation token.
  * This function is intended to be used in a #NotifyActionCallback to get
