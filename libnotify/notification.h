@@ -55,6 +55,11 @@ typedef struct _NotifyNotification NotifyNotification;
 typedef struct _NotifyNotificationClass NotifyNotificationClass;
 typedef struct _NotifyNotificationPrivate NotifyNotificationPrivate;
 
+/**
+ * NotifyNotification:
+ *
+ * A passive pop-up notification.
+ */
 struct _NotifyNotification
 {
         /*< private >*/
