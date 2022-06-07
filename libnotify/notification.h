@@ -90,9 +90,9 @@ typedef enum
 
 /**
  * NotifyActionCallback:
- * @notification:
- * @action:
- * @user_data:
+ * @notification: a #NotifyActionCallback notification
+ * @action: (transfer none): The activated action name
+ * @user_data: (nullable) (transfer none): User provided data
  *
  * An action callback function.
  */
