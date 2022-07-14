@@ -3,6 +3,7 @@ variables:
 
 stages:
   - build
+  - deploy
 
 build:ubuntu:
   stage: build
@@ -11,7 +12,6 @@ build:ubuntu:
     - apt-get update &&
     - apt-get install -q -y --no-install-recommends
         gobject-introspection
-        gtk-doc-tools
         libgdk-pixbuf2.0-dev
         libgirepository1.0-dev
         libglib2.0-dev
@@ -23,15 +23,26 @@ build:ubuntu:
         python3-setuptools
         xsltproc
         docbook-xsl-ns
-    - pip3 install meson
+    - pip3 install meson gi-docgen
   script:
     - meson _build -Ddocbook_docs=enabled
     - ninja -C _build install
+    - mv _build/docs/reference/libnotify-0 _reference
   artifacts:
     expose_as: "Build artifacts"
     paths:
       - _build/docs/notification-spec.html
-      - _build/docs/reference/html
-      - _build/docs/reference/html/index.html
+      - _reference
       - _build/meson-logs
 
+pages:
+  stage: deploy
+  script:
+    - mkdir public
+    - mv _reference/* public/
+  artifacts:
+    when: on_success
+    paths:
+      - public
+  # https://github.com/linux-test-project/lcov/issues/58
+  allow_failure: true

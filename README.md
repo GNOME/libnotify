@@ -10,6 +10,10 @@ or display some form of information without getting in the user's way.
 It is also a simple wrapper to send cross-desktop Notifications for sandboxed
 applications using the [XDG Portal Notification API][portal].
 
+### Documentation
+
+You can find the nightly documentation at https://gnome.pages.gitlab.gnome.org/libnotify/.
+
 ## Notice
 
 For GLib based applications the [GNotification][gnotif] API should be used
