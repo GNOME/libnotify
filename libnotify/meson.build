@@ -72,7 +72,7 @@ introspection = get_option('introspection')
 g_ir_scanner = find_program('g-ir-scanner', required: introspection.enabled())
 
 if g_ir_scanner.found() and not introspection.disabled()
-  gnome.generate_gir(libnotify_lib,
+  libnotify_gir = gnome.generate_gir(libnotify_lib,
     sources: headers + sources + enum_types,
     namespace: 'Notify',
     nsversion: MODULE_VERSION,

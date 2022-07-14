@@ -39,8 +39,9 @@ G_BEGIN_DECLS
 /**
  * NOTIFY_EXPIRES_NEVER:
  *
- * The notification never expires. It stays open until closed by the calling API
- * or the user.
+ * The notification never expires.
+ *
+ * It stays open until closed by the calling API or the user.
  */
 #define NOTIFY_EXPIRES_NEVER    0
 
@@ -100,7 +101,7 @@ typedef enum
  * @NOTIFY_CLOSED_REASON_EXPIRED: Timeout has expired.
  * @NOTIFY_CLOSED_REASON_DISMISSED: It has been dismissed by the user.
  * @NOTIFY_CLOSED_REASON_API_REQUEST: It has been closed by a call to
- *   notify_notification_close().
+ *   [method@Notify.close].
  * @NOTIFY_CLOSED_REASON_UNDEFIEND: Closed by undefined/reserved reasons.
  *
  * The reason for which the notification has been closed.
@@ -132,8 +133,9 @@ typedef void    (*NotifyActionCallback) (NotifyNotification *notification,
  * NOTIFY_ACTION_CALLBACK:
  * @func: The function to cast.
  *
- * A convenience macro for casting a function to a #NotifyActionCallback. This
- * is much like G_CALLBACK().
+ * A convenience macro for casting a function to a [callback@ActionCallback].
+ *
+ * This is much like [func@GObject.CALLBACK].
  */
 #define NOTIFY_ACTION_CALLBACK(func) ((NotifyActionCallback)(func))
 

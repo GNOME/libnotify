@@ -35,12 +35,6 @@
 #include "internal.h"
 #include "notify-marshal.h"
 
-/**
- * SECTION:notify
- * @Short_description: Notification API
- * @Title: notify
- */
-
 static gboolean         _initted = FALSE;
 static char            *_app_name = NULL;
 static char            *_snap_name = NULL;
@@ -432,7 +426,7 @@ _notify_uses_portal_notifications (void)
  *
  * Gets the application name registered.
  *
- * Returns: The registered application name, passed to notify_init().
+ * Returns: The registered application name, passed to [func@init].
  */
 const char *
 notify_get_app_name (void)
@@ -443,7 +437,7 @@ notify_get_app_name (void)
 /**
  * notify_uninit:
  *
- * Uninitialized libnotify.
+ * Uninitializes libnotify.
  *
  * This should be called when the program no longer needs libnotify for
  * the rest of its lifecycle, typically just before exitting.
@@ -592,10 +586,12 @@ out:
 /**
  * notify_get_server_caps:
  *
- * Synchronously queries the server for its capabilities and returns them in a #GList.
+ * Queries the server capabilities.
  *
- * Returns: (transfer full) (element-type utf8): a #GList of server capability strings. Free
- *   the list elements with g_free() and the list itself with g_list_free().
+ * Synchronously queries the server for its capabilities and returns them in a
+ * list.
+ *
+ * Returns: (transfer full) (element-type utf8): a list of server capability strings.
  */
 GList *
 notify_get_server_caps (void)
@@ -654,12 +650,14 @@ notify_get_server_caps (void)
  * @ret_version: (out) (allow-none) (transfer full): a location to store the server version, or %NULL
  * @ret_spec_version: (out) (allow-none) (transfer full): a location to store the version the service is compliant with, or %NULL
  *
- * Synchronously queries the server for its information, specifically, the name, vendor,
- * server version, and the version of the notifications specification that it
- * is compliant with.
+ * Queries the server for information.
+ *
+ * Synchronously queries the server for its information, specifically, the name,
+ * vendor, server version, and the version of the notifications specification
+ * that it is compliant with.
  *
  * Returns: %TRUE if successful, and the variables passed will be set, %FALSE
- *          on error. The returned strings must be freed with g_free
+ *   on error. The returned strings must be freed with g_free
  */
 gboolean
 notify_get_server_info (char **ret_name,

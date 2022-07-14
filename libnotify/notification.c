@@ -30,9 +30,9 @@
 
 
 /**
- * SECTION:notification
- * @Short_description: A passive pop-up notification.
- * @Title: NotifyNotification
+ * NotifyNotification:
+ *
+ * A passive pop-up notification.
  *
  * #NotifyNotification represents a passive pop-up notification. It can
  * contain summary text, body text, and an icon, as well as hints specifying
@@ -173,6 +173,11 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                               G_TYPE_NONE,
                               0);
 
+        /**
+         * NotifyNotification:id:
+         *
+         * The Id of the notification.
+         */
         g_object_class_install_property (object_class,
                                          PROP_ID,
                                          g_param_spec_int ("id", "ID",
@@ -186,6 +191,13 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                            | G_PARAM_STATIC_NICK
                                                            | G_PARAM_STATIC_BLURB));
 
+        /**
+         * NotifyNotification:app-name:
+         *
+         * The name of the application for the notification.
+         *
+         * Since: 0.7.3
+         */
         g_object_class_install_property (object_class,
                                          PROP_APP_NAME,
                                          g_param_spec_string ("app-name",
@@ -197,6 +209,11 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
 
+        /**
+         * NotifyNotification:summary:
+         *
+         * The summary of the notification.
+         */
         g_object_class_install_property (object_class,
                                          PROP_SUMMARY,
                                          g_param_spec_string ("summary",
@@ -209,6 +226,11 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
 
+        /**
+         * NotifyNotification:body:
+         *
+         * The body of the notification.
+         */
         g_object_class_install_property (object_class,
                                          PROP_BODY,
                                          g_param_spec_string ("body",
@@ -221,6 +243,11 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
 
+        /**
+         * NotifyNotification:icon-name:
+         *
+         * The icon-name of the icon to be displayed on the notification.
+         */
         g_object_class_install_property (object_class,
                                          PROP_ICON_NAME,
                                          g_param_spec_string ("icon-name",
@@ -233,6 +260,13 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
 
+        /**
+         * NotifyNotification:closed-reason:
+         *
+         * The closed reason of the notification.
+         *
+         * See [signal@Notification::closed].
+         */
         g_object_class_install_property (object_class,
                                          PROP_CLOSED_REASON,
                                          g_param_spec_int ("closed-reason",
@@ -443,8 +477,9 @@ maybe_warn_portal_unsupported_feature (const char *feature_name)
  * @body: (allow-none): The optional body text.
  * @icon: (allow-none): The optional icon theme icon name or filename.
  *
- * Creates a new #NotifyNotification. The summary text is required, but
- * all other parameters are optional.
+ * Creates a new #NotifyNotification.
+ *
+ * The summary text is required, but all other parameters are optional.
  *
  * Returns: The new #NotifyNotification.
  */
@@ -601,9 +636,10 @@ notify_notification_update_internal (NotifyNotification *notification,
  * @body: (allow-none): The optional body text.
  * @icon: (allow-none): The optional icon theme icon name or filename.
  *
- * Updates the notification text and icon. This won't send the update out
- * and display it on the screen. For that, you will need to call
- * notify_notification_show().
+ * Updates the notification text and icon.
+ *
+ * This won't send the update out and display it on the screen. For that, you
+ * will need to call [method@Notification.show].
  *
  * Returns: %TRUE, unless an invalid parameter was passed.
  */
@@ -1055,7 +1091,7 @@ add_portal_notification (GDBusProxy         *proxy,
  * Tells the notification server to display the notification on the screen.
  *
  * Returns: %TRUE if successful. On error, this will return %FALSE and set
- *          @error.
+ *   @error.
  */
 gboolean
 notify_notification_show (NotifyNotification *notification,
@@ -1179,9 +1215,10 @@ notify_notification_show (NotifyNotification *notification,
  * @notification: The notification.
  * @timeout: The timeout in milliseconds.
  *
- * Sets the timeout of the notification. To set the default time, pass
- * %NOTIFY_EXPIRES_DEFAULT as @timeout. To set the notification to never
- * expire, pass %NOTIFY_EXPIRES_NEVER.
+ * Sets the timeout of the notification.
+ *
+ * To set the default time, pass %NOTIFY_EXPIRES_DEFAULT as @timeout. To set the
+ * notification to never expire, pass %NOTIFY_EXPIRES_NEVER.
  *
  * Note that the timeout may be ignored by the server.
  */
@@ -1209,8 +1246,10 @@ _notify_notification_get_timeout (const NotifyNotification *notification)
  * @notification: The notification.
  * @category: The category.
  *
- * Sets the category of this notification. This can be used by the
- * notification server to filter or display the data in a certain way.
+ * Sets the category of this notification.
+ *
+ * This can be used by the notification server to filter or display the data in
+ * a certain way.
  */
 void
 notify_notification_set_category (NotifyNotification *notification,
@@ -1236,8 +1275,6 @@ notify_notification_set_category (NotifyNotification *notification,
  * @urgency: The urgency level.
  *
  * Sets the urgency level of this notification.
- *
- * See: #NotifyUrgency
  */
 void
 notify_notification_set_urgency (NotifyNotification *notification,
@@ -1257,8 +1294,8 @@ notify_notification_set_urgency (NotifyNotification *notification,
  * @icon: The icon.
  *
  * Sets the icon in the notification from a #GdkPixbuf.
- * Deprecated: use notify_notification_set_image_from_pixbuf() instead.
  *
+ * Deprecated: use [method@Notification.set_image_from_pixbuf] instead.
  */
 void
 notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
@@ -1272,8 +1309,7 @@ notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
  * @notification: The notification.
  * @pixbuf: The image.
  *
- * Sets the image in the notification from a #GdkPixbuf.
- *
+ * Sets the image in the notification from a [class@GdkPixbuf.Pixbuf].
  */
 void
 notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
@@ -1392,8 +1428,9 @@ maybe_parse_snap_hint_value (NotifyNotification *notification,
  * @key: the hint key
  * @value: (allow-none): the hint value, or %NULL to unset the hint
  *
- * Sets a hint for @key with value @value. If @value is %NULL,
- * a previously set hint for @key is unset.
+ * Sets a hint for @key with value @value.
+ *
+ * If @value is %NULL, a previously set hint for @key is unset.
  *
  * If @value is floating, it is consumed.
  *
@@ -1422,10 +1459,11 @@ notify_notification_set_hint (NotifyNotification *notification,
  * @notification: a #NotifyNotification
  * @app_name: the localised application name
  *
- * Sets the application name for the notification. If this function is
- * not called or if @app_name is %NULL, the application name will be
- * set from the value used in notify_init() or overridden with
- * notify_set_app_name().
+ * Sets the application name for the notification.
+ *
+ * If this function is not called or if @app_name is %NULL, the application name
+ * will be set from the value used in [func@init] or overridden with
+ * [func@set_app_name].
  *
  * Since: 0.7.3
  */
@@ -1453,7 +1491,7 @@ notify_notification_set_app_name (NotifyNotification *notification,
  *
  * Sets a hint with a 32-bit integer value.
  *
- * Deprecated: 0.6. Use notify_notification_set_hint() instead
+ * Deprecated: 0.6. Use [method@Notification.set_hint] instead
  */
 void
 notify_notification_set_hint_int32 (NotifyNotification *notification,
@@ -1473,7 +1511,7 @@ notify_notification_set_hint_int32 (NotifyNotification *notification,
  *
  * Sets a hint with an unsigned 32-bit integer value.
  *
- * Deprecated: 0.6. Use notify_notification_set_hint() instead
+ * Deprecated: 0.6. Use [method@Notification.set_hint] instead
  */
 void
 notify_notification_set_hint_uint32 (NotifyNotification *notification,
@@ -1492,7 +1530,7 @@ notify_notification_set_hint_uint32 (NotifyNotification *notification,
  *
  * Sets a hint with a double value.
  *
- * Deprecated: 0.6. Use notify_notification_set_hint() instead
+ * Deprecated: 0.6. Use [method@Notification.set_hint] instead
  */
 void
 notify_notification_set_hint_double (NotifyNotification *notification,
@@ -1511,7 +1549,7 @@ notify_notification_set_hint_double (NotifyNotification *notification,
  *
  * Sets a hint with a byte value.
  *
- * Deprecated: 0.6. Use notify_notification_set_hint() instead
+ * Deprecated: 0.6. Use [method@Notification.set_hint] instead
  */
 void
 notify_notification_set_hint_byte (NotifyNotification *notification,
@@ -1529,10 +1567,11 @@ notify_notification_set_hint_byte (NotifyNotification *notification,
  * @value: (array length=len): The hint's value.
  * @len: The length of the byte array.
  *
- * Sets a hint with a byte array value. The length of @value must be passed
- * as @len.
+ * Sets a hint with a byte array value.
  *
- * Deprecated: 0.6. Use notify_notification_set_hint() instead
+ * The length of @value must be passed as @len.
+ *
+ * Deprecated: 0.6. Use [method@Notification.set_hint] instead
  */
 void
 notify_notification_set_hint_byte_array (NotifyNotification *notification,
@@ -1566,7 +1605,7 @@ notify_notification_set_hint_byte_array (NotifyNotification *notification,
  *
  * Sets a hint with a string value.
  *
- * Deprecated: 0.6. Use notify_notification_set_hint() instead
+ * Deprecated: 0.6. Use [method@Notification.set_hint] instead
  */
 void
 notify_notification_set_hint_string (NotifyNotification *notification,
@@ -1638,11 +1677,12 @@ notify_notification_clear_actions (NotifyNotification *notification)
  * @callback: The action's callback function.
  * @user_data: Optional custom data to pass to @callback.
  * @free_func: (type GLib.DestroyNotify): An optional function to free @user_data when the notification
- *             is destroyed.
+ *   is destroyed.
  *
- * Adds an action to a notification. When the action is invoked, the
- * specified callback function will be called, along with the value passed
- * to @user_data.
+ * Adds an action to a notification.
+ *
+ * When the action is invoked, the specified callback function will be called,
+ * along with the value passed to @user_data.
  */
 void
 notify_notification_add_action (NotifyNotification  *notification,
@@ -1681,8 +1721,10 @@ notify_notification_add_action (NotifyNotification  *notification,
  * notify_notification_get_activation_token:
  * @notification: The notification.
  *
+ * Gets the activation token of the notification.
+ *
  * If an an action is currently being activated, return the activation token.
- * This function is intended to be used in a #NotifyActionCallback to get
+ * This function is intended to be used in a [callback@ActionCallback] to get
  * the activation token for the activated action, if the notification daemon
  * supports it.
  *
@@ -1762,13 +1804,14 @@ notify_notification_close (NotifyNotification *notification,
  * notify_notification_get_closed_reason:
  * @notification: The notification.
  *
- * Returns the closed reason code for the notification. This is valid only
- * after the "closed" signal is emitted.
+ * Returns the closed reason code for the notification.
  *
- * Since version 0.8.0 the returned value is of type #NotifyClosedReason.
+ * This is valid only after the [signal@Notification::closed] signal is emitted.
+ *
+ * Since version 0.8.0 the returned value is of type [enum@ClosedReason].
  *
  * Returns: An integer representing the closed reason code
- *  (Since 0.8.0 it's also a #NotifyClosedReason).
+ *   (Since 0.8.0 it's also a [enum@ClosedReason]).
  */
 gint
 notify_notification_get_closed_reason (const NotifyNotification *notification)
