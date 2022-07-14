@@ -1,3 +1,18 @@
+New in 0.8.0
+============
+
+* Use Desktop Portal Notification when running confined (snap and flatpak)
+  Now the library acts like a wrapper in such scenario, with some limited
+  capabilities, but this will enforce security and user control over the
+  allowed notifications. [Marco]
+* notify-send: Handles SIGINT gracefully, closing waiting notification [Marco]
+* Use NotifyClosedReason enum as closed reason return value [Marco]
+* Bump dependency on GLib 2.38 [Marco]
+* Various introspection docs improvements and fixes [Marco]
+
+Contributors:
+  Marco Trevisan
+
 New in 0.7.12
 =============
 
