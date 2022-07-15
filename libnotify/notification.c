@@ -1295,7 +1295,7 @@ notify_notification_set_urgency (NotifyNotification *notification,
  *
  * Sets the icon in the notification from a #GdkPixbuf.
  *
- * Deprecated: use [method@Notification.set_image_from_pixbuf] instead.
+ * Deprecated: 0.5. Use [method@Notification.set_image_from_pixbuf] instead.
  */
 void
 notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
@@ -1310,6 +1310,8 @@ notify_notification_set_icon_from_pixbuf (NotifyNotification *notification,
  * @pixbuf: The image.
  *
  * Sets the image in the notification from a [class@GdkPixbuf.Pixbuf].
+ *
+ * Since: 0.5
  */
 void
 notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
