@@ -542,7 +542,7 @@ _get_portal_proxy (GError **error)
  * Synchronously creates the #GDBusProxy for the notification service,
  * and caches the result.
  *
- * Returns: the #GDBusProxy for the notification service, or %NULL on error
+ * Returns: (nullable): the #GDBusProxy for the notification service, or %NULL on error
  */
 GDBusProxy *
 _notify_get_proxy (GError **error)

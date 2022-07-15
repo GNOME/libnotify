@@ -1459,7 +1459,7 @@ notify_notification_set_hint (NotifyNotification *notification,
 /**
  * notify_notification_set_app_name:
  * @notification: a #NotifyNotification
- * @app_name: the localised application name
+ * @app_name: (nullable): the localised application name
  *
  * Sets the application name for the notification.
  *
@@ -1730,7 +1730,7 @@ notify_notification_add_action (NotifyNotification  *notification,
  * the activation token for the activated action, if the notification daemon
  * supports it.
  *
- * Return value: (transfer none): The current activation token, or %NULL if none
+ * Returns: (nullable) (transfer none): The current activation token, or %NULL if none
  *
  * Since: 0.7.10
  */
