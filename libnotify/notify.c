@@ -537,7 +537,7 @@ _get_portal_proxy (GError **error)
 
 /*
  * _notify_get_proxy:
- * @error: (allow-none): a location to store a #GError, or %NULL
+ * @error: (nullable): a location to store a #GError, or %NULL
  *
  * Synchronously creates the #GDBusProxy for the notification service,
  * and caches the result.
@@ -645,10 +645,10 @@ notify_get_server_caps (void)
 
 /**
  * notify_get_server_info:
- * @ret_name: (out) (allow-none) (transfer full): a location to store the server name, or %NULL
- * @ret_vendor: (out) (allow-none) (transfer full): a location to store the server vendor, or %NULL
- * @ret_version: (out) (allow-none) (transfer full): a location to store the server version, or %NULL
- * @ret_spec_version: (out) (allow-none) (transfer full): a location to store the version the service is compliant with, or %NULL
+ * @ret_name: (out) (optional) (transfer full): a location to store the server name, or %NULL
+ * @ret_vendor: (out) (optional) (transfer full): a location to store the server vendor, or %NULL
+ * @ret_version: (out) (optional) (transfer full): a location to store the server version, or %NULL
+ * @ret_spec_version: (out) (optional) (transfer full): a location to store the version the service is compliant with, or %NULL
  *
  * Queries the server for information.
  *

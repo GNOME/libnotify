@@ -473,9 +473,9 @@ maybe_warn_portal_unsupported_feature (const char *feature_name)
 
 /**
  * notify_notification_new:
- * @summary: The required summary text.
- * @body: (allow-none): The optional body text.
- * @icon: (allow-none): The optional icon theme icon name or filename.
+ * @summary: (not nullable): The required summary text.
+ * @body: (nullable): The optional body text.
+ * @icon: (nullable): The optional icon theme icon name or filename.
  *
  * Creates a new #NotifyNotification.
  *
@@ -633,8 +633,8 @@ notify_notification_update_internal (NotifyNotification *notification,
  * notify_notification_update:
  * @notification: The notification to update.
  * @summary: The new required summary text.
- * @body: (allow-none): The optional body text.
- * @icon: (allow-none): The optional icon theme icon name or filename.
+ * @body: (nullable): The optional body text.
+ * @icon: (nullable): The optional icon theme icon name or filename.
  *
  * Updates the notification text and icon.
  *
@@ -1428,7 +1428,7 @@ maybe_parse_snap_hint_value (NotifyNotification *notification,
  * notify_notification_set_hint:
  * @notification: a #NotifyNotification
  * @key: the hint key
- * @value: (allow-none): the hint value, or %NULL to unset the hint
+ * @value: (nullable): the hint value
  *
  * Sets a hint for @key with value @value.
  *
