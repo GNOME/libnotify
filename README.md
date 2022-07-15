@@ -1,5 +1,7 @@
 # libnotify
 
+Send desktop notifications.
+
 ## Description
 
 libnotify is a library for sending desktop notifications to a notification
