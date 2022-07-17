@@ -22,8 +22,11 @@ LT_CURRENT=4
 LT_REVISION=0
 LT_AGE=0
 
+API_VERSION = 7
+
 VERSION_ARRAY = meson.project_version().split('.')
-MODULE_VERSION = '@0@.@1@'.format(VERSION_ARRAY[0], VERSION_ARRAY[1])
+# Minor version is hardcoded until we have a real API break
+MODULE_VERSION = '@0@.@1@'.format(VERSION_ARRAY[0], API_VERSION)
 LIBNAME = meson.project_name().split('lib')[1]
 
 default_includes = include_directories('.')
