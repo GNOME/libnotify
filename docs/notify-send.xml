@@ -133,6 +133,6 @@
   <refsection>
     <info><title>See also</title></info>
 
-    <para>The Desktop Notification Spec on <link xlink:href="http://www.galago-project.org/specs/notification/">http://www.galago-project.org/specs/notification/</link>.</para>
+    <para>The Desktop Notification Spec on <link xlink:href="https://specifications.freedesktop.org/notification-spec/">https://specifications.freedesktop.org/notification-spec/</link>.</para>
   </refsection>
 </refentry>
