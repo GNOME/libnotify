@@ -1,7 +1,7 @@
 project('libnotify',
   'c',
   version: '0.8.1',
-  meson_version: '>= 0.47.0')
+  meson_version: '>= 0.58.0')
 
 gnome = import('gnome')
 pkgconfig = import('pkgconfig')
