@@ -1,7 +1,7 @@
 gnome.gtkdoc(meson.project_name(),
   mode: 'sgml',
   main_sgml: meson.project_name() + '-docs.sgml',
-  src_dir: join_paths(meson.global_source_root(), meson.project_name()),
+  src_dir: join_paths(meson.project_source_root(), meson.project_name()),
   dependencies: libnotify_dep,
   gobject_typesfile: meson.project_name() + '.types',
   ignore_headers: ['notify-enum-types.h', 'notify-marshal.h', 'internal.h'],
