@@ -60,6 +60,13 @@ typedef struct _NotifyNotificationPrivate NotifyNotificationPrivate;
  * NotifyNotification:
  *
  * A passive pop-up notification.
+ *
+ * #NotifyNotification represents a passive pop-up notification. It can
+ * contain summary text, body text, and an icon, as well as hints specifying
+ * how the notification should be presented. The notification is rendered
+ * by a notification daemon, and may present the notification in any number
+ * of ways. As such, there is a clear separation of content and presentation,
+ * and this API enforces that.
  */
 struct _NotifyNotification
 {
@@ -101,7 +108,7 @@ typedef enum
  * @NOTIFY_CLOSED_REASON_EXPIRED: Timeout has expired.
  * @NOTIFY_CLOSED_REASON_DISMISSED: It has been dismissed by the user.
  * @NOTIFY_CLOSED_REASON_API_REQUEST: It has been closed by a call to
- *   [method@Notify.close].
+ *   [method@NotifyNotification.close].
  * @NOTIFY_CLOSED_REASON_UNDEFIEND: Closed by undefined/reserved reasons.
  *
  * The reason for which the notification has been closed.
