@@ -1,3 +1,16 @@
+New in 0.8.2
+============
+
+* Set new summary for library [Maximiliano]
+* docs: port to gi-docgen [Maximiliano]
+* docs: Fix URL to Desktop Notification Spec [Andre]
+* meson: replace deprecated meson.source_root() calls [Kai]
+* meson: bump minimum meson version to 0.58 [centaurii]
+* Introspection docs fixes [Maximiliano, Logan]
+
+Contributors:
+  Maximiliano Sandoval R, Andre Klapper, Kai Smith, centaurii, Logan Rathbone
+
 New in 0.8.1
 ============
 
