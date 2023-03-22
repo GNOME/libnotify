@@ -37,9 +37,14 @@ libnotify_cflags = [
 ]
 
 mapfile = meson.project_name() + '.map'
-libnotify_ldflags = cc.get_supported_link_arguments([
-  '-Wl,--version-script,'+join_paths(meson.current_source_dir(), mapfile),
-])
+mapfile_flags = \
+  '-Wl,--version-script,'+join_paths(meson.current_source_dir(), mapfile)
+if host_machine.system() == 'sunos'
+  # Solaris 11.4 requires an extra flag to recgonize GNU format mapfiles
+  mapfile_flags = '-Wl,-zgnu-version-script-compat,' + \
+                  mapfile_flags.replace('-Wl,', '')
+endif
+libnotify_ldflags = cc.get_supported_link_arguments([mapfile_flags])
 
 notify_dep = declare_dependency(
   include_directories: default_includes,
