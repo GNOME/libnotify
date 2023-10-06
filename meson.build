@@ -39,7 +39,7 @@ man1dir = join_paths(prefix, get_option('mandir'), 'man1')
 libnotify_deps = []
 extra_deps = []
 
-glib_req_version = '>= 2.38.0'
+glib_req_version = '>= 2.62.0'
 
 gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0')
 glib_dep = dependency('glib-2.0', version: glib_req_version)
