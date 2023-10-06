@@ -397,10 +397,16 @@ notify_notification_dispose (GObject *object)
 {
         NotifyNotification        *obj = NOTIFY_NOTIFICATION (object);
         NotifyNotificationPrivate *priv = obj->priv;
+        GDBusProxy                *proxy;
 
         if (priv->portal_timeout_id) {
                 g_source_remove (priv->portal_timeout_id);
                 priv->portal_timeout_id = 0;
+        }
+
+        proxy = _notify_get_proxy (NULL);
+        if (proxy != NULL && priv->proxy_signal_handler != 0) {
+                g_signal_handler_disconnect (proxy, priv->proxy_signal_handler);
         }
 
         g_clear_object (&priv->icon_pixbuf);
@@ -413,7 +419,6 @@ notify_notification_finalize (GObject *object)
 {
         NotifyNotification        *obj = NOTIFY_NOTIFICATION (object);
         NotifyNotificationPrivate *priv = obj->priv;
-        GDBusProxy                *proxy;
 
         _notify_cache_remove_notification (obj);
 
@@ -433,11 +438,6 @@ notify_notification_finalize (GObject *object)
 
         if (priv->hints != NULL)
                 g_hash_table_destroy (priv->hints);
-
-        proxy = _notify_get_proxy (NULL);
-        if (proxy != NULL && priv->proxy_signal_handler != 0) {
-                g_signal_handler_disconnect (proxy, priv->proxy_signal_handler);
-        }
 
         g_free (obj->priv);
 
