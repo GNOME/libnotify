@@ -1,6 +1,6 @@
 project('libnotify',
   'c',
-  version: '0.8.2',
+  version: '0.8.3',
   meson_version: '>= 0.56.0')
 
 gnome = import('gnome')

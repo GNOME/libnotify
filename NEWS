@@ -1,3 +1,20 @@
+New in 0.8.3
+============
+
+This release contains a critical stability/minor security update which affects
+Electron applications that utilize Portal notifications (eg, through Flatpak).
+It is highly recommended that all users of libnotify 0.8.x update to this
+release.
+
+Please note that this fix has increased the minimum required version of glib to
+2.62.0.
+
+* notification: Use g_signal_connect_object (#34) [Maximiliano]
+* notification: Move disconnect to dispose [Maximiliano]
+
+Contributors:
+  Maximiliano Sandoval R
+
 New in 0.8.2
 ============
 
