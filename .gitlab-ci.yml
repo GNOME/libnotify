@@ -23,7 +23,7 @@ build:ubuntu:
         python3-setuptools
         xsltproc
         docbook-xsl-ns
-    - pip3 install meson gi-docgen
+        gi-docgen
   script:
     - meson _build -Ddocbook_docs=enabled
     - ninja -C _build install
