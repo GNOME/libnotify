@@ -303,7 +303,7 @@ main (int argc, char *argv[])
                 exit (0);
         }
 
-        if (n_text != NULL && n_text[0] != NULL && *n_text[0] != '\0')
+        if (n_text != NULL && n_text[0] != NULL)
                 summary = n_text[0];
 
         if (summary == NULL) {
