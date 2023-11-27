@@ -206,6 +206,25 @@ server_has_capability (const gchar *capability)
         return supported;
 }
 
+/* The XDG Desktop Notifications Specification requires valid UTF-8 for certain
+ * strings. Given the stability/security implications by accepting console
+ * input, we will insist upon valid UTF-8 being provided for these strings, and
+ * print an error message otherwise.
+ */
+static void
+validate_utf8_or_die (const char *str, const char *param)
+{
+        if (! g_utf8_validate (str, -1, NULL))
+        {
+                /* Translators: the parameter is the 'Component' as defined by the
+                 * XDG notification specification (eg, 'Summary', 'Body', etc.) -
+                 * these are separately translated.
+                 */
+                g_printerr (N_("Invalid UTF-8 provided for parameter: %s\n"), param);
+                exit (1);
+        }
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -304,7 +323,13 @@ main (int argc, char *argv[])
         }
 
         if (n_text != NULL && n_text[0] != NULL && *n_text[0] != '\0')
+        {
                 summary = n_text[0];
+                /* Translators: XDG notification component to be translated
+                 * consistently as within the specification.
+                 */
+                validate_utf8_or_die (summary, N_("Summary"));
+        }
 
         if (summary == NULL) {
                 fprintf (stderr, "%s\n", N_("No summary specified."));
@@ -313,6 +338,11 @@ main (int argc, char *argv[])
 
         if (n_text[1] != NULL) {
                 body = g_strcompress (n_text[1]);
+
+                /* Translators: XDG notification component to be translated
+                 * consistently as within the specification.
+                 */
+                validate_utf8_or_die (body, N_("Body"));
 
                 if (n_text[2] != NULL) {
                         fprintf (stderr, "%s\n",
