@@ -289,7 +289,6 @@ notify_notification_class_init (NotifyNotificationClass *klass)
 
 static void
 notify_notification_update_internal (NotifyNotification *notification,
-                                     const char         *app_name,
                                      const char         *summary,
                                      const char         *body,
                                      const char         *icon);
@@ -309,11 +308,8 @@ notify_notification_set_property (GObject      *object,
                 break;
 
         case PROP_APP_NAME:
-                notify_notification_update_internal (notification,
-                                                     g_value_get_string (value),
-                                                     priv->summary,
-                                                     priv->body,
-                                                     priv->icon_name);
+                notify_notification_set_app_name (notification,
+                                                  g_value_get_string (value));
                 break;
 
         case PROP_APP_ICON:
@@ -323,7 +319,6 @@ notify_notification_set_property (GObject      *object,
 
         case PROP_SUMMARY:
                 notify_notification_update_internal (notification,
-                                                     priv->app_name,
                                                      g_value_get_string (value),
                                                      priv->body,
                                                      priv->icon_name);
@@ -331,7 +326,6 @@ notify_notification_set_property (GObject      *object,
 
         case PROP_BODY:
                 notify_notification_update_internal (notification,
-                                                     priv->app_name,
                                                      priv->summary,
                                                      g_value_get_string (value),
                                                      priv->icon_name);
@@ -339,7 +333,6 @@ notify_notification_set_property (GObject      *object,
 
         case PROP_ICON_NAME:
                 notify_notification_update_internal (notification,
-                                                     priv->app_name,
                                                      priv->summary,
                                                      priv->body,
                                                      g_value_get_string (value));
@@ -602,17 +595,10 @@ try_prepend_snap (NotifyNotification *notification,
 
 static void
 notify_notification_update_internal (NotifyNotification *notification,
-                                     const char         *app_name,
                                      const char         *summary,
                                      const char         *body,
                                      const char         *icon)
 {
-        if (notification->priv->app_name != app_name) {
-                g_free (notification->priv->app_name);
-                notification->priv->app_name = g_strdup (app_name);
-                g_object_notify (G_OBJECT (notification), "app-name");
-        }
-
         if (notification->priv->summary != summary) {
                 g_free (notification->priv->summary);
                 notification->priv->summary = g_strdup (summary);
@@ -689,7 +675,6 @@ notify_notification_update (NotifyNotification *notification,
         g_return_val_if_fail (summary != NULL && *summary != '\0', FALSE);
 
         notify_notification_update_internal (notification,
-                                             notification->priv->app_name,
                                              summary, body, icon);
 
         return TRUE;
