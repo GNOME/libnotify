@@ -597,6 +597,8 @@ notify_notification_update_internal (NotifyNotification *notification,
 
         if (notification->priv->icon_name != icon) {
                 gchar *snapped_icon;
+                const char *hint_name = NULL;
+
                 g_free (notification->priv->icon_name);
                 notification->priv->icon_name = (icon != NULL
                                                  && *icon != '\0' ? g_strdup (icon) : NULL);
@@ -608,6 +610,23 @@ notify_notification_update_internal (NotifyNotification *notification,
                         g_free (notification->priv->icon_name);
                         notification->priv->icon_name = snapped_icon;
                 }
+
+                if (_notify_check_spec_version(1, 2)) {
+                    hint_name = "image-path";
+                } else if (_notify_check_spec_version(1, 1)) {
+                    hint_name = "image_path";
+                } else {
+                    /* Before 1.1 only one image/icon could be specified and the
+                     * icon_data hint didn't allow for a path or icon name,
+                     * therefore the icon is set as the app icon of the Notify call */
+                }
+
+                if (hint_name) {
+                    notify_notification_set_hint (notification,
+                                                  hint_name,
+                                                  notification->priv->icon_name ? g_variant_new_string (notification->priv->icon_name) : NULL);
+                }
+
                 g_object_notify (G_OBJECT (notification), "icon-name");
         }
 
@@ -1162,7 +1181,8 @@ notify_notification_show (NotifyNotification *notification,
                                          g_variant_new ("(susssasa{sv}i)",
                                                         priv->app_name ? priv->app_name : notify_get_app_name (),
                                                         priv->id,
-                                                        priv->icon_name ? priv->icon_name : "",
+                                                        /* Use the icon_name as app icon only before there was a hint for it */
+                                                        !_notify_check_spec_version(1, 1) && priv->icon_name ? priv->icon_name : "",
                                                         priv->summary ? priv->summary : "",
                                                         priv->body ? priv->body : "",
                                                         &actions_builder,
