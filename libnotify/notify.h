@@ -37,6 +37,9 @@ gboolean        notify_is_initted (void);
 const char     *notify_get_app_name (void);
 void            notify_set_app_name (const char *app_name);
 
+const char     *notify_get_app_icon (void);
+void            notify_set_app_icon (const char *app_icon);
+
 GList          *notify_get_server_caps (void);
 
 gboolean        notify_get_server_info (char **ret_name,
