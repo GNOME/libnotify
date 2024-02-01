@@ -558,8 +558,8 @@ _get_portal_proxy (GError **error)
         _portal_version = g_variant_get_uint32 (res);
         g_assert (_portal_version > 0);
 
-        g_warning ("Running in confined mode, using Portal notifications. "
-                   "Some features and hints won't be supported");
+        g_debug ("Running in confined mode, using Portal notifications. "
+                 "Some features and hints won't be supported");
 
         g_variant_unref (res);
 
