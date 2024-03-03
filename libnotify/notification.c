@@ -820,15 +820,33 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                 const char *id;
                 const char *action;
                 GVariant *parameter;
+                int i;
 
                 g_variant_get (parameters, "(&s&s@av)", &id, &action, &parameter);
-                g_variant_unref (parameter);
 
                 notification_id = get_portal_notification_id (notification);
 
                 if (!g_str_equal (notification_id, id)) {
                         g_free (notification_id);
                         return;
+                }
+
+                for (i = 0; i < g_variant_n_children (parameter); i++) {
+                    GVariant *pdata = NULL;
+                    g_variant_get_child (parameter, i, "v", &pdata);
+
+                    if (g_variant_is_of_type (pdata, G_VARIANT_TYPE_VARDICT)) {
+                        const char *activation_token = NULL;
+                        g_variant_lookup (pdata, "activation-token", "&s", &activation_token);
+
+                        if (activation_token) {
+                            g_free (priv->activation_token);
+                            priv->activation_token = g_strdup (activation_token);
+                            break;
+                        }
+                    }
+
+                    g_variant_unref (pdata);
                 }
 
                 if (!activate_action (notification, action) &&
@@ -840,6 +858,7 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                 close_notification (notification, NOTIFY_CLOSED_REASON_DISMISSED);
 
                 g_free (notification_id);
+                g_variant_unref (parameter);
         } else {
                 g_debug ("Unhandled signal '%s.%s'", interface, signal_name);
         }
