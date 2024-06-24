@@ -56,6 +56,7 @@ struct _NotifyNotificationPrivate
         char           *summary;
         char           *body;
         char           *activation_token;
+        char           *app_duration;
 
         /* NULL to use icon data. Anything else to have server lookup icon */
         char           *icon_name;
@@ -1519,6 +1520,19 @@ notify_notification_set_app_name (NotifyNotification *notification,
         notification->priv->app_name = g_strdup (app_name);
 
         g_object_notify (G_OBJECT (notification), "app-name");
+}
+
+void notify_notification_set_app_duration (NotifyNotification *notification, const char *app_duration)
+{
+        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+        if(maybe_warn_portal_unsupported_feature("App Duration")){
+                return;
+        }
+
+        g_free (notification->priv->app_duration);
+        notification->priv->app_duration = g_strdup(app_duration);
+
+        g_object_notify(G_OBJECT(notification),"app-duration");
 }
 
 /**

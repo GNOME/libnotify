@@ -98,6 +98,7 @@ typedef enum
         NOTIFY_URGENCY_LOW,
         NOTIFY_URGENCY_NORMAL,
         NOTIFY_URGENCY_CRITICAL,
+        NOTIFY_URGENCY_IMMEDIATE,
 
 } NotifyUrgency;
 
@@ -210,6 +211,7 @@ void                notify_notification_set_app_name          (NotifyNotificatio
 
 void                notify_notification_set_app_icon          (NotifyNotification *notification,
                                                                const char         *app_icon);
+void                notify_notification_set_app_duration        (NotifyNotification *notification,      const char *app_duration);
 
 void                notify_notification_clear_hints           (NotifyNotification *notification);
 

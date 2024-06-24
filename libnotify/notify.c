@@ -37,6 +37,7 @@
 
 static gboolean         _initted = FALSE;
 static char            *_app_name = NULL;
+static char            *_app_duration = NULL;
 static char            *_app_icon = NULL;
 static char            *_snap_name = NULL;
 static char            *_snap_app = NULL;
@@ -151,6 +152,18 @@ set_app_name (const char *app_name)
 }
 
 
+static gboolean set_app_duration(const char *app_duration)
+{
+        g_return_val_if_fail(app_duration != NULL, FALSE);
+        g_return_val_if_fail (*app_duration != '\0', FALSE);
+
+        g_free(_app_duration);
+        _app_duration = g_strdup(app_duration);
+
+        return TRUE;
+
+}
+
 /**
  * notify_set_app_name:
  * @app_name: The name of the application
@@ -162,6 +175,12 @@ void
 notify_set_app_name (const char *app_name)
 {
         set_app_name (app_name);
+}
+
+
+void notify_set_app_duration(const char *app_duration)
+{
+        set_app_duration(app_duration);
 }
 
 /**
@@ -214,6 +233,8 @@ notify_init (const char *app_name)
         if (!set_app_name (app_name)) {
                 return FALSE;
         }
+
+
 
         _initted = TRUE;
 
