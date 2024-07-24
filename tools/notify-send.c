@@ -495,6 +495,7 @@ main (int argc, char *argv[])
         if (print_id) {
                 g_object_get (notify, "id", &notification_id, NULL);
                 g_printf ("%d\n", notification_id);
+                fflush (stdout);
         }
 
         if (wait) {
