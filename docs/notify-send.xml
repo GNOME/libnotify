@@ -67,7 +67,7 @@
       <varlistentry>
         <term><option>-A</option>, <option>--action</option>=[<replaceable>NAME</replaceable>=]<replaceable>Text...</replaceable></term>
         <listitem>
-          <para>Specifies the actions to display to the user. Implies <option>--wait</option> to wait for user input. May be set multiple times. The <replaceable>NAME</replaceable> of the action is output to <literal>stdout</literal>. If <replaceable>NAME</replaceable> is not specified, the numerical index of the option is used (starting with <literal>1</literal>).</para>
+          <para>Specifies the actions to display to the user. Implies <option>--wait</option> to wait for user input. May be set multiple times. The <replaceable>NAME</replaceable> of the action is output to <literal>stdout</literal>. If <replaceable>NAME</replaceable> is not specified, the numerical index of the option is used (starting with <literal>0</literal>).</para>
         </listitem>
       </varlistentry>
       <varlistentry>
