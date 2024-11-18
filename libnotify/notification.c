@@ -1518,7 +1518,7 @@ notify_notification_set_app_name (NotifyNotification *notification,
 
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
-        if (maybe_warn_portal_unsupported_feature ("App Name")) {
+        if (_notify_uses_portal_notifications ()) {
                 return;
         }
 
