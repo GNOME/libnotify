@@ -905,21 +905,22 @@ get_notification_gicon (NotifyNotification  *notification,
         GFileInputStream *input;
         GFile *file = NULL;
         GIcon *gicon = NULL;
+		char *icon_str = priv->app_icon ? priv->app_icon : priv->icon_name;
 
         if (priv->icon_pixbuf) {
                 return G_ICON (g_object_ref (priv->icon_pixbuf));
         }
 
-        if (!priv->icon_name) {
+        if (!icon_str) {
                 return NULL;
         }
 
-        if (strstr (priv->icon_name, "://")) {
-                file = g_file_new_for_uri (priv->icon_name);
-        } else if (g_file_test (priv->icon_name, G_FILE_TEST_EXISTS)) {
-                file = g_file_new_for_path (priv->icon_name);
+        if (strstr (icon_str, "://")) {
+                file = g_file_new_for_uri (icon_str);
+        } else if (g_file_test (icon_str, G_FILE_TEST_EXISTS)) {
+                file = g_file_new_for_path (icon_str);
         } else {
-                gicon = g_themed_icon_new (priv->icon_name);
+                gicon = g_themed_icon_new (icon_str);
         }
 
         if (!file) {
@@ -1538,10 +1539,6 @@ notify_notification_set_app_icon (NotifyNotification *notification,
                                   const char         *app_icon)
 {
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
-
-        if (maybe_warn_portal_unsupported_feature ("App Icon")) {
-                return;
-        }
 
         g_free (notification->priv->app_icon);
         notification->priv->app_icon = g_strdup (app_icon);
