@@ -369,7 +369,7 @@ main (int argc, char *argv[])
         notify = g_object_new (NOTIFY_TYPE_NOTIFICATION,
                                "summary", summary,
                                "body", body,
-                               "icon-name", icon_str,
+                               "app-icon", icon_str,
                                "id", notification_id,
                                NULL);
 
