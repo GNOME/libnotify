@@ -211,4 +211,9 @@ gboolean            notify_notification_close                 (NotifyNotificatio
 
 gint                notify_notification_get_closed_reason     (const NotifyNotification *notification);
 
+void                notify_notification_set_image_path        (NotifyNotification *notification,
+                                                               const char         *image_path);
+
+const char         *notify_notification_get_image_path        (NotifyNotification *notification);
+
 G_END_DECLS
