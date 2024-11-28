@@ -57,7 +57,10 @@ struct _NotifyNotificationPrivate
         char           *body;
         char           *activation_token;
 
-        /* NULL to use icon data. Anything else to have server lookup icon */
+        /* icon_name maps with the "image-path" hint of the spec;
+         * icon_pixbuf maps with "image-data". These variables are poorly named
+         * but pre-date changes to the spec.
+         */
         char           *icon_name;
         GdkPixbuf      *icon_pixbuf;
 
@@ -97,6 +100,7 @@ enum
         PROP_SUMMARY,
         PROP_BODY,
         PROP_ICON_NAME,
+        PROP_IMAGE_PATH,
         PROP_CLOSED_REASON
 };
 
@@ -201,7 +205,7 @@ notify_notification_class_init (NotifyNotificationClass *klass)
          *
          * The icon of the application for the notification.
          *
-         * Since: 0.8.4
+         * Since: 0.9
          */
         g_object_class_install_property (object_class,
                                          PROP_APP_ICON,
@@ -252,7 +256,15 @@ notify_notification_class_init (NotifyNotificationClass *klass)
         /**
          * NotifyNotification:icon-name:
          *
-         * The icon-name of the icon to be displayed on the notification.
+         * The icon-name of the image to be displayed on the notification.
+         *
+         * Deprecated: 0.9: This property name is no longer descriptive of what
+         * it actually sets, as it actually sets the image and not the icon of
+         * the notification, and is not consistent with the wording of the
+         * Desktop Notifications Specification. It is only
+         * provided for backwards compatibility. Instead, use the
+         * [property@Notification:image-path] or the
+         * [property@Notification:app-icon] property, depending on the context.
          */
         g_object_class_install_property (object_class,
                                          PROP_ICON_NAME,
@@ -265,6 +277,21 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_NAME
                                                               | G_PARAM_STATIC_NICK
                                                               | G_PARAM_STATIC_BLURB));
+
+        /**
+         * NotifyNotification:image-path:
+         *
+         * The path of the image to be displayed on the notification, in the
+         * format prescribed by the "image-path" hint of the Desktop
+         * Notifications Specification.
+         *
+         * Since: 0.9
+         */
+        g_object_class_install_property (object_class,
+                                         PROP_IMAGE_PATH,
+                                         g_param_spec_string ("image-path", NULL, NULL,
+                                                              NULL,
+                                                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
         /**
          * NotifyNotification:closed-reason:
@@ -345,6 +372,11 @@ notify_notification_set_property (GObject      *object,
                                                      g_value_get_string (value));
                 break;
 
+        case PROP_IMAGE_PATH:
+                notify_notification_set_image_path (notification,
+                                                    g_value_get_string (value));
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
                 break;
@@ -382,6 +414,10 @@ notify_notification_get_property (GObject    *object,
                 break;
 
         case PROP_ICON_NAME:
+                g_value_set_string (value, priv->icon_name);
+                break;
+
+        case PROP_IMAGE_PATH:
                 g_value_set_string (value, priv->icon_name);
                 break;
 
@@ -659,6 +695,7 @@ notify_notification_update_internal (NotifyNotification *notification,
                 }
 
                 g_object_notify (G_OBJECT (notification), "icon-name");
+                g_object_notify (G_OBJECT (notification), "image-path");
         }
 
         notification->priv->updates_pending = TRUE;
@@ -1532,7 +1569,7 @@ notify_notification_set_app_name (NotifyNotification *notification,
  * If this function is not called or if @app_icon is %NULL, the application icon
  * will be set from the value set via [func@set_app_icon].
  *
- * Since: 0.8.4
+ * Since: 0.9
  */
 void
 notify_notification_set_app_icon (NotifyNotification *notification,
@@ -1546,6 +1583,44 @@ notify_notification_set_app_icon (NotifyNotification *notification,
         g_object_notify (G_OBJECT (notification), "app-icon");
 }
 
+/**
+ * notify_notification_set_image_path:
+ * @notification: a `NotifyNotification`
+ * @image_path: (nullable): The optional image path by file name/URI or theme
+ *   icon name.
+ *
+ * Sets the image path for the optional image of the notification.
+ *
+ * Since: 0.9
+ */
+void
+notify_notification_set_image_path (NotifyNotification *notification,
+                                    const char         *image_path)
+{
+        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+
+        notify_notification_update_internal (notification,
+                        notification->priv->app_name,
+                        notification->priv->summary,
+                        notification->priv->body,
+                        image_path);
+}
+
+/**
+ * notify_notification_get_image_path:
+ * @notification: a `NotifyNotification`
+ *
+ * Gets the image path for the optional image of the notification.
+ *
+ * Since: 0.9
+ */
+const char *
+notify_notification_get_image_path (NotifyNotification *notification)
+{
+        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), NULL);
+
+        return notification->priv->icon_name;
+}
 
 /**
  * notify_notification_set_hint_int32:
