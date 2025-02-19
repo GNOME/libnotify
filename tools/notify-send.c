@@ -262,7 +262,7 @@ main (int argc, char *argv[])
                  ("Specifies the timeout in milliseconds at which to expire the "
                   "notification."), N_("TIME")},
                 {"app-name", 'a', 0, G_OPTION_ARG_STRING, &app_name,
-                 N_("Specifies the app name for the icon"), N_("APP_NAME")},
+                 N_("Specifies the app name for the notification"), N_("APP_NAME")},
                 {"icon", 'i', 0, G_OPTION_ARG_FILENAME, &icon_str,
                  N_("Specifies an icon filename or stock icon to display."),
                  N_("ICON")},
@@ -359,7 +359,7 @@ main (int argc, char *argv[])
                                 &server_version,
                                 &server_spec_version);
 
-        g_debug ("Using sever %s %s, v%s - Supporting Notification Spec %s",
+        g_debug ("Using server %s %s, v%s - Supporting Notification Spec %s",
                  server_name, server_vendor, server_version, server_spec_version);
         g_free (server_name);
         g_free (server_vendor);

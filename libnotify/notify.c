@@ -37,6 +37,7 @@
 
 static gboolean         _initted = FALSE;
 static char            *_app_name = NULL;
+static char            *_app_icon = NULL;
 static char            *_snap_name = NULL;
 static char            *_snap_app = NULL;
 static char            *_flatpak_app = NULL;
@@ -161,6 +162,21 @@ void
 notify_set_app_name (const char *app_name)
 {
         set_app_name (app_name);
+}
+
+/**
+ * notify_set_app_icon:
+ * @app_icon: (nullable): The optional icon theme icon name or filename.
+ *
+ * Sets the application icon.
+ *
+ * Since: 0.8.4
+ */
+void
+notify_set_app_icon (const char *app_icon)
+{
+        g_free (_app_icon);
+        _app_icon = g_strdup (app_icon);
 }
 
 /**
@@ -435,6 +451,21 @@ notify_get_app_name (void)
 }
 
 /**
+ * notify_get_app_icon:
+ *
+ * Gets the application icon registered.
+ *
+ * Returns: The registered application icon, set via [func@set_app_icon].
+ *
+ * Since: 0.8.4
+ */
+const char *
+notify_get_app_icon (void)
+{
+        return _app_icon;
+}
+
+/**
  * notify_uninit:
  *
  * Uninitializes libnotify.
@@ -527,8 +558,8 @@ _get_portal_proxy (GError **error)
         _portal_version = g_variant_get_uint32 (res);
         g_assert (_portal_version > 0);
 
-        g_warning ("Running in confined mode, using Portal notifications. "
-                   "Some features and hints won't be supported");
+        g_debug ("Running in confined mode, using Portal notifications. "
+                 "Some features and hints won't be supported");
 
         g_variant_unref (res);
 

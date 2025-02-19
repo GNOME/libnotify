@@ -52,6 +52,7 @@ struct _NotifyNotificationPrivate
 {
         guint32         id;
         char           *app_name;
+        char           *app_icon;
         char           *summary;
         char           *body;
         char           *activation_token;
@@ -92,6 +93,7 @@ enum
         PROP_0,
         PROP_ID,
         PROP_APP_NAME,
+        PROP_APP_ICON,
         PROP_SUMMARY,
         PROP_BODY,
         PROP_ICON_NAME,
@@ -195,6 +197,25 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                               | G_PARAM_STATIC_BLURB));
 
         /**
+         * NotifyNotification:app-icon:
+         *
+         * The icon of the application for the notification.
+         *
+         * Since: 0.8.4
+         */
+        g_object_class_install_property (object_class,
+                                         PROP_APP_ICON,
+                                         g_param_spec_string ("app-icon",
+                                                              "Application icon",
+                                                              "The application icon to use for this notification as filename or icon theme-compliant name",
+                                                              NULL,
+                                                              G_PARAM_READWRITE
+                                                              | G_PARAM_STATIC_NAME
+                                                              | G_PARAM_STATIC_NICK
+                                                              | G_PARAM_STATIC_BLURB));
+
+
+        /**
          * NotifyNotification:summary:
          *
          * The summary of the notification.
@@ -295,6 +316,11 @@ notify_notification_set_property (GObject      *object,
                                                      priv->icon_name);
                 break;
 
+        case PROP_APP_ICON:
+                notify_notification_set_app_icon (notification,
+                                                  g_value_get_string (value));
+                break;
+
         case PROP_SUMMARY:
                 notify_notification_update_internal (notification,
                                                      priv->app_name,
@@ -345,6 +371,10 @@ notify_notification_get_property (GObject    *object,
 
         case PROP_APP_NAME:
                 g_value_set_string (value, priv->app_name);
+                break;
+
+        case PROP_APP_ICON:
+                g_value_set_string (value, priv->app_icon);
                 break;
 
         case PROP_BODY:
@@ -423,6 +453,7 @@ notify_notification_finalize (GObject *object)
         _notify_cache_remove_notification (obj);
 
         g_free (priv->app_name);
+        g_free (priv->app_icon);
         g_free (priv->summary);
         g_free (priv->body);
         g_free (priv->icon_name);
@@ -597,6 +628,8 @@ notify_notification_update_internal (NotifyNotification *notification,
 
         if (notification->priv->icon_name != icon) {
                 gchar *snapped_icon;
+                const char *hint_name = NULL;
+
                 g_free (notification->priv->icon_name);
                 notification->priv->icon_name = (icon != NULL
                                                  && *icon != '\0' ? g_strdup (icon) : NULL);
@@ -608,6 +641,23 @@ notify_notification_update_internal (NotifyNotification *notification,
                         g_free (notification->priv->icon_name);
                         notification->priv->icon_name = snapped_icon;
                 }
+
+                if (_notify_check_spec_version(1, 2)) {
+                    hint_name = "image-path";
+                } else if (_notify_check_spec_version(1, 1)) {
+                    hint_name = "image_path";
+                } else {
+                    /* Before 1.1 only one image/icon could be specified and the
+                     * icon_data hint didn't allow for a path or icon name,
+                     * therefore the icon is set as the app icon of the Notify call */
+                }
+
+                if (hint_name) {
+                    notify_notification_set_hint (notification,
+                                                  hint_name,
+                                                  notification->priv->icon_name ? g_variant_new_string (notification->priv->icon_name) : NULL);
+                }
+
                 g_object_notify (G_OBJECT (notification), "icon-name");
         }
 
@@ -1082,6 +1132,7 @@ notify_notification_show (NotifyNotification *notification,
         gpointer                   key, data;
         GVariant                  *result;
         GApplication              *application = NULL;
+        const char                *app_icon = NULL;
 
         g_return_val_if_fail (notification != NULL, FALSE);
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
@@ -1156,13 +1207,20 @@ notify_notification_show (NotifyNotification *notification,
             }
         }
 
+        app_icon = priv->app_icon ? priv->app_icon : notify_get_app_icon ();
+
+        /* Use the icon_name as app icon only before there was a hint for it */
+        if (!app_icon && !_notify_check_spec_version(1, 1)) {
+            app_icon = priv->icon_name;
+        }
+
         /* TODO: make this nonblocking */
         result = g_dbus_proxy_call_sync (proxy,
                                          "Notify",
                                          g_variant_new ("(susssasa{sv}i)",
                                                         priv->app_name ? priv->app_name : notify_get_app_name (),
                                                         priv->id,
-                                                        priv->icon_name ? priv->icon_name : "",
+                                                        app_icon ? app_icon : "",
                                                         priv->summary ? priv->summary : "",
                                                         priv->body ? priv->body : "",
                                                         &actions_builder,
@@ -1462,6 +1520,35 @@ notify_notification_set_app_name (NotifyNotification *notification,
 
         g_object_notify (G_OBJECT (notification), "app-name");
 }
+
+/**
+ * notify_notification_set_app_icon:
+ * @notification: a #NotifyNotification
+ * @app_icon: (nullable): The optional icon theme icon name or filename.
+ *
+ * Sets the application icon for the notification.
+ *
+ * If this function is not called or if @app_icon is %NULL, the application icon
+ * will be set from the value set via [func@set_app_icon].
+ *
+ * Since: 0.8.4
+ */
+void
+notify_notification_set_app_icon (NotifyNotification *notification,
+                                  const char         *app_icon)
+{
+        g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
+
+        if (maybe_warn_portal_unsupported_feature ("App Icon")) {
+                return;
+        }
+
+        g_free (notification->priv->app_icon);
+        notification->priv->app_icon = g_strdup (app_icon);
+
+        g_object_notify (G_OBJECT (notification), "app-icon");
+}
+
 
 /**
  * notify_notification_set_hint_int32:
