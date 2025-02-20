@@ -48,7 +48,7 @@ typedef struct
 
 } CallbackPair;
 
-struct _NotifyNotificationPrivate
+typedef struct _NotifyNotificationPrivate
 {
         guint32         id;
         char           *app_name;
@@ -80,7 +80,7 @@ struct _NotifyNotificationPrivate
         gulong          proxy_signal_handler;
 
         gint            closed_reason;
-};
+} NotifyNotificationPrivate;
 
 enum
 {
@@ -110,9 +110,7 @@ static void     notify_notification_get_property (GObject      *object,
                                                   GParamSpec   *pspec);
 static guint    signals[LAST_SIGNAL] = { 0 };
 
-static GObjectClass *parent_class = NULL;
-
-G_DEFINE_TYPE (NotifyNotification, notify_notification, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (NotifyNotification, notify_notification, G_TYPE_OBJECT)
 
 static GObject *
 notify_notification_constructor (GType                  type,
@@ -120,8 +118,9 @@ notify_notification_constructor (GType                  type,
                                  GObjectConstructParam *construct_params)
 {
         GObject *object;
+        GObjectClass *object_class = G_OBJECT_CLASS (notify_notification_parent_class);
 
-        object = parent_class->constructor (type,
+        object = object_class->constructor (type,
                                             n_construct_properties,
                                             construct_params);
 
@@ -134,8 +133,6 @@ static void
 notify_notification_class_init (NotifyNotificationClass *klass)
 {
         GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-        parent_class = g_type_class_peek_parent (klass);
 
         object_class->constructor = notify_notification_constructor;
         object_class->get_property = notify_notification_get_property;
@@ -300,7 +297,8 @@ notify_notification_set_property (GObject      *object,
                                   GParamSpec   *pspec)
 {
         NotifyNotification        *notification = NOTIFY_NOTIFICATION (object);
-        NotifyNotificationPrivate *priv = notification->priv;
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
 
         switch (prop_id) {
         case PROP_ID:
@@ -351,7 +349,8 @@ notify_notification_get_property (GObject    *object,
                                   GParamSpec *pspec)
 {
         NotifyNotification        *notification = NOTIFY_NOTIFICATION (object);
-        NotifyNotificationPrivate *priv = notification->priv;
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
 
         switch (prop_id) {
         case PROP_ID:
@@ -399,27 +398,30 @@ destroy_pair (CallbackPair *pair)
 }
 
 static void
-notify_notification_init (NotifyNotification *obj)
+notify_notification_init (NotifyNotification *notification)
 {
-        obj->priv = g_new0 (NotifyNotificationPrivate, 1);
-        obj->priv->timeout = NOTIFY_EXPIRES_DEFAULT;
-        obj->priv->closed_reason = NOTIFY_CLOSED_REASON_UNSET;
-        obj->priv->hints = g_hash_table_new_full (g_str_hash,
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
+        priv->timeout = NOTIFY_EXPIRES_DEFAULT;
+        priv->closed_reason = NOTIFY_CLOSED_REASON_UNSET;
+        priv->hints = g_hash_table_new_full (g_str_hash,
+                                             g_str_equal,
+                                             g_free,
+                                             (GDestroyNotify) g_variant_unref);
+
+        priv->action_map = g_hash_table_new_full (g_str_hash,
                                                   g_str_equal,
                                                   g_free,
-                                                  (GDestroyNotify) g_variant_unref);
-
-        obj->priv->action_map = g_hash_table_new_full (g_str_hash,
-                                                       g_str_equal,
-                                                       g_free,
-                                                       (GDestroyNotify) destroy_pair);
+                                                  (GDestroyNotify) destroy_pair);
 }
 
 static void
 notify_notification_dispose (GObject *object)
 {
-        NotifyNotification        *obj = NOTIFY_NOTIFICATION (object);
-        NotifyNotificationPrivate *priv = obj->priv;
+        NotifyNotification        *notification = NOTIFY_NOTIFICATION (object);
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
         GDBusProxy                *proxy;
 
         if (priv->portal_timeout_id) {
@@ -434,16 +436,17 @@ notify_notification_dispose (GObject *object)
 
         g_clear_object (&priv->icon_pixbuf);
 
-        G_OBJECT_CLASS (parent_class)->dispose (object);
+        G_OBJECT_CLASS (notify_notification_parent_class)->dispose (object);
 }
 
 static void
 notify_notification_finalize (GObject *object)
 {
-        NotifyNotification        *obj = NOTIFY_NOTIFICATION (object);
-        NotifyNotificationPrivate *priv = obj->priv;
+        NotifyNotification        *notification = NOTIFY_NOTIFICATION (object);
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
 
-        _notify_cache_remove_notification (obj);
+        _notify_cache_remove_notification (notification);
 
         g_free (priv->app_name);
         g_free (priv->app_icon);
@@ -463,9 +466,7 @@ notify_notification_finalize (GObject *object)
         if (priv->hints != NULL)
                 g_hash_table_destroy (priv->hints);
 
-        g_free (obj->priv);
-
-        G_OBJECT_CLASS (parent_class)->finalize (object);
+        G_OBJECT_CLASS (notify_notification_parent_class)->finalize (object);
 }
 
 static gboolean
@@ -599,33 +600,36 @@ notify_notification_update_internal (NotifyNotification *notification,
                                      const char         *body,
                                      const char         *icon)
 {
-        if (notification->priv->summary != summary) {
-                g_free (notification->priv->summary);
-                notification->priv->summary = g_strdup (summary);
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
+        if (priv->summary != summary) {
+                g_free (priv->summary);
+                priv->summary = g_strdup (summary);
                 g_object_notify (G_OBJECT (notification), "summary");
         }
 
-        if (notification->priv->body != body) {
-                g_free (notification->priv->body);
-                notification->priv->body = (body != NULL
+        if (priv->body != body) {
+                g_free (priv->body);
+                priv->body = (body != NULL
                                             && *body != '\0' ? g_strdup (body) : NULL);
                 g_object_notify (G_OBJECT (notification), "body");
         }
 
-        if (notification->priv->icon_name != icon) {
+        if (priv->icon_name != icon) {
                 gchar *snapped_icon;
                 const char *hint_name = NULL;
 
-                g_free (notification->priv->icon_name);
-                notification->priv->icon_name = (icon != NULL
+                g_free (priv->icon_name);
+                priv->icon_name = (icon != NULL
                                                  && *icon != '\0' ? g_strdup (icon) : NULL);
                 snapped_icon = try_prepend_snap_desktop (notification,
-                                                         notification->priv->icon_name);
+                                                         priv->icon_name);
                 if (snapped_icon != NULL) {
                         g_debug ("Icon updated in snap environment: '%s' -> '%s'\n",
-                                 notification->priv->icon_name, snapped_icon);
-                        g_free (notification->priv->icon_name);
-                        notification->priv->icon_name = snapped_icon;
+                                 priv->icon_name, snapped_icon);
+                        g_free (priv->icon_name);
+                        priv->icon_name = snapped_icon;
                 }
 
                 if (_notify_check_spec_version(1, 2)) {
@@ -641,13 +645,14 @@ notify_notification_update_internal (NotifyNotification *notification,
                 if (hint_name) {
                     notify_notification_set_hint (notification,
                                                   hint_name,
-                                                  notification->priv->icon_name ? g_variant_new_string (notification->priv->icon_name) : NULL);
+                                                  priv->icon_name ?
+                                                  g_variant_new_string (priv->icon_name) : NULL);
                 }
 
                 g_object_notify (G_OBJECT (notification), "icon-name");
         }
 
-        notification->priv->updates_pending = TRUE;
+        priv->updates_pending = TRUE;
 }
 
 /**
@@ -670,7 +675,6 @@ notify_notification_update (NotifyNotification *notification,
                             const char         *body,
                             const char         *icon)
 {
-        g_return_val_if_fail (notification != NULL, FALSE);
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
         g_return_val_if_fail (summary != NULL && *summary != '\0', FALSE);
 
@@ -683,6 +687,8 @@ notify_notification_update (NotifyNotification *notification,
 static char *
 get_portal_notification_id (NotifyNotification *notification)
 {
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
         char *app_id;
         char *notification_id;
 
@@ -700,7 +706,7 @@ get_portal_notification_id (NotifyNotification *notification)
         notification_id = g_strdup_printf ("libnotify-%s-%s-%u",
                                            app_id,
                                            notify_get_app_name (),
-                                           notification->priv->id);
+                                           priv->id);
 
         g_free (app_id);
 
@@ -711,19 +717,21 @@ static gboolean
 activate_action (NotifyNotification *notification,
                  const gchar        *action)
 {
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
         CallbackPair *pair;
 
-        pair = g_hash_table_lookup (notification->priv->action_map, action);
+        pair = g_hash_table_lookup (priv->action_map, action);
 
         if (!pair) {
                 return FALSE;
         }
 
-        notification->priv->activating = TRUE;
+        priv->activating = TRUE;
         pair->cb (notification, (char *) action, pair->user_data);
-        notification->priv->activating = FALSE;
-        g_free (notification->priv->activation_token);
-        notification->priv->activation_token = NULL;
+        priv->activating = FALSE;
+        g_free (priv->activation_token);
+        priv->activation_token = NULL;
 
         return TRUE;
 }
@@ -732,15 +740,18 @@ static gboolean
 close_notification (NotifyNotification *notification,
                     NotifyClosedReason  reason)
 {
-        if (notification->priv->closed_reason != NOTIFY_CLOSED_REASON_UNSET ||
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
+        if (priv->closed_reason != NOTIFY_CLOSED_REASON_UNSET ||
             reason == NOTIFY_CLOSED_REASON_UNSET) {
                 return FALSE;
         }
 
         g_object_ref (G_OBJECT (notification));
-        notification->priv->closed_reason = reason;
+        priv->closed_reason = reason;
         g_signal_emit (notification, signals[SIGNAL_CLOSED], 0);
-        notification->priv->id = 0;
+        priv->id = 0;
         g_object_unref (G_OBJECT (notification));
 
         return TRUE;
@@ -753,6 +764,9 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                    GVariant   *parameters,
                    NotifyNotification *notification)
 {
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
         const char *interface;
 
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
@@ -764,7 +778,7 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                 guint32 id, reason;
 
                 g_variant_get (parameters, "(uu)", &id, &reason);
-                if (id != notification->priv->id)
+                if (id != priv->id)
                         return;
 
                 close_notification (notification, reason);
@@ -776,7 +790,7 @@ proxy_g_signal_cb (GDBusProxy *proxy,
 
                 g_variant_get (parameters, "(u&s)", &id, &action);
 
-                if (id != notification->priv->id)
+                if (id != priv->id)
                         return;
 
                 if (!activate_action (notification, action) &&
@@ -790,11 +804,11 @@ proxy_g_signal_cb (GDBusProxy *proxy,
 
                 g_variant_get (parameters, "(u&s)", &id, &activation_token);
 
-                if (id != notification->priv->id)
+                if (id != priv->id)
                         return;
 
-                g_free (notification->priv->activation_token);
-                notification->priv->activation_token = g_strdup (activation_token);
+                g_free (priv->activation_token);
+                priv->activation_token = g_strdup (activation_token);
         } else if (g_str_equal (signal_name, "ActionInvoked") &&
                    g_str_equal (interface, NOTIFY_PORTAL_DBUS_CORE_INTERFACE) &&
                    g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(ssav)"))) {
@@ -833,12 +847,14 @@ remove_portal_notification (GDBusProxy         *proxy,
                             NotifyClosedReason  reason,
                             GError            **error)
 {
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
         GVariant *ret;
         gchar *notification_id;
 
-        if (notification->priv->portal_timeout_id) {
-                g_source_remove (notification->priv->portal_timeout_id);
-                notification->priv->portal_timeout_id = 0;
+        if (priv->portal_timeout_id) {
+                g_source_remove (priv->portal_timeout_id);
+                priv->portal_timeout_id = 0;
         }
 
         notification_id = get_portal_notification_id (notification);
@@ -868,9 +884,11 @@ static gboolean
 on_portal_timeout (gpointer data)
 {
         NotifyNotification *notification = data;
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
         GDBusProxy *proxy;
 
-        notification->priv->portal_timeout_id = 0;
+        priv->portal_timeout_id = 0;
 
         proxy = _notify_get_proxy (NULL);
         if (proxy == NULL) {
@@ -886,7 +904,8 @@ static GIcon *
 get_notification_gicon (NotifyNotification  *notification,
                         GError             **error)
 {
-        NotifyNotificationPrivate *priv = notification->priv;
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
         GFileInputStream *input;
         GFile *file = NULL;
         GIcon *gicon = NULL;
@@ -960,11 +979,12 @@ add_portal_notification (GDBusProxy         *proxy,
                          NotifyNotification *notification,
                          GError            **error)
 {
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
         GIcon *icon;
         GVariant *urgency;
         GVariant *ret;
         GVariantBuilder builder;
-        NotifyNotificationPrivate *priv = notification->priv;
         GError *local_error = NULL;
         static guint32 portal_notification_count = 0;
         char *notification_id;
@@ -1021,7 +1041,7 @@ add_portal_notification (GDBusProxy         *proxy,
                                        g_variant_builder_end (&buttons));
         }
 
-        urgency = g_hash_table_lookup (notification->priv->hints, "urgency");
+        urgency = g_hash_table_lookup (priv->hints, "urgency");
         if (urgency) {
                 switch (g_variant_get_byte (urgency)) {
                 case NOTIFY_URGENCY_LOW:
@@ -1119,7 +1139,6 @@ notify_notification_show (NotifyNotification *notification,
         GApplication              *application = NULL;
         const char                *app_icon = NULL;
 
-        g_return_val_if_fail (notification != NULL, FALSE);
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
         g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
@@ -1128,7 +1147,7 @@ notify_notification_show (NotifyNotification *notification,
                 g_assert_not_reached ();
         }
 
-        priv = notification->priv;
+        priv = notify_notification_get_instance_private (notification);
         proxy = _notify_get_proxy (error);
         if (proxy == NULL) {
                 return FALSE;
@@ -1247,19 +1266,23 @@ void
 notify_notification_set_timeout (NotifyNotification *notification,
                                  gint                timeout)
 {
-        g_return_if_fail (notification != NULL);
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
-        notification->priv->timeout = timeout;
+        priv->timeout = timeout;
 }
 
 gint
 _notify_notification_get_timeout (const NotifyNotification *notification)
 {
-        g_return_val_if_fail (notification != NULL, -1);
-        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), -1);
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private ((NotifyNotification *) notification);
 
-        return notification->priv->timeout;
+        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION ((NotifyNotification *) notification), -1);
+
+        return priv->timeout;
 }
 
 /**
@@ -1276,7 +1299,6 @@ void
 notify_notification_set_category (NotifyNotification *notification,
                                   const char         *category)
 {
-        g_return_if_fail (notification != NULL);
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
         if (maybe_warn_portal_unsupported_feature ("Category")) {
@@ -1301,7 +1323,6 @@ void
 notify_notification_set_urgency (NotifyNotification *notification,
                                  NotifyUrgency       urgency)
 {
-        g_return_if_fail (notification != NULL);
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
         notify_notification_set_hint_byte (notification,
@@ -1338,6 +1359,8 @@ void
 notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
                                            GdkPixbuf          *pixbuf)
 {
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
         gint            width;
         gint            height;
         gint            rowstride;
@@ -1359,7 +1382,7 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
                 hint_name = "icon_data";
         }
 
-        g_clear_object (&notification->priv->icon_pixbuf);
+        g_clear_object (&priv->icon_pixbuf);
 
         if (pixbuf == NULL) {
                 notify_notification_set_hint (notification, hint_name, NULL);
@@ -1367,7 +1390,7 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         }
 
         if (_notify_uses_portal_notifications ()) {
-                notification->priv->icon_pixbuf = g_object_ref (pixbuf);
+                priv->icon_pixbuf = g_object_ref (pixbuf);
                 return;
         }
 
@@ -1464,16 +1487,19 @@ notify_notification_set_hint (NotifyNotification *notification,
                               const char         *key,
                               GVariant           *value)
 {
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
         g_return_if_fail (key != NULL && *key != '\0');
 
         if (value != NULL) {
                 value = maybe_parse_snap_hint_value (notification, key, value);
-                g_hash_table_insert (notification->priv->hints,
+                g_hash_table_insert (priv->hints,
                                     g_strdup (key),
                                     g_variant_ref_sink (value));
         } else {
-                g_hash_table_remove (notification->priv->hints, key);
+                g_hash_table_remove (priv->hints, key);
         }
 }
 
@@ -1494,14 +1520,17 @@ void
 notify_notification_set_app_name (NotifyNotification *notification,
                                   const char         *app_name)
 {
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
         if (maybe_warn_portal_unsupported_feature ("App Name")) {
                 return;
         }
 
-        g_free (notification->priv->app_name);
-        notification->priv->app_name = g_strdup (app_name);
+        g_free (priv->app_name);
+        priv->app_name = g_strdup (app_name);
 
         g_object_notify (G_OBJECT (notification), "app-name");
 }
@@ -1522,14 +1551,16 @@ void
 notify_notification_set_app_icon (NotifyNotification *notification,
                                   const char         *app_icon)
 {
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
         if (maybe_warn_portal_unsupported_feature ("App Icon")) {
                 return;
         }
 
-        g_free (notification->priv->app_icon);
-        notification->priv->app_icon = g_strdup (app_icon);
+        g_free (priv->app_icon);
+        priv->app_icon = g_strdup (app_icon);
 
         g_object_notify (G_OBJECT (notification), "app-icon");
 }
@@ -1686,10 +1717,12 @@ _remove_all (void)
 void
 notify_notification_clear_hints (NotifyNotification *notification)
 {
-        g_return_if_fail (notification != NULL);
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
-        g_hash_table_foreach_remove (notification->priv->hints,
+        g_hash_table_foreach_remove (priv->hints,
                                      (GHRFunc) _remove_all,
                                      NULL);
 }
@@ -1703,22 +1736,24 @@ notify_notification_clear_hints (NotifyNotification *notification)
 void
 notify_notification_clear_actions (NotifyNotification *notification)
 {
-        g_return_if_fail (notification != NULL);
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
-        g_hash_table_foreach_remove (notification->priv->action_map,
+        g_hash_table_foreach_remove (priv->action_map,
                                      (GHRFunc) _remove_all,
                                      NULL);
 
-        if (notification->priv->actions != NULL) {
-                g_slist_foreach (notification->priv->actions,
+        if (priv->actions != NULL) {
+                g_slist_foreach (priv->actions,
                                  (GFunc) g_free,
                                  NULL);
-                g_slist_free (notification->priv->actions);
+                g_slist_free (priv->actions);
         }
 
-        notification->priv->actions = NULL;
-        notification->priv->has_nondefault_actions = FALSE;
+        priv->actions = NULL;
+        priv->has_nondefault_actions = FALSE;
 }
 
 /**
@@ -1752,7 +1787,7 @@ notify_notification_add_action (NotifyNotification  *notification,
         g_return_if_fail (label != NULL && *label != '\0');
         g_return_if_fail (callback != NULL);
 
-        priv = notification->priv;
+        priv = notify_notification_get_instance_private (notification);
 
         priv->actions = g_slist_append (priv->actions, g_strdup (action));
         priv->actions = g_slist_append (priv->actions, g_strdup (label));
@@ -1763,9 +1798,9 @@ notify_notification_add_action (NotifyNotification  *notification,
         pair->free_func = free_func;
         g_hash_table_insert (priv->action_map, g_strdup (action), pair);
 
-        if (!notification->priv->has_nondefault_actions &&
+        if (!priv->has_nondefault_actions &&
             g_ascii_strcasecmp (action, "default") != 0) {
-                notification->priv->has_nondefault_actions = TRUE;
+                priv->has_nondefault_actions = TRUE;
         }
 }
 
@@ -1787,19 +1822,24 @@ notify_notification_add_action (NotifyNotification  *notification,
 const char *
 notify_notification_get_activation_token (NotifyNotification *notification)
 {
-        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), NULL);
-        g_return_val_if_fail (notification->priv->activating, NULL);
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
 
-        return notification->priv->activation_token;
+        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), NULL);
+        g_return_val_if_fail (priv->activating, NULL);
+
+        return priv->activation_token;
 }
 
 gboolean
 _notify_notification_has_nondefault_actions (const NotifyNotification *n)
 {
-        g_return_val_if_fail (n != NULL, FALSE);
-        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (n), FALSE);
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private ((NotifyNotification *) n);
 
-        return n->priv->has_nondefault_actions;
+        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION ((NotifyNotification *) n), FALSE);
+
+        return priv->has_nondefault_actions;
 }
 
 /**
@@ -1822,7 +1862,7 @@ notify_notification_close (NotifyNotification *notification,
         g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), FALSE);
         g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-        priv = notification->priv;
+        priv = notify_notification_get_instance_private (notification);
 
         proxy = _notify_get_proxy (error);
         if (proxy == NULL) {
@@ -1868,9 +1908,11 @@ notify_notification_close (NotifyNotification *notification,
 gint
 notify_notification_get_closed_reason (const NotifyNotification *notification)
 {
-        g_return_val_if_fail (notification != NULL, NOTIFY_CLOSED_REASON_UNSET);
-        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification),
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private ((NotifyNotification *) notification);
+
+        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION ((NotifyNotification *) notification),
                               NOTIFY_CLOSED_REASON_UNSET);
 
-        return notification->priv->closed_reason;
+        return priv->closed_reason;
 }

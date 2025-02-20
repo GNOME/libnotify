@@ -20,8 +20,7 @@
  * Boston, MA  02111-1307, USA.
  */
 
-#ifndef _NOTIFY_NOTIFICATION_H_
-#define _NOTIFY_NOTIFICATION_H_
+#pragma once
 
 #include <glib.h>
 #include <glib-object.h>
@@ -46,15 +45,8 @@ G_BEGIN_DECLS
 #define NOTIFY_EXPIRES_NEVER    0
 
 #define NOTIFY_TYPE_NOTIFICATION         (notify_notification_get_type ())
-#define NOTIFY_NOTIFICATION(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), NOTIFY_TYPE_NOTIFICATION, NotifyNotification))
-#define NOTIFY_NOTIFICATION_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), NOTIFY_TYPE_NOTIFICATION, NotifyNotificationClass))
-#define NOTIFY_IS_NOTIFICATION(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), NOTIFY_TYPE_NOTIFICATION))
-#define NOTIFY_IS_NOTIFICATION_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), NOTIFY_TYPE_NOTIFICATION))
-#define NOTIFY_NOTIFICATION_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), NOTIFY_TYPE_NOTIFICATION, NotifyNotificationClass))
 
-typedef struct _NotifyNotification NotifyNotification;
-typedef struct _NotifyNotificationClass NotifyNotificationClass;
-typedef struct _NotifyNotificationPrivate NotifyNotificationPrivate;
+G_DECLARE_DERIVABLE_TYPE (NotifyNotification, notify_notification, NOTIFY, NOTIFICATION, GObject);
 
 /**
  * NotifyNotification:
@@ -68,13 +60,6 @@ typedef struct _NotifyNotificationPrivate NotifyNotificationPrivate;
  * of ways. As such, there is a clear separation of content and presentation,
  * and this API enforces that.
  */
-struct _NotifyNotification
-{
-        /*< private >*/
-        GObject                    parent_object;
-
-        NotifyNotificationPrivate *priv;
-};
 
 struct _NotifyNotificationClass
 {
@@ -145,8 +130,6 @@ typedef void    (*NotifyActionCallback) (NotifyNotification *notification,
  * This is much like [func@GObject.CALLBACK].
  */
 #define NOTIFY_ACTION_CALLBACK(func) ((NotifyActionCallback)(func))
-
-GType               notify_notification_get_type             (void);
 
 NotifyNotification *notify_notification_new                  (const char         *summary,
                                                               const char         *body,
@@ -229,4 +212,3 @@ gboolean            notify_notification_close                 (NotifyNotificatio
 gint                notify_notification_get_closed_reason     (const NotifyNotification *notification);
 
 G_END_DECLS
-#endif /* NOTIFY_NOTIFICATION_H */
