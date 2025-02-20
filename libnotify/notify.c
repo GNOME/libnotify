@@ -494,6 +494,8 @@ notify_uninit (void)
                     _notify_notification_has_nondefault_actions (n)) {
                         notify_notification_close (n, NULL);
                 }
+
+                g_object_run_dispose (G_OBJECT (n));
         }
 
         if (_proxy != NULL) {

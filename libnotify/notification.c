@@ -434,8 +434,6 @@ notify_notification_dispose (GObject *object)
                 g_clear_signal_handler (&priv->proxy_signal_handler, proxy);
         }
 
-        g_clear_object (&priv->icon_pixbuf);
-
         G_OBJECT_CLASS (notify_notification_parent_class)->dispose (object);
 }
 
@@ -454,6 +452,7 @@ notify_notification_finalize (GObject *object)
         g_free (priv->body);
         g_free (priv->icon_name);
         g_free (priv->activation_token);
+        g_clear_object (&priv->icon_pixbuf);
 
         if (priv->actions != NULL) {
                 g_slist_foreach (priv->actions, (GFunc) g_free, NULL);

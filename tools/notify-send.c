@@ -510,7 +510,9 @@ main (int argc, char *argv[])
                 loop = NULL;
         }
 
+#ifndef g_autoptr
         g_clear_object (&notify);
+#endif
 
         notify_uninit ();
 
