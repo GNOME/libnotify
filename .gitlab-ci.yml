@@ -1,12 +1,13 @@
 variables:
   DEBIAN_FRONTEND: noninteractive
+  MESON_BUILD_DIR: _build
+  DOCS_BUILD_DIR: _reference
 
 stages:
   - build
   - deploy
 
-build:ubuntu:
-  stage: build
+.build:ubuntu:base:
   image: ubuntu:devel
   before_script:
     - apt-get update &&
@@ -26,21 +27,28 @@ build:ubuntu:
         docbook-xsl-ns
         gi-docgen
   script:
-    - meson _build -Ddocbook_docs=enabled
-    - ninja -C _build install
-    - mv _build/docs/reference/libnotify-0 _reference
+    - meson setup ${MESON_BUILD_DIR} -Ddocbook_docs=enabled
+
+build:ubuntu:
+  stage: build
+  extends:
+    - .build:ubuntu:base
+  script:
+    - !reference [".build:ubuntu:base", "script"]
+    - meson install -C ${MESON_BUILD_DIR}
+    - mv ${MESON_BUILD_DIR}/docs/reference/libnotify-0 ${DOCS_BUILD_DIR}
   artifacts:
     expose_as: "Build artifacts"
     paths:
-      - _build/docs/notification-spec.html
-      - _reference
-      - _build/meson-logs
+      - ${MESON_BUILD_DIR}/docs/notification-spec.html
+      - ${DOCS_BUILD_DIR}
+      - ${MESON_BUILD_DIR}/meson-logs
 
 pages:
   stage: deploy
   script:
     - mkdir public
-    - mv _reference/* public/
+    - mv ${DOCS_BUILD_DIR}/* public/
   artifacts:
     when: on_success
     paths:
