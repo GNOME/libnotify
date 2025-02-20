@@ -21,6 +21,6 @@ You can find the nightly documentation at https://gnome.pages.gitlab.gnome.org/l
 For GLib based applications the [GNotification][gnotif] API should be used
 instead.
 
-[fdo-spec]: https://specifications.freedesktop.org/notification-spec/notification-spec-latest.html
+[fdo-spec]: https://specifications.freedesktop.org/notification-spec/latest/
 [gnotif]: https://docs.gtk.org/gio/class.Notification.html
 [portal]: https://github.com/flatpak/xdg-desktop-portal/blob/main/data/org.freedesktop.portal.Notification.xml
