@@ -1,3 +1,25 @@
+New in 0.8.4
+============
+
+* notification: Set the icon-name property as image hint instead of as app-icon
+  [Julian Sparber]
+* notify-send: Require valid UTF-8 for Summary and Body [Logan Rathbone]
+* notify-send: Allow sending an empty summary [Evy Garden]
+* notify-send: Flush stdout after printing notification ID [delthas]
+* build: Improve mapfile and support building in solaris [Alan Coopersmith]
+* libnotify/notification: Modernize the NotifyNotification class definition
+  (and add support for auto-pointers) [Marco Trevisan]
+
+* Bugs fixed:
+  - #35 notify-send dumps core if notification message is invalid UTF-8 [Logan
+    Rathbone]
+  - #39 libnotify should be quiet [Bastien Nocera]
+  - #44 fdo documentation link outdated in README.md [Marco Trevisan]
+
+Contributors:
+  Alan Coopersmith, Bastien Nocera, Evy Garden, Julian Sparber, Logan Rathbone,
+  Marco Trevisan, Sertonix, delthas
+
 New in 0.8.3
 ============
 
