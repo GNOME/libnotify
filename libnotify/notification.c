@@ -424,10 +424,7 @@ notify_notification_dispose (GObject *object)
                 notify_notification_get_instance_private (notification);
         GDBusProxy                *proxy;
 
-        if (priv->portal_timeout_id) {
-                g_source_remove (priv->portal_timeout_id);
-                priv->portal_timeout_id = 0;
-        }
+        g_clear_handle_id (&priv->portal_timeout_id, g_source_remove);
 
         proxy = _notify_get_proxy (NULL);
         if (proxy != NULL) {
@@ -454,10 +451,8 @@ notify_notification_finalize (GObject *object)
         g_free (priv->activation_token);
         g_clear_object (&priv->icon_pixbuf);
 
-        if (priv->actions != NULL) {
-                g_slist_foreach (priv->actions, (GFunc) g_free, NULL);
-                g_slist_free (priv->actions);
-        }
+        if (priv->actions != NULL)
+                g_slist_free_full (priv->actions, g_free);
 
         if (priv->action_map != NULL)
                 g_hash_table_destroy (priv->action_map);
@@ -729,8 +724,7 @@ activate_action (NotifyNotification *notification,
         priv->activating = TRUE;
         pair->cb (notification, (char *) action, pair->user_data);
         priv->activating = FALSE;
-        g_free (priv->activation_token);
-        priv->activation_token = NULL;
+        g_clear_pointer (&priv->activation_token, g_free);
 
         return TRUE;
 }
@@ -1744,12 +1738,7 @@ notify_notification_clear_actions (NotifyNotification *notification)
                                      (GHRFunc) _remove_all,
                                      NULL);
 
-        if (priv->actions != NULL) {
-                g_slist_foreach (priv->actions,
-                                 (GFunc) g_free,
-                                 NULL);
-                g_slist_free (priv->actions);
-        }
+        g_slist_free_full (priv->actions, g_free);
 
         priv->actions = NULL;
         priv->has_nondefault_actions = FALSE;

@@ -482,10 +482,7 @@ notify_uninit (void)
                 return;
         }
 
-        if (_app_name != NULL) {
-                g_free (_app_name);
-                _app_name = NULL;
-        }
+        g_clear_pointer (&_app_name, g_free);
 
         for (l = _active_notifications; l != NULL; l = l->next) {
                 NotifyNotification *n = NOTIFY_NOTIFICATION (l->data);
@@ -498,19 +495,10 @@ notify_uninit (void)
                 g_object_run_dispose (G_OBJECT (n));
         }
 
-        if (_proxy != NULL) {
-            g_object_unref (_proxy);
-            _proxy = NULL;
-        }
-
-        g_free (_snap_name);
-        _snap_name = NULL;
-
-        g_free (_snap_app);
-        _snap_app = NULL;
-
-        g_free (_flatpak_app);
-        _flatpak_app = NULL;
+        g_clear_object (&_proxy);
+        g_clear_pointer (&_snap_name, g_free);
+        g_clear_pointer (&_snap_app, g_free);
+        g_clear_pointer (&_flatpak_app, g_free);
 
         _initted = FALSE;
 }
@@ -606,8 +594,7 @@ out:
         }
 
         if (!_notify_update_spec_version (error)) {
-               g_object_unref (_proxy);
-               _proxy = NULL;
+               g_clear_object (&_proxy);
                return NULL;
         }
 
