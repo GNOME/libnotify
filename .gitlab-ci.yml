@@ -19,7 +19,33 @@ stages:
 .build:ubuntu:base:
   image: ubuntu:devel
   before_script:
-    - apt-get update &&
+    # Disable installing of manpages and docs
+    - |
+      cat <<"EOF" | tee /etc/dpkg/dpkg.cfg.d/01_nodoc
+      # Delete man pages
+      path-exclude=/usr/share/man/*
+
+      # Delete docs
+      path-exclude=/usr/share/doc/*
+      path-include=/usr/share/doc/*/copyright
+      EOF
+
+     # Disable installing of locale files
+    - |
+      cat <<"EOF" | tee /etc/dpkg/dpkg.cfg.d/01_nolocales
+      # Delete locales
+      path-exclude=/usr/share/locale/*
+      EOF
+
+    - apt-get update
+
+    # Install eatmydata
+    - apt install -y -q eatmydata
+    - mkdir -p "/usr/local/libexec/dt-deb-action"
+    - ln -s /usr/bin/eatmydata /usr/local/libexec/dt-deb-action/dpkg
+    - echo 'Dir::Bin::dpkg /usr/local/libexec/dt-deb-action/dpkg;' >
+      /etc/apt/apt.conf.d/00dt-deb-action-eatmydata
+
     - apt-get install -q -y --no-install-recommends
         gobject-introspection
         libgdk-pixbuf2.0-dev
