@@ -57,7 +57,7 @@ configure_file(input: 'config.h.meson',
 
 if get_option('man')
   xsltproc = find_program('xsltproc', required: true)
-  stylesheet = 'http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl'
+  stylesheet = 'http://docbook.sourceforge.net/release/xsl-ns/current/manpages/docbook.xsl'
   xsltproc_command = [
     xsltproc,
     '--nonet',
