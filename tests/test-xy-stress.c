@@ -21,7 +21,7 @@
  */
 
 #include <libnotify/notify.h>
-#include <gdk/gdk.h>
+#include <gtk/gtk.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -61,18 +61,18 @@ static gboolean
 _popup_random_bubble (gpointer unused)
 {
         GdkDisplay     *display;
-        GdkScreen      *screen;
-
-        int             screen_x2, screen_y2;
+        GListModel     *monitors;
+        GdkMonitor     *monitor;
+        GdkRectangle    rect;
         int             x, y;
 
         display = gdk_display_get_default ();
-        screen = gdk_display_get_default_screen (display);
-        screen_x2 = gdk_screen_get_width (screen) - 1;
-        screen_y2 = gdk_screen_get_height (screen) - 1;
+        monitors = gdk_display_get_monitors (display);
+        monitor = g_list_model_get_item (monitors, 0);
+        gdk_monitor_get_geometry (monitor, &rect);
 
-        x = g_random_int_range (0, screen_x2);
-        y = g_random_int_range (0, screen_y2);
+        x = g_random_int_range (rect.x, rect.x + rect.width - 1);
+        y = g_random_int_range (rect.y, rect.y + rect.height - 1);
         emit_notification (x, y);
 
         return TRUE;
@@ -83,7 +83,7 @@ main (int argc, char **argv)
 {
         GMainLoop *loop;
 
-        gdk_init (&argc, &argv);
+        gtk_init ();
 
         notify_init ("XY");
 

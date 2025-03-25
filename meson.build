@@ -44,7 +44,7 @@ glib_req_version = '>= 2.62.0'
 gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0')
 glib_dep = dependency('glib-2.0', version: glib_req_version)
 gio_dep = dependency('gio-2.0', version: glib_req_version)
-gtk_dep = dependency('gtk+-3.0', version: '>= 2.90', required: get_option('tests'))
+gtk_dep = dependency('gtk4', version: '>= 4.0', required: get_option('tests'))
 
 libnotify_deps = [gdk_pixbuf_dep, gio_dep, glib_dep]
 tests_deps = [gtk_dep]

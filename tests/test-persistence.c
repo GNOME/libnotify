@@ -53,8 +53,6 @@ install_callback (NotifyNotification *n,
         g_assert (strcmp (action, "install") == 0);
 
         printf ("You clicked Install\n");
-
-        gtk_main_quit ();
 }
 
 int
@@ -62,7 +60,7 @@ main (int argc, char *argv[])
 {
         NotifyNotification *n;
 
-        gtk_init (&argc, &argv);
+        gtk_init ();
         notify_init ("Persistence Test");
 
         n = notify_notification_new ("Software Updates Available",
@@ -79,16 +77,10 @@ main (int argc, char *argv[])
         notify_notification_show (n, NULL);
 
         if (!server_has_persistence ()) {
-                GtkStatusIcon *icon;
                 g_message ("Server does not support persistence; using a status icon");
-                icon = gtk_status_icon_new_from_icon_name ("software-update-available-symbolic");
-                gtk_status_icon_set_tooltip_markup (icon, "<b>Software Updates Available</b>\nImportant updates for your apps are now available.");
-                gtk_status_icon_set_visible (icon, TRUE);
         } else {
                 g_message ("Server supports persistence; status icon not needed");
         }
-
-        gtk_main ();
 
         return 0;
 }

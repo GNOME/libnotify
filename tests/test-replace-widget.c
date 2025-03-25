@@ -25,13 +25,12 @@
 static int      count = 0;
 
 static void
-on_exposed (GtkWidget      *widget,
-            GdkEventExpose *ev,
-            void           *user_data)
+on_mapped (GtkWidget      *widget,
+           void           *user_data)
 {
         NotifyNotification *n = NOTIFY_NOTIFICATION (user_data);
 
-        g_signal_handlers_disconnect_by_func (widget, on_exposed, user_data);
+        g_signal_handlers_disconnect_by_func (widget, on_mapped, user_data);
 
         notify_notification_show (n, NULL);
 }
@@ -58,19 +57,18 @@ main (int argc, char *argv[])
         GtkWidget      *window;
         GtkWidget      *button;
 
-        gtk_init (&argc, &argv);
+        gtk_init ();
         notify_init ("Replace Test");
 
-        window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+        window = gtk_window_new ();
         g_signal_connect (G_OBJECT (window),
                           "delete_event",
-                          G_CALLBACK (gtk_main_quit),
+                          G_CALLBACK (gtk_window_destroy),
                           NULL);
 
         button = gtk_button_new_with_label ("click here to change notification");
-        gtk_container_add (GTK_CONTAINER (window), button);
 
-        gtk_widget_show_all (window);
+        gtk_window_set_child (GTK_WINDOW (window), button);
 
         n = notify_notification_new ("Widget Attachment Test",
                                      "Button has not been clicked yet",
@@ -83,11 +81,12 @@ main (int argc, char *argv[])
                           G_CALLBACK (on_clicked),
                           n);
         g_signal_connect_after (G_OBJECT (button),
-                                "expose-event",
-                                G_CALLBACK (on_exposed),
+                                "map",
+                                G_CALLBACK (on_mapped),
                                 n);
 
-        gtk_main ();
+        while (g_list_model_get_n_items (gtk_window_get_toplevels ()) > 0)
+                g_main_context_iteration (NULL, TRUE);
 
         return 0;
 }

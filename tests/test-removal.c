@@ -20,6 +20,8 @@
 #include <libnotify/notify.h>
 #include <gtk/gtk.h>
 
+static GMainLoop *loop;
+
 static void
 next_callback (NotifyNotification *n,
                const char         *action)
@@ -30,7 +32,7 @@ next_callback (NotifyNotification *n,
 
         notify_notification_close (n, NULL);
 
-        gtk_main_quit ();
+        g_main_loop_quit (loop);
 }
 
 int
@@ -38,7 +40,7 @@ main (int argc, char *argv[])
 {
         NotifyNotification *n;
 
-        gtk_init (&argc, &argv);
+        loop = g_main_loop_new (NULL, FALSE);
 
         notify_init ("Urgency");
 
@@ -104,7 +106,7 @@ main (int argc, char *argv[])
                 exit (1);
         }
 
-        gtk_main ();
+        g_main_loop_run (loop);
 
         g_object_unref (G_OBJECT (n));
 

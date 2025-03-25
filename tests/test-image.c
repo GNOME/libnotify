@@ -42,8 +42,11 @@ main (int argc, char *argv[])
         char           *file;
         char           *uri;
         GdkPixbuf      *pixbuf;
+        GtkIconTheme   *theme;
+        GtkIconPaintable *paintable;
+        GFile          *icon_file;
 
-        gtk_init (&argc, &argv);
+        gtk_init ();
 
         if (!notify_init ("Images Test"))
                 exit (1);
@@ -84,11 +87,16 @@ main (int argc, char *argv[])
         n = notify_notification_new ("Raw image test",
                                      "Testing sending raw pixbufs",
                                      NULL);
-        pixbuf = gtk_icon_theme_load_icon (gtk_icon_theme_get_for_screen (gdk_screen_get_default ()),
-                                           "folder-open",
-                                           48,
-                                           GTK_ICON_LOOKUP_USE_BUILTIN,
-                                           NULL);
+        theme = gtk_icon_theme_new ();
+        paintable = gtk_icon_theme_lookup_icon (theme,
+                                                "folder-open", NULL,
+                                                48, 1,
+                                                GTK_TEXT_DIR_NONE,
+                                                0);
+        icon_file = gtk_icon_paintable_get_file (paintable);
+
+        pixbuf = gdk_pixbuf_new_from_file (g_file_get_path (icon_file), NULL);
+
         if (pixbuf == NULL) {
                 fprintf (stderr, "failed to render pixbuf\n");
                 return 1;
@@ -96,6 +104,8 @@ main (int argc, char *argv[])
 
         notify_notification_set_image_from_pixbuf (n, pixbuf);
         g_object_unref (pixbuf);
+        g_object_unref (icon_file);
+        g_object_unref (paintable);
 
         if (!notify_notification_show (n, NULL)) {
                 fprintf (stderr, "failed to send notification\n");
