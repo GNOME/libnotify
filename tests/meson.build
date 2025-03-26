@@ -22,7 +22,7 @@ test_progs = [
 ]
 
 foreach tprog: test_progs
-  executable('test-' + tprog, ['test-' + tprog + '.c'],
+  test('test-' + tprog, executable('test-' + tprog, ['test-' + tprog + '.c'],
     dependencies: [libnotify_dep, tests_deps],
-  )
+  ))
 endforeach
