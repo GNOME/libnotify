@@ -228,11 +228,6 @@ validate_utf8_or_die (const char *str, const char *param)
 int
 main (int argc, char *argv[])
 {
-#ifdef g_autoptr
-        g_autoptr (NotifyNotification) notify = NULL;
-#else
-        NotifyNotification *notify = NULL;
-#endif
         static const char  *summary = NULL;
         char               *body;
         static const char  *type = NULL;
@@ -253,6 +248,7 @@ main (int argc, char *argv[])
         static gboolean     wait = FALSE;
         static int          expire_timeout = NOTIFY_EXPIRES_DEFAULT;
         GOptionContext     *opt_ctx;
+        NotifyNotification *notify;
         GError             *error = NULL;
         gboolean            retval;
 
@@ -510,9 +506,7 @@ main (int argc, char *argv[])
                 loop = NULL;
         }
 
-#ifndef g_autoptr
-        g_clear_object (&notify);
-#endif
+        g_object_unref (G_OBJECT (notify));
 
         notify_uninit ();
 
