@@ -251,7 +251,7 @@ main (int argc, char *argv[])
         static gboolean     hint_error = FALSE, show_error = FALSE;
         static gboolean     transient = FALSE;
         static gboolean     wait = FALSE;
-        static glong        expire_timeout = NOTIFY_EXPIRES_DEFAULT;
+        static int          expire_timeout = NOTIFY_EXPIRES_DEFAULT;
         GOptionContext     *opt_ctx;
         GError             *error = NULL;
         gboolean            retval;
