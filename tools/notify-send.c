@@ -481,7 +481,7 @@ main (int argc, char *argv[])
                                   G_CALLBACK (handle_closed),
                                   NULL);
 
-                if (expire_timeout > 0) {
+                if (expire_timeout != NOTIFY_EXPIRES_NEVER) {
                         g_timeout_add (expire_timeout, on_wait_timeout, NULL);
                 }
         }
