@@ -1,3 +1,21 @@
+New in 0.8.5
+============
+
+This is a bugfix release.
+
+* Revert usage of autopointers (#54) [Logan Rathbone]
+* notify-send: wait timeout variable should be int, not long [Logan Rathbone]
+* test: make tests run with `meson test` (#30) [Logan Rathbone, with thanks to
+  'matoro']
+* notify-send: Utilize app_icon property rather than icon-name (#53) [Logan
+  Rathbone]
+* notify: constructor should set app-icon property, not icon-name (#53) [Logan
+  Rathbone]
+* Revert updating of meson stylesheet URL (!46) [Jan Tojnar]
+
+Contributors:
+  Jan Tojnar, matoro, Logan Rathbone
+
 New in 0.8.4
 ============
 
