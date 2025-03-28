@@ -1,3 +1,14 @@
+New in 0.8.6
+============
+
+This contains no substantive code changes compared to 0.8.5. Version 0.8.5 did
+not get properly distributed due to a CI configuration issue.
+
+* ci: Don't try to run tests for dist job [Logan Rathbone]
+
+Contributors:
+  Logan Rathbone
+
 New in 0.8.5
 ============
 
