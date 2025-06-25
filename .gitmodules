@@ -1,0 +1,3 @@
+[submodule "subprojects/gi-docgen"]
+	path = subprojects/gi-docgen
+	url = https://gitlab.gnome.org/GNOME/gi-docgen.git
