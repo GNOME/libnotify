@@ -617,8 +617,7 @@ notify_notification_update_internal (NotifyNotification *notification,
                 g_free (priv->icon_name);
                 priv->icon_name = (icon != NULL
                                                  && *icon != '\0' ? g_strdup (icon) : NULL);
-                snapped_icon = try_prepend_snap_desktop (notification,
-                                                         priv->icon_name);
+                snapped_icon = try_prepend_snap (notification, priv->icon_name);
                 if (snapped_icon != NULL) {
                         g_debug ("Icon updated in snap environment: '%s' -> '%s'\n",
                                  priv->icon_name, snapped_icon);
