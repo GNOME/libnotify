@@ -299,6 +299,14 @@ _initialize_snap_names (void)
 
         if (_snap_app == NULL) {
                 _snap_app = g_strdup (_snap_name);
+        } else if (strchr (_snap_app, '-')) {
+                const char *snap_uuid;
+
+                /* Snapd appends now an UUID to the app name so let's drop it. */
+                snap_uuid = _snap_app + strlen(_snap_app) - 36 /* UUID length */;
+                if (snap_uuid > _snap_app + 1 && g_uuid_string_is_valid (snap_uuid)) {
+                        *((char *) snap_uuid-1) = '\0';
+                }
         }
 
         g_debug ("SNAP app: %s", _snap_app);
