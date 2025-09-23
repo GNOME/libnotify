@@ -28,6 +28,7 @@
 
 #include "notify.h"
 #include "internal.h"
+#include "launch-context.h"
 
 #if !defined(G_PARAM_STATIC_NAME) && !defined(G_PARAM_STATIC_NICK) && \
     !defined(G_PARAM_STATIC_BLURB)
@@ -1827,6 +1828,38 @@ notify_notification_get_activation_token (NotifyNotification *notification)
         g_return_val_if_fail (priv->activating, NULL);
 
         return priv->activation_token;
+}
+
+/**
+ * notify_notification_get_activation_app_launch_context:
+ * @notification: The notification.
+ *
+ * Gets an application launch context for the notification action
+ * activation.
+ *
+ * If an an action is currently being activated, gets a
+ * a [class@Gio.AppLaunchContext] that can be used to launch applications using
+ * the current activation token (see [method@Notification.get_activation_token]).
+ *
+ * This function is intended to be used in a [callback@ActionCallback] to get
+ * the launch context for the activated action, if the notification daemon
+ * supports it.
+ *
+ * Returns: (nullable) (transfer full): The [class@Gio.AppLaunchContext] for
+ *  the current activation token, or %NULL if unset
+ *
+ * Since: 0.8.7
+ */
+GAppLaunchContext *
+notify_notification_get_activation_app_launch_context (NotifyNotification *notification)
+{
+        NotifyNotificationPrivate *priv =
+                notify_notification_get_instance_private (notification);
+
+        g_return_val_if_fail (NOTIFY_IS_NOTIFICATION (notification), NULL);
+        g_return_val_if_fail (priv->activating, NULL);
+
+        return notification_app_launch_context_new (notification);
 }
 
 gboolean

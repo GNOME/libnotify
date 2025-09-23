@@ -205,6 +205,8 @@ void                notify_notification_add_action            (NotifyNotificatio
 
 const char         *notify_notification_get_activation_token  (NotifyNotification *notification);
 
+GAppLaunchContext  *notify_notification_get_activation_app_launch_context (NotifyNotification *notification);
+
 void                notify_notification_clear_actions         (NotifyNotification *notification);
 gboolean            notify_notification_close                 (NotifyNotification *notification,
                                                                GError            **error);

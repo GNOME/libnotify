@@ -168,13 +168,18 @@ handle_action (NotifyNotification *notify,
                gpointer            user_data)
 {
         const char *action_name = user_data;
-        const char *activation_token;
+        g_autoptr(GAppLaunchContext) launch_context = NULL;
 
-        activation_token = notify_notification_get_activation_token (notify);
+        launch_context = notify_notification_get_activation_app_launch_context (notify);
 
         g_printf ("%s\n", action_name);
 
-        if (activation_token) {
+        if (launch_context) {
+                g_autofree char *activation_token = NULL;
+
+                activation_token =
+                        g_app_launch_context_get_startup_notify_id (launch_context,
+                                                                    NULL, NULL);
                 g_debug ("Activation Token: %s", activation_token);
         }
 

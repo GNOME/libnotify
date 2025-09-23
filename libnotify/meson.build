@@ -11,6 +11,10 @@ sources = [
   'notification.c',
 ]
 
+private_sources = [
+  'launch-context.c',
+]
+
 features_data = configuration_data()
 features_data.set('LIBNOTIFY_MAJOR_VERSION', VERSION_ARRAY[0])
 features_data.set('LIBNOTIFY_MINOR_VERSION', VERSION_ARRAY[1])
@@ -55,7 +59,12 @@ notify_dep = declare_dependency(
 
 libnotify_lib = shared_library(LIBNAME,
   dependencies: notify_dep,
-  sources: sources + enum_types + marshal,
+  sources: [
+    sources,
+    enum_types,
+    marshal,
+    private_sources,
+  ],
   version: '@0@.@1@.@2@'.format(LT_CURRENT, LT_REVISION, LT_AGE),
   soversion: LT_CURRENT,
   install: true,
