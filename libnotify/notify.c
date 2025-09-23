@@ -281,7 +281,9 @@ _initialize_snap_names (void)
                 }
 
                 if (g_str_equal (ns[1], _snap_name)) {
-                        _snap_app = g_strdup (ns[2]);
+                        /* Discard the last namespace, being the extension. */
+                        g_clear_pointer (&ns[ns_length-1], g_free);
+                        _snap_app = g_strjoinv (".", &ns[2]);
                         g_strfreev (ns);
                         break;
                 }
