@@ -1,10 +1,12 @@
 project('libnotify',
   'c',
   version: '0.8.6',
-  meson_version: '>= 0.56.0')
+  meson_version: '>= 0.64.0')
 
+fs = import('fs')
 gnome = import('gnome')
 pkgconfig = import('pkgconfig')
+python = import('python')
 
 cc = meson.get_compiler('c')
 
