@@ -47,6 +47,7 @@ stages:
       /etc/apt/apt.conf.d/00dt-deb-action-eatmydata
 
     - apt-get install -q -y --no-install-recommends
+        dbus-daemon
         gobject-introspection
         libgdk-pixbuf-2.0-dev
         libgirepository1.0-dev
@@ -58,9 +59,11 @@ stages:
         ninja-build
         python3-pip
         python3-setuptools
+        python3-dbusmock
         xsltproc
         docbook-xsl-ns
         gi-docgen
+        xvfb
   script:
     - meson setup ${MESON_BUILD_DIR} -Ddocbook_docs=enabled
 
@@ -88,7 +91,7 @@ build:dist:ubuntu:
     - apt-get install -q -y git
   script:
     - !reference [".build:ubuntu:base", "script"]
-    - meson dist -C "${MESON_BUILD_DIR}" --include-subprojects --no-tests
+    - meson dist -C "${MESON_BUILD_DIR}" --include-subprojects
   artifacts:
     name: "${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: "always"
