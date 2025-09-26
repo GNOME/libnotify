@@ -48,7 +48,7 @@ stages:
 
     - apt-get install -q -y --no-install-recommends
         gobject-introspection
-        libgdk-pixbuf2.0-dev
+        libgdk-pixbuf-2.0-dev
         libgirepository1.0-dev
         libglib2.0-dev
         libgtk-4-dev
