@@ -816,37 +816,35 @@ proxy_g_signal_cb (GDBusProxy *proxy,
         } else if (g_str_equal (signal_name, "ActionInvoked") &&
                    g_str_equal (interface, NOTIFY_PORTAL_DBUS_CORE_INTERFACE) &&
                    g_variant_is_of_type (parameters, G_VARIANT_TYPE ("(ssav)"))) {
-                char *notification_id;
+                g_autofree char *notification_id = NULL;
+                g_autofree char *activation_token = NULL;
                 const char *id;
                 const char *action;
-                GVariant *parameter;
-                int i;
+                g_autoptr(GVariant) parameter = NULL;
+                g_autoptr(GVariant) platform_data = NULL;
 
                 g_variant_get (parameters, "(&s&s@av)", &id, &action, &parameter);
 
                 notification_id = get_portal_notification_id (notification);
 
                 if (!g_str_equal (notification_id, id)) {
-                        g_free (notification_id);
                         return;
                 }
 
-                for (i = 0; i < g_variant_n_children (parameter); i++) {
-                    GVariant *pdata = NULL;
-                    g_variant_get_child (parameter, i, "v", &pdata);
+                /* According to the spec, it has to be the 2nd parameter */
+                if (g_variant_n_children (parameter) > 1) {
+                        g_variant_get_child (parameter, 1, "v", &platform_data);
 
-                    if (g_variant_is_of_type (pdata, G_VARIANT_TYPE_VARDICT)) {
-                        const char *activation_token = NULL;
-                        g_variant_lookup (pdata, "activation-token", "&s", &activation_token);
+                        if (g_variant_is_of_type (platform_data,
+                                                  G_VARIANT_TYPE_VARDICT)) {
+                                g_variant_lookup (platform_data,
+                                                  "activation-token", "s",
+                                                  &activation_token);
 
-                        if (activation_token) {
-                            g_free (priv->activation_token);
-                            priv->activation_token = g_strdup (activation_token);
-                            break;
+                                g_free (priv->activation_token);
+                                priv->activation_token =
+                                        g_steal_pointer (&activation_token);
                         }
-                    }
-
-                    g_variant_unref (pdata);
                 }
 
                 if (!activate_action (notification, action) &&
@@ -856,9 +854,6 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                 }
 
                 close_notification (notification, NOTIFY_CLOSED_REASON_DISMISSED);
-
-                g_free (notification_id);
-                g_variant_unref (parameter);
         } else {
                 g_debug ("Unhandled signal '%s.%s'", interface, signal_name);
         }
