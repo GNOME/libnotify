@@ -51,6 +51,17 @@ gboolean
 _notify_check_spec_version (int major,
                             int minor)
 {
+        g_autoptr (GError) error = NULL;
+
+        /* This requires a connection being set, so ensure it's the case. */
+        if (!_notify_get_proxy (&error)) {
+                g_critical ("Failed to check the server protocol version: %s",
+                            error->message);
+                return FALSE;
+        }
+
+        g_assert (_spec_version_major > 0);
+
        if (_spec_version_major > major)
                return TRUE;
        if (_spec_version_major < major)
