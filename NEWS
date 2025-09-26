@@ -1,3 +1,23 @@
+New in 0.8.7
+============
+
+This is release contains bugfixes when used within a snap and a new API to
+get a Gio.AppLaunchContext that can be used to launch applications with an
+action activation token.
+
+* ci: Enable tests again (adding new dependencies) [Marco]
+* tests: Run non-interactive tests in headless mode [Marco]
+* test-image: Use a local asset instead of relying on invalid icon theme [Marco]
+* notification: Add ability to get a GAppLaunchContext on activation [Marco]
+* notify: Ignore the snap UUID to compute the snap application [Marco]
+* notify: Support snap application that contains a dot in their name [Marco]
+* notification: Allow using a desktop file as is from a snap if readable [Marco]
+* notification: Do not use the desktop file logic for icons [Marco]
+* notification: Remove app name warning in sandboxes [Maximiliano]
+
+Contributors:
+  Marco Trevisan, Maximiliano Sandoval
+
 New in 0.8.6
 ============
 
