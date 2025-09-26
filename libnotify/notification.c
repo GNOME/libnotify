@@ -80,7 +80,6 @@ typedef struct _NotifyNotificationPrivate
 
         gboolean        has_nondefault_actions;
         gboolean        activating;
-        gboolean        updates_pending;
 
         gulong          proxy_signal_handler;
 
@@ -661,8 +660,6 @@ notify_notification_update_internal (NotifyNotification *notification,
 
                 g_object_notify (G_OBJECT (notification), "icon-name");
         }
-
-        priv->updates_pending = TRUE;
 }
 
 /**
