@@ -2,7 +2,9 @@ test_env = environment()
 test_env.set('G_DEBUG', 'fatal-criticals')
 
 dbus_run_session = find_program('dbus-run-session', required: false)
-py = python.find_installation('python3', modules: 'dbusmock', required: false)
+py = python.find_installation('python3',
+  modules: ['dbus', 'dbusmock'],
+  required: false)
 xvfb_run = find_program('xvfb-run', required: false)
 
 if not dbus_run_session.found() or not py.found()
@@ -61,3 +63,12 @@ foreach tprog, tprop: test_progs
     workdir: meson.current_build_dir(),
   )
 endforeach
+
+
+test('test-notify-send', py,
+  args: files('test_notify_send.py'),
+  depends: tool_notify_send,
+  env: {
+    'NOTIFY_SEND': tool_notify_send.full_path(),
+  },
+)
