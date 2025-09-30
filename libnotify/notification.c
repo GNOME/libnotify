@@ -494,7 +494,7 @@ notify_notification_new (const char *summary,
         return g_object_new (NOTIFY_TYPE_NOTIFICATION,
                              "summary", summary,
                              "body", body,
-                             "app-icon", icon,
+                             "icon-name", icon,
                              NULL);
 }
 
