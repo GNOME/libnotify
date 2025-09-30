@@ -4,6 +4,7 @@ libnotify_includedir = join_paths(includedir, libnotify_includesubdir)
 headers = [
   'notify.h',
   'notification.h',
+  'notification-hints.h',
 ]
 
 sources = [

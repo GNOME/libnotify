@@ -26,6 +26,8 @@
 #include <glib-object.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
+#include <libnotify/notification-hints.h>
+
 G_BEGIN_DECLS
 
 /**

@@ -384,7 +384,8 @@ main (int argc, char *argv[])
         notify_notification_set_app_name (notify, app_name);
 
         if (transient) {
-                notify_notification_set_hint (notify, "transient",
+                notify_notification_set_hint (notify,
+                                              NOTIFY_NOTIFICATION_HINT_TRANSIENT,
                                               g_variant_new_boolean (TRUE));
 
                 if (!server_has_capability ("persistence")) {

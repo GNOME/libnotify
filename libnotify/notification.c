@@ -643,9 +643,9 @@ notify_notification_update_internal (NotifyNotification *notification,
                 }
 
                 if (_notify_check_spec_version(1, 2)) {
-                    hint_name = "image-path";
+                    hint_name = NOTIFY_NOTIFICATION_HINT_IMAGE_PATH;
                 } else if (_notify_check_spec_version(1, 1)) {
-                    hint_name = "image_path";
+                    hint_name = NOTIFY_NOTIFICATION_HINT_IMAGE_PATH_LEGACY;
                 } else {
                     /* Before 1.1 only one image/icon could be specified and the
                      * icon_data hint didn't allow for a path or icon name,
@@ -1050,7 +1050,7 @@ add_portal_notification (GDBusProxy         *proxy,
                                        g_variant_builder_end (&buttons));
         }
 
-        urgency = g_hash_table_lookup (priv->hints, "urgency");
+        urgency = g_hash_table_lookup (priv->hints, NOTIFY_NOTIFICATION_HINT_URGENCY);
         if (urgency) {
                 switch (g_variant_get_byte (urgency)) {
                 case NOTIFY_URGENCY_LOW:
@@ -1191,7 +1191,8 @@ notify_notification_show (NotifyNotification *notification,
         }
 
         if (_notify_get_snap_app () &&
-            g_hash_table_lookup (priv->hints, "desktop-entry") == NULL) {
+            g_hash_table_lookup (priv->hints,
+                                 NOTIFY_NOTIFICATION_HINT_DESKTOP_ENTRY) == NULL) {
                 gchar *snap_desktop;
 
                 snap_desktop = g_strdup_printf ("%s_%s",
@@ -1200,7 +1201,7 @@ notify_notification_show (NotifyNotification *notification,
 
                 g_debug ("Using desktop entry: %s", snap_desktop);
                 g_variant_builder_add (&hints_builder, "{sv}",
-                                       "desktop-entry",
+                                       NOTIFY_NOTIFICATION_HINT_DESKTOP_ENTRY,
                                        g_variant_new_take_string (snap_desktop));
         }
 
@@ -1209,13 +1210,15 @@ notify_notification_show (NotifyNotification *notification,
         }
 
         if (application != NULL) {
-            GVariant *desktop_entry = g_hash_table_lookup (priv->hints, "desktop-entry");
+            GVariant *desktop_entry = g_hash_table_lookup (priv->hints,
+                                                           NOTIFY_NOTIFICATION_HINT_DESKTOP_ENTRY);
 
             if (desktop_entry == NULL) {
                 const char *application_id = g_application_get_application_id (application);
 
                 g_debug ("Using desktop entry: %s", application_id);
-                g_variant_builder_add (&hints_builder, "{sv}", "desktop-entry",
+                g_variant_builder_add (&hints_builder, "{sv}",
+                                       NOTIFY_NOTIFICATION_HINT_DESKTOP_ENTRY,
                                        g_variant_new_string (application_id));
             }
         }
@@ -1316,7 +1319,7 @@ notify_notification_set_category (NotifyNotification *notification,
 
         if (category != NULL && category[0] != '\0') {
                 notify_notification_set_hint_string (notification,
-                                                     "category",
+                                                     NOTIFY_NOTIFICATION_HINT_CATEGORY,
                                                      category);
         }
 }
@@ -1335,7 +1338,7 @@ notify_notification_set_urgency (NotifyNotification *notification,
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
         notify_notification_set_hint_byte (notification,
-                                           "urgency",
+                                           NOTIFY_NOTIFICATION_HINT_URGENCY,
                                            (guchar) urgency);
 }
 
@@ -1384,9 +1387,9 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         g_return_if_fail (pixbuf == NULL || GDK_IS_PIXBUF (pixbuf));
 
         if (_notify_check_spec_version(1, 2)) {
-                hint_name = "image-data";
+                hint_name = NOTIFY_NOTIFICATION_HINT_IMAGE_DATA;
         } else if (_notify_check_spec_version(1, 1)) {
-                hint_name = "image_data";
+                hint_name = NOTIFY_NOTIFICATION_HINT_IMAGE_DATA_LEGACY;
         } else {
                 hint_name = "icon_data";
         }
@@ -1462,11 +1465,11 @@ maybe_parse_snap_hint_value (NotifyNotification *notification,
         if (!_notify_get_snap_path ())
                 return value;
 
-        if (g_strcmp0 (key, "desktop-entry") == 0) {
+        if (g_strcmp0 (key, NOTIFY_NOTIFICATION_HINT_DESKTOP_ENTRY) == 0) {
                 parse_func = try_prepend_snap_desktop;
-        } else if (g_strcmp0 (key, "image-path") == 0 ||
-                   g_strcmp0 (key, "image_path") == 0 ||
-                   g_strcmp0 (key, "sound-file") == 0) {
+        } else if (g_strcmp0 (key, NOTIFY_NOTIFICATION_HINT_IMAGE_PATH) == 0 ||
+                   g_strcmp0 (key, NOTIFY_NOTIFICATION_HINT_IMAGE_PATH_LEGACY) == 0 ||
+                   g_strcmp0 (key, NOTIFY_NOTIFICATION_HINT_SOUND_FILE) == 0) {
                 parse_func = try_prepend_snap;
         }
 
