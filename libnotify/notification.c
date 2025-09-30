@@ -1696,12 +1696,6 @@ notify_notification_set_hint_string (NotifyNotification *notification,
         }
 }
 
-static gboolean
-_remove_all (void)
-{
-        return TRUE;
-}
-
 /**
  * notify_notification_clear_hints:
  * @notification: The notification.
@@ -1716,9 +1710,7 @@ notify_notification_clear_hints (NotifyNotification *notification)
 
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
-        g_hash_table_foreach_remove (priv->hints,
-                                     (GHRFunc) _remove_all,
-                                     NULL);
+        g_hash_table_remove_all (priv->hints);
 }
 
 /**
@@ -1735,9 +1727,7 @@ notify_notification_clear_actions (NotifyNotification *notification)
 
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
 
-        g_hash_table_foreach_remove (priv->action_map,
-                                     (GHRFunc) _remove_all,
-                                     NULL);
+        g_hash_table_remove_all (priv->action_map);
 
         g_slist_free_full (priv->actions, g_free);
 
