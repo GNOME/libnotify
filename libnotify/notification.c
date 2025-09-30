@@ -622,7 +622,6 @@ notify_notification_update_internal (NotifyNotification *notification,
 
         if (priv->icon_name != icon) {
                 gchar *snapped_icon;
-                const char *hint_name = NULL;
 
                 g_free (priv->icon_name);
                 priv->icon_name = (icon != NULL
@@ -635,22 +634,10 @@ notify_notification_update_internal (NotifyNotification *notification,
                         priv->icon_name = snapped_icon;
                 }
 
-                if (_notify_check_spec_version(1, 2)) {
-                    hint_name = NOTIFY_NOTIFICATION_HINT_IMAGE_PATH;
-                } else if (_notify_check_spec_version(1, 1)) {
-                    hint_name = NOTIFY_NOTIFICATION_HINT_IMAGE_PATH_LEGACY;
-                } else {
-                    /* Before 1.1 only one image/icon could be specified and the
-                     * icon_data hint didn't allow for a path or icon name,
-                     * therefore the icon is set as the app icon of the Notify call */
-                }
-
-                if (hint_name) {
-                    notify_notification_set_hint (notification,
-                                                  hint_name,
-                                                  priv->icon_name ?
-                                                  g_variant_new_string (priv->icon_name) : NULL);
-                }
+                notify_notification_set_hint (notification,
+                                              NOTIFY_NOTIFICATION_HINT_IMAGE_PATH,
+                                              priv->icon_name ?
+                                              g_variant_new_string (priv->icon_name) : NULL);
 
                 g_object_notify_by_pspec (G_OBJECT (notification), properties[PROP_ICON_NAME]);
         }
@@ -1103,6 +1090,38 @@ add_portal_notification (GDBusProxy         *proxy,
         return TRUE;
 }
 
+const char *
+get_hint_name (NotifyNotification *notification,
+               const char         *hint)
+{
+        if (g_str_equal (hint, NOTIFY_NOTIFICATION_HINT_IMAGE_DATA)) {
+                if (_notify_check_spec_version (1, 2)) {
+                        return hint;
+                }
+                if (_notify_check_spec_version (1, 1)) {
+                        return NOTIFY_NOTIFICATION_HINT_IMAGE_DATA_LEGACY;
+                }
+                return "icon_data";
+        }
+
+        if (g_str_equal (hint, NOTIFY_NOTIFICATION_HINT_IMAGE_PATH)) {
+                if (_notify_check_spec_version (1, 2)) {
+                        return hint;
+                }
+                if (_notify_check_spec_version (1, 1)) {
+                        return NOTIFY_NOTIFICATION_HINT_IMAGE_PATH_LEGACY;
+                }
+
+                /* Before 1.1 only one image/icon could be specified and the
+                 * icon_data hint didn't allow for a path or icon name,
+                 * therefore the icon is set as the app icon of the Notify call
+                 */
+                return NULL;
+        }
+
+        return hint;
+}
+
 /**
  * notify_notification_show:
  * @notification: The notification.
@@ -1164,7 +1183,12 @@ notify_notification_show (NotifyNotification *notification,
         g_variant_builder_init (&hints_builder, G_VARIANT_TYPE ("a{sv}"));
         g_hash_table_iter_init (&iter, priv->hints);
         while (g_hash_table_iter_next (&iter, &key, &data)) {
-                g_variant_builder_add (&hints_builder, "{sv}", key, data);
+                const char *hint = get_hint_name (notification, key);
+                if (!hint) {
+                        continue;
+                }
+
+                g_variant_builder_add (&hints_builder, "{sv}", hint, data);
         }
 
         if (g_hash_table_lookup (priv->hints, "sender-pid") == NULL) {
@@ -1208,7 +1232,7 @@ notify_notification_show (NotifyNotification *notification,
         app_icon = priv->app_icon ? priv->app_icon : notify_get_app_icon ();
 
         /* Use the icon_name as app icon only before there was a hint for it */
-        if (!app_icon && !_notify_check_spec_version(1, 1)) {
+        if (!app_icon && !_notify_check_spec_version (1, 1)) {
             app_icon = priv->icon_name;
         }
 
@@ -1366,22 +1390,15 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
         gboolean        has_alpha;
         gsize           image_len;
         GVariant       *value;
-        const char     *hint_name;
 
         g_return_if_fail (pixbuf == NULL || GDK_IS_PIXBUF (pixbuf));
-
-        if (_notify_check_spec_version(1, 2)) {
-                hint_name = NOTIFY_NOTIFICATION_HINT_IMAGE_DATA;
-        } else if (_notify_check_spec_version(1, 1)) {
-                hint_name = NOTIFY_NOTIFICATION_HINT_IMAGE_DATA_LEGACY;
-        } else {
-                hint_name = "icon_data";
-        }
 
         g_clear_object (&priv->icon_pixbuf);
 
         if (pixbuf == NULL) {
-                notify_notification_set_hint (notification, hint_name, NULL);
+                notify_notification_set_hint (notification,
+                                              NOTIFY_NOTIFICATION_HINT_IMAGE_DATA,
+                                              NULL);
                 return;
         }
 
@@ -1415,7 +1432,9 @@ notify_notification_set_image_from_pixbuf (NotifyNotification *notification,
                                                         TRUE,
                                                         (GDestroyNotify) g_object_unref,
                                                         g_object_ref (pixbuf)));
-        notify_notification_set_hint (notification, hint_name, value);
+        notify_notification_set_hint (notification,
+                                      NOTIFY_NOTIFICATION_HINT_IMAGE_DATA,
+                                      value);
 }
 
 typedef gchar * (*StringParserFunc) (NotifyNotification *, const gchar *);
