@@ -92,6 +92,13 @@
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><option>-n</option>, <option>--app-icon</option>=<replaceable>ICON</replaceable>
+        </term>
+        <listitem>
+          <para>Specifies an application icon filename or app icon name. The server may or may not display it.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term><option>-c</option>, <option>--category</option>=<replaceable>TYPE</replaceable>[,<replaceable>TYPE</replaceable>…]
         </term>
         <listitem>

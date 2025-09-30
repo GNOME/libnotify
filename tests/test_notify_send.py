@@ -35,6 +35,12 @@ class TestNotifySend(dbusmock.DBusTestCase):
         cls.start_session_bus()
         cls.dbus_con = cls.get_dbus(False)
 
+    @classmethod
+    def get_local_asset(self, *args):
+        path = os.path.join(os.path.dirname(__file__), *args)
+        self.assertTrue(os.path.exists(path), f"{path} does not exist")
+        return path
+
     def setUp(self):
         (self.p_mock, self.obj_daemon) = self.spawn_server_template(
             "notification_daemon", {}, stdout=subprocess.PIPE
@@ -122,6 +128,7 @@ class TestNotifySend(dbusmock.DBusTestCase):
                 "--replace-id", "1234",
                 "--expire-time", "27",
                 "--app-name", "foo.App",
+                "--app-icon", "some-app-icon",
                 "--icon", "some-icon",
                 "--category", "some.category",
                 "--transient",
@@ -137,7 +144,7 @@ class TestNotifySend(dbusmock.DBusTestCase):
             notification,
             exp_replaces_id=1234,
             exp_app_name="foo.App",
-            exp_app_icon="some-icon",
+            exp_app_icon="some-app-icon",
             exp_summary="title",
             exp_body="my text",
             exp_expire_timeout=27,
@@ -148,6 +155,59 @@ class TestNotifySend(dbusmock.DBusTestCase):
                 "category": "some.category",
                 "desktop-entry": "notify-send-app",
                 "transient": True,
+            },
+        )
+
+    def test_image_only(self):
+        """notify-send with image"""
+
+        ns_proc = subprocess.Popen([notify_send, "image-only", "-i", "my-image"])
+        ns_proc.wait()
+        self.assertEqual(ns_proc.returncode, 0)
+
+        notification = self.assertDaemonCall("Notify")
+        self.assertNotificationMatches(
+            notification,
+            exp_summary="image-only",
+            exp_hints={
+                "urgency": 1,
+                "sender-pid": ns_proc.pid,
+                "image_path": "my-image",
+            },
+        )
+
+    def test_file_image_only(self):
+        """notify-send with local image"""
+
+        image_file = self.get_local_asset("applet-critical.png")
+        ns_proc = self.notify_send(["image-only", "-i", image_file])
+
+        notification = self.assertDaemonCall("Notify")
+        self.assertNotificationMatches(
+            notification,
+            exp_summary="image-only",
+            exp_hints={
+                "urgency": 1,
+                "sender-pid": ns_proc.pid,
+                "image_path": image_file,
+            },
+        )
+
+    def test_app_icon_only(self):
+        """notify-send with app-icon"""
+
+        ns_proc = subprocess.Popen([notify_send, "app-icon-only", "-n", "my-app-icon"])
+        ns_proc.wait()
+        self.assertEqual(ns_proc.returncode, 0)
+
+        notification = self.assertDaemonCall("Notify")
+        self.assertNotificationMatches(
+            notification,
+            exp_summary="app-icon-only",
+            exp_app_icon="my-app-icon",
+            exp_hints={
+                "urgency": 1,
+                "sender-pid": ns_proc.pid,
             },
         )
 

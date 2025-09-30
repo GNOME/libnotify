@@ -238,6 +238,7 @@ main (int argc, char *argv[])
         char               *body;
         static const char  *type = NULL;
         static char        *app_name = NULL;
+        static char        *app_icon = NULL;
         static char        *icon_str = NULL;
         static char       **n_text = NULL;
         static char       **hints = NULL;
@@ -271,6 +272,9 @@ main (int argc, char *argv[])
                  N_("Specifies the app name for the notification"), N_("APP_NAME")},
                 {"icon", 'i', 0, G_OPTION_ARG_FILENAME, &icon_str,
                  N_("Specifies an icon filename or stock icon to display."),
+                 N_("ICON")},
+                {"app-icon", 'n', 0, G_OPTION_ARG_FILENAME, &app_icon,
+                 N_("Specifies an application icon filename or app icon name. The server may or may not display it."),
                  N_("ICON")},
                 {"category", 'c', 0, G_OPTION_ARG_FILENAME, &type,
                  N_("Specifies the notification category."),
@@ -375,7 +379,7 @@ main (int argc, char *argv[])
         notify = g_object_new (NOTIFY_TYPE_NOTIFICATION,
                                "summary", summary,
                                "body", body,
-                               "app-icon", icon_str,
+                               "app-icon", app_icon,
                                "icon-name", icon_str,
                                "id", notification_id,
                                NULL);
