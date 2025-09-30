@@ -82,6 +82,32 @@ build:ubuntu:
       - ${DOCS_BUILD_DIR}
       - ${MESON_BUILD_DIR}/meson-logs
 
+build:coverage:ubuntu:
+  stage: build
+  extends:
+    - .build:ubuntu:base
+  before_script:
+    - !reference [".build:ubuntu:base", "before_script"]
+    - apt-get install -q -y gcovr
+  script:
+    - meson setup ${MESON_BUILD_DIR} -Db_coverage=true
+    - meson test -C ${MESON_BUILD_DIR} --print-errorlogs
+    - ninja -C ${MESON_BUILD_DIR} coverage || true
+    - cat ${MESON_BUILD_DIR}/meson-logs/coverage.txt || true
+  artifacts:
+    reports:
+      junit: ${MESON_BUILD_DIR}/meson-logs/testlog.junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: ${MESON_BUILD_DIR}/meson-logs/coverage.xml
+    expose_as: 'Coverage Report'
+    when: always
+    paths:
+      - ${MESON_BUILD_DIR}/meson-logs
+      - ${MESON_BUILD_DIR}/meson-logs/coveragereport/index.html
+    expire_in: 1 week
+  coverage: '/^TOTAL.*\s+(\d+\%)$/'
+
 build:dist:ubuntu:
   stage: build
   extends:
@@ -100,9 +126,15 @@ build:dist:ubuntu:
 
 pages:
   stage: deploy
+  needs:
+    - job: build:ubuntu
+      artifacts: true
+    - job: build:coverage:ubuntu
+      artifacts: true
   script:
     - mkdir public
     - mv ${DOCS_BUILD_DIR}/* public/
+    - mv ${MESON_BUILD_DIR}/meson-logs/coveragereport public/coverage
   artifacts:
     when: on_success
     paths:
