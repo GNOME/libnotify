@@ -1016,14 +1016,6 @@ add_portal_notification (GDBusProxy         *proxy,
         } else if (g_hash_table_lookup (priv->action_map, "DEFAULT")) {
                 g_variant_builder_add (&builder, "{sv}", "default-action",
                                        g_variant_new_string ("DEFAULT"));
-        } else if (_notify_get_snap_app ()) {
-                /* In the snap case we may need to ensure that a default-action
-                 * is set to ensure that we will use the FDO notification daemon
-                 * and won't fallback to GTK one, as app-id won't match.
-                 * See: https://github.com/flatpak/xdg-desktop-portal/issues/769
-                 */
-                g_variant_builder_add (&builder, "{sv}", "default-action",
-                                       g_variant_new_string ("snap-fake-default-action"));
         }
 
         if (priv->has_nondefault_actions) {
