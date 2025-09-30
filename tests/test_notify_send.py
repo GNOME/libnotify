@@ -120,6 +120,24 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         self.assertEqual(ns_proc.returncode, 0)
         return ns_proc
 
+    def notify_send_wait_id(self, args=[]):
+        ns_proc = self.notify_send_proc(["--print-id"] + args,
+                                        stdout=subprocess.PIPE)
+
+        while True:
+            stdout = ns_proc.stdout.readline()
+            if stdout or ns_proc.poll():
+                break
+
+        try:
+            ns_proc.communicate(timeout=0.5)
+        except subprocess.TimeoutExpired:
+            pass
+
+        self.assertIsNone(ns_proc.poll())
+        return [ns_proc, int(stdout.decode("utf-8").strip())]
+
+
 class TestNotifySend(TestBaseNotifySend):
     """Test mocking notification-daemon"""
 
@@ -295,6 +313,17 @@ class TestNotifySend(TestBaseNotifySend):
             },
         )
 
+    def test_close_notification(self):
+        [ns_proc, notification_id] =  self.notify_send_wait_id([
+            "Wait me", "--wait",
+        ])
+
+        self.obj_daemon.EmitSignal(DBUS_IFACE, "NotificationClosed", "uu",
+                                   (notification_id, 3))
+        [stdout, _] = ns_proc.communicate(timeout=5)
+        self.assertFalse(stdout.decode("utf-8").strip())
+        self.assertEqual(ns_proc.returncode, 0)
+
 
 class TestNotifySendActions(TestBaseNotifySend):
     """Test mocking notification-daemon with actions"""
@@ -304,20 +333,13 @@ class TestNotifySendActions(TestBaseNotifySend):
         TestBaseNotifySend.setUpClass()
         cls.caps.append("actions")
 
-    def check_activate_action(self, action_id):
-        ns_proc = self.notify_send_proc([
+    def show_actions_notification(self):
+        [ns_proc, notification_id] =  self.notify_send_wait_id([
             "action!", "Choose it",
-            "--print-id",
             "--action=Foo",
             "--action=bar-action=Bar",
-        ], stdout=subprocess.PIPE)
+        ])
 
-        while True:
-            stdout = ns_proc.stdout.readline()
-            if stdout or ns_proc.poll():
-                break
-
-        action_id = str(action_id)
         notification = self.assertDaemonCall("Notify")
         self.assertNotificationMatches(
             notification,
@@ -330,8 +352,12 @@ class TestNotifySendActions(TestBaseNotifySend):
             },
         )
 
-        notification_id = int(stdout.decode('utf-8').strip())
+        return [ns_proc, notification_id]
 
+    def check_activate_action(self, action_id):
+        [ns_proc, notification_id] = self.show_actions_notification()
+
+        action_id = str(action_id)
         self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
                                    (notification_id, action_id))
 
@@ -346,6 +372,15 @@ class TestNotifySendActions(TestBaseNotifySend):
     def test_activate_named_action(self):
         """notify-send with action"""
         self.check_activate_action("bar-action")
+
+    def test_close_notification(self):
+        [ns_proc, notification_id] = self.show_actions_notification()
+
+        self.obj_daemon.EmitSignal(DBUS_IFACE, "NotificationClosed", "uu",
+                                   (notification_id, 2))
+        [stdout, _] = ns_proc.communicate(timeout=5)
+        self.assertFalse(stdout.decode("utf-8").strip())
+        self.assertEqual(ns_proc.returncode, 0)
 
 
 
