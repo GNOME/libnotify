@@ -144,6 +144,7 @@ class TestNotifySend(dbusmock.DBusTestCase):
             exp_hints={
                 "urgency": 2,
                 "sender-pid": ns_proc.pid,
+                "image_path": "some-icon",
                 "category": "some.category",
                 "desktop-entry": "notify-send-app",
                 "transient": True,

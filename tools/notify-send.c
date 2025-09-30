@@ -376,6 +376,7 @@ main (int argc, char *argv[])
                                "summary", summary,
                                "body", body,
                                "app-icon", icon_str,
+                               "icon-name", icon_str,
                                "id", notification_id,
                                NULL);
 
