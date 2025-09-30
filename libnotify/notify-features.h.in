@@ -27,19 +27,19 @@
 /**
  * NOTIFY_VERSION_MAJOR:
  *
- * Adwaita major version component (e.g. 1 if the version is 1.2.3).
+ * Notify major version component (e.g. 1 if the version is 1.2.3).
  */
 #define NOTIFY_VERSION_MAJOR    (@LIBNOTIFY_MAJOR_VERSION@)
 /**
  * NOTIFY_VERSION_MINOR:
  *
- * Adwaita minor version component (e.g. 2 if the version is 1.2.3).
+ * Notify minor version component (e.g. 2 if the version is 1.2.3).
  */
 #define NOTIFY_VERSION_MINOR    (@LIBNOTIFY_MINOR_VERSION@)
 /**
  * NOTIFY_VERSION_MICRO:
  *
- * Adwaita micro version component (e.g. 3 if the version is 1.2.3).
+ * Notify micro version component (e.g. 3 if the version is 1.2.3).
  */
 #define NOTIFY_VERSION_MICRO    (@LIBNOTIFY_MICRO_VERSION@)
 
