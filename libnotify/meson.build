@@ -94,7 +94,8 @@ if g_ir_scanner.found() and not introspection.disabled()
     export_packages: meson.project_name(),
     includes: ['GLib-2.0', 'GdkPixbuf-2.0'],
     extra_args: '--c-include=@0@/@1@.h'.format(meson.project_name(), LIBNAME),
-    install: true
+    install: true,
+    fatal_warnings: true,
   )
 endif
 
