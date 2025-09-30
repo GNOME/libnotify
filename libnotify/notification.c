@@ -101,7 +101,8 @@ enum
         PROP_SUMMARY,
         PROP_BODY,
         PROP_ICON_NAME,
-        PROP_CLOSED_REASON
+        PROP_CLOSED_REASON,
+        NUM_PROPERTIES,
 };
 
 static void     notify_notification_set_property (GObject      *object,
@@ -113,6 +114,7 @@ static void     notify_notification_get_property (GObject      *object,
                                                   GValue       *value,
                                                   GParamSpec   *pspec);
 static guint    signals[LAST_SIGNAL] = { 0 };
+static GParamSpec *properties[NUM_PROPERTIES] = { 0 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (NotifyNotification, notify_notification, G_TYPE_OBJECT)
 
@@ -174,18 +176,16 @@ notify_notification_class_init (NotifyNotificationClass *klass)
          *
          * The Id of the notification.
          */
-        g_object_class_install_property (object_class,
-                                         PROP_ID,
-                                         g_param_spec_int ("id", "ID",
-                                                           "The notification ID",
-                                                           0,
-                                                           G_MAXINT32,
-                                                           0,
-                                                           G_PARAM_READWRITE
-                                                           | G_PARAM_CONSTRUCT
-                                                           | G_PARAM_STATIC_NAME
-                                                           | G_PARAM_STATIC_NICK
-                                                           | G_PARAM_STATIC_BLURB));
+        properties[PROP_ID] = g_param_spec_int ("id", "ID",
+                                                "The notification ID",
+                                                0,
+                                                G_MAXINT32,
+                                                0,
+                                                G_PARAM_READWRITE
+                                                | G_PARAM_CONSTRUCT
+                                                | G_PARAM_STATIC_NAME
+                                                | G_PARAM_STATIC_NICK
+                                                | G_PARAM_STATIC_BLURB);
 
         /**
          * NotifyNotification:app-name:
@@ -194,16 +194,14 @@ notify_notification_class_init (NotifyNotificationClass *klass)
          *
          * Since: 0.7.3
          */
-        g_object_class_install_property (object_class,
-                                         PROP_APP_NAME,
-                                         g_param_spec_string ("app-name",
-                                                              "Application name",
-                                                              "The application name to use for this notification",
-                                                              NULL,
-                                                              G_PARAM_READWRITE
-                                                              | G_PARAM_STATIC_NAME
-                                                              | G_PARAM_STATIC_NICK
-                                                              | G_PARAM_STATIC_BLURB));
+        properties[PROP_APP_NAME] = g_param_spec_string ("app-name",
+                                                         "Application name",
+                                                         "The application name to use for this notification",
+                                                         NULL,
+                                                         G_PARAM_READWRITE
+                                                         | G_PARAM_STATIC_NAME
+                                                         | G_PARAM_STATIC_NICK
+                                                         | G_PARAM_STATIC_BLURB);
 
         /**
          * NotifyNotification:app-icon:
@@ -212,16 +210,14 @@ notify_notification_class_init (NotifyNotificationClass *klass)
          *
          * Since: 0.8.4
          */
-        g_object_class_install_property (object_class,
-                                         PROP_APP_ICON,
-                                         g_param_spec_string ("app-icon",
-                                                              "Application icon",
-                                                              "The application icon to use for this notification as filename or icon theme-compliant name",
-                                                              NULL,
-                                                              G_PARAM_READWRITE
-                                                              | G_PARAM_STATIC_NAME
-                                                              | G_PARAM_STATIC_NICK
-                                                              | G_PARAM_STATIC_BLURB));
+        properties[PROP_APP_ICON] = g_param_spec_string ("app-icon",
+                                                         "Application icon",
+                                                         "The application icon to use for this notification as filename or icon theme-compliant name",
+                                                         NULL,
+                                                         G_PARAM_READWRITE
+                                                         | G_PARAM_STATIC_NAME
+                                                         | G_PARAM_STATIC_NICK
+                                                         | G_PARAM_STATIC_BLURB);
 
 
         /**
@@ -229,51 +225,45 @@ notify_notification_class_init (NotifyNotificationClass *klass)
          *
          * The summary of the notification.
          */
-        g_object_class_install_property (object_class,
-                                         PROP_SUMMARY,
-                                         g_param_spec_string ("summary",
-                                                              "Summary",
-                                                              "The summary text",
-                                                              NULL,
-                                                              G_PARAM_READWRITE
-                                                              | G_PARAM_CONSTRUCT
-                                                              | G_PARAM_STATIC_NAME
-                                                              | G_PARAM_STATIC_NICK
-                                                              | G_PARAM_STATIC_BLURB));
+        properties[PROP_SUMMARY] = g_param_spec_string ("summary",
+                                                        "Summary",
+                                                        "The summary text",
+                                                        NULL,
+                                                        G_PARAM_READWRITE
+                                                        | G_PARAM_CONSTRUCT
+                                                        | G_PARAM_STATIC_NAME
+                                                        | G_PARAM_STATIC_NICK
+                                                        | G_PARAM_STATIC_BLURB);
 
         /**
          * NotifyNotification:body:
          *
          * The body of the notification.
          */
-        g_object_class_install_property (object_class,
-                                         PROP_BODY,
-                                         g_param_spec_string ("body",
-                                                              "Message Body",
-                                                              "The message body text",
-                                                              NULL,
-                                                              G_PARAM_READWRITE
-                                                              | G_PARAM_CONSTRUCT
-                                                              | G_PARAM_STATIC_NAME
-                                                              | G_PARAM_STATIC_NICK
-                                                              | G_PARAM_STATIC_BLURB));
+        properties[PROP_BODY] = g_param_spec_string ("body",
+                                                     "Message Body",
+                                                     "The message body text",
+                                                     NULL,
+                                                     G_PARAM_READWRITE
+                                                     | G_PARAM_CONSTRUCT
+                                                     | G_PARAM_STATIC_NAME
+                                                     | G_PARAM_STATIC_NICK
+                                                                      | G_PARAM_STATIC_BLURB);
 
         /**
          * NotifyNotification:icon-name:
          *
          * The icon-name of the icon to be displayed on the notification.
          */
-        g_object_class_install_property (object_class,
-                                         PROP_ICON_NAME,
-                                         g_param_spec_string ("icon-name",
-                                                              "Icon Name",
-                                                              "The icon filename or icon theme-compliant name",
-                                                              NULL,
-                                                              G_PARAM_READWRITE
-                                                              | G_PARAM_CONSTRUCT
-                                                              | G_PARAM_STATIC_NAME
-                                                              | G_PARAM_STATIC_NICK
-                                                              | G_PARAM_STATIC_BLURB));
+        properties[PROP_ICON_NAME] = g_param_spec_string ("icon-name",
+                                                          "Icon Name",
+                                                          "The icon filename or icon theme-compliant name",
+                                                          NULL,
+                                                          G_PARAM_READWRITE
+                                                          | G_PARAM_CONSTRUCT
+                                                          | G_PARAM_STATIC_NAME
+                                                          | G_PARAM_STATIC_NICK
+                                                          | G_PARAM_STATIC_BLURB);
 
         /**
          * NotifyNotification:closed-reason:
@@ -282,9 +272,7 @@ notify_notification_class_init (NotifyNotificationClass *klass)
          *
          * See [signal@Notification::closed].
          */
-        g_object_class_install_property (object_class,
-                                         PROP_CLOSED_REASON,
-                                         g_param_spec_int ("closed-reason",
+        properties[PROP_CLOSED_REASON] = g_param_spec_int ("closed-reason",
                                                            "Closed Reason",
                                                            "The reason code for why the notification was closed",
                                                            NOTIFY_CLOSED_REASON_UNSET,
@@ -293,7 +281,9 @@ notify_notification_class_init (NotifyNotificationClass *klass)
                                                            G_PARAM_READABLE
                                                            | G_PARAM_STATIC_NAME
                                                            | G_PARAM_STATIC_NICK
-                                                           | G_PARAM_STATIC_BLURB));
+                                                           | G_PARAM_STATIC_BLURB);
+
+        g_object_class_install_properties (object_class, NUM_PROPERTIES, properties);
 }
 
 static void
@@ -624,14 +614,13 @@ notify_notification_update_internal (NotifyNotification *notification,
         if (priv->summary != summary) {
                 g_free (priv->summary);
                 priv->summary = g_strdup (summary);
-                g_object_notify (G_OBJECT (notification), "summary");
+                g_object_notify_by_pspec (G_OBJECT (notification), properties[PROP_SUMMARY]);
         }
 
         if (priv->body != body) {
                 g_free (priv->body);
-                priv->body = (body != NULL
-                                            && *body != '\0' ? g_strdup (body) : NULL);
-                g_object_notify (G_OBJECT (notification), "body");
+                priv->body = (body != NULL && *body != '\0' ? g_strdup (body) : NULL);
+                g_object_notify_by_pspec (G_OBJECT (notification), properties[PROP_BODY]);
         }
 
         if (priv->icon_name != icon) {
@@ -666,7 +655,7 @@ notify_notification_update_internal (NotifyNotification *notification,
                                                   g_variant_new_string (priv->icon_name) : NULL);
                 }
 
-                g_object_notify (G_OBJECT (notification), "icon-name");
+                g_object_notify_by_pspec (G_OBJECT (notification), properties[PROP_ICON_NAME]);
         }
 }
 
@@ -1537,7 +1526,7 @@ notify_notification_set_app_name (NotifyNotification *notification,
         g_free (priv->app_name);
         priv->app_name = g_strdup (app_name);
 
-        g_object_notify (G_OBJECT (notification), "app-name");
+        g_object_notify_by_pspec (G_OBJECT (notification), properties[PROP_APP_NAME]);
 }
 
 /**
@@ -1567,7 +1556,7 @@ notify_notification_set_app_icon (NotifyNotification *notification,
         g_free (priv->app_icon);
         priv->app_icon = g_strdup (app_icon);
 
-        g_object_notify (G_OBJECT (notification), "app-icon");
+        g_object_notify_by_pspec (G_OBJECT (notification), properties[PROP_APP_ICON]);
 }
 
 
