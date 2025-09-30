@@ -149,6 +149,14 @@ notify_notification_class_init (NotifyNotificationClass *klass)
          * @notification: The object which received the signal.
          *
          * Emitted when the notification is closed.
+         *
+         * Note that when a [class@Notify.Notification] is used in a sandboxed
+         * environment where XDG Desktop Notification Portal is implicitly used,
+         * the signal [signal@Notify.Notification::closed] is only emitted when
+         * the notification is closed in response to an user action response.
+         *
+         * NO signal will be emitted if the user or the daemon dismissed the
+         * notification for any other reason.
          */
         signals[SIGNAL_CLOSED] =
                 g_signal_new ("closed",
