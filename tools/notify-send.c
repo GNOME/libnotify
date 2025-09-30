@@ -92,7 +92,8 @@ notify_notification_set_hint_variant (NotifyNotification *notification,
                                                              key, h_double);
                 }
         } else if (!strcasecmp (type, "byte")) {
-                gint h_byte = (gint) g_ascii_strtoull (value, NULL, 10);
+                int base = g_str_has_prefix (value, "0x") ? 16 : 10;
+                gint h_byte = (gint) g_ascii_strtoull (value, NULL, base);
 
                 if (h_byte < 0 || h_byte > 0xFF)
                         conv_error = TRUE;
