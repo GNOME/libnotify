@@ -49,11 +49,17 @@ gio_dep = dependency('gio-2.0', version: glib_req_version)
 gio_unix_dep = dependency('gio-unix-2.0', version: glib_req_version)
 gtk_dep = dependency('gtk4', version: '>= 4.0', required: get_option('tests'))
 
+have_gio_desktop_app_info = cc.check_header('gio/gdesktopappinfo.h',
+  dependencies: gio_unix_dep,
+  required: host_machine.system() == 'linux',
+)
+
 libnotify_deps = [gdk_pixbuf_dep, gio_dep, glib_dep, gio_unix_dep]
 tests_deps = [gtk_dep]
 
 conf = configuration_data()
 conf.set_quoted('VERSION', meson.project_version())
+conf.set('HAVE_GIO_DESKTOP_APP_INFO', have_gio_desktop_app_info)
 configure_file(input: 'config.h.meson',
   output : 'config.h',
   configuration : conf)

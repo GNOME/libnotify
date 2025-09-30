@@ -24,7 +24,10 @@
 #include "config.h"
 
 #include <gio/gio.h>
+
+#ifdef HAVE_GIO_DESKTOP_APP_INFO
 #include <gio/gdesktopappinfo.h>
+#endif
 
 #include "notify.h"
 #include "internal.h"
@@ -575,6 +578,7 @@ try_prepend_snap_desktop (NotifyNotification *notification,
 
         if (ret == NULL && _notify_get_snap_name () != NULL &&
             strchr (desktop, G_DIR_SEPARATOR) == NULL) {
+#ifdef HAVE_GIO_DESKTOP_APP_INFO
                 g_autoptr(GDesktopAppInfo) app_info = NULL;
                 g_autofree char *desktop_id = NULL;
 
@@ -584,6 +588,7 @@ try_prepend_snap_desktop (NotifyNotification *notification,
                         g_clear_object (&app_info);
                         return NULL;
                 }
+#endif /* HAVE_GIO_DESKTOP_APP_INFO */
 
                 ret = g_strdup_printf ("%s_%s", _notify_get_snap_name (), desktop);
         }
