@@ -1490,8 +1490,8 @@ notify_notification_set_hint (NotifyNotification *notification,
         if (value != NULL) {
                 value = maybe_parse_snap_hint_value (notification, key, value);
                 g_hash_table_insert (priv->hints,
-                                    g_strdup (key),
-                                    g_variant_ref_sink (value));
+                                     g_strdup (key),
+                                     g_variant_ref_sink (value));
         } else {
                 g_hash_table_remove (priv->hints, key);
         }
