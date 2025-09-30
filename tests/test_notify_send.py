@@ -19,6 +19,19 @@ import subprocess
 import sys
 import unittest
 
+DBUS_IFACE = "org.freedesktop.Notifications"
+
+DEFAULT_CAPS = [
+    "body",
+    "body-markup",
+    "icon-static",
+    "image/svg+xml",
+    "private-synchronous",
+    "append",
+    "private-icon-only",
+    "truncation",
+]
+
 notify_send = os.environ.get("NOTIFY_SEND", None)
 
 if not notify_send:
@@ -27,13 +40,14 @@ if not notify_send:
 subprocess.check_output([notify_send, "--version"], text=True)
 
 
-class TestNotifySend(dbusmock.DBusTestCase):
+class TestBaseNotifySend(dbusmock.DBusTestCase):
     """Test mocking notification-daemon"""
 
     @classmethod
     def setUpClass(cls):
         cls.start_session_bus()
         cls.dbus_con = cls.get_dbus(False)
+        cls.caps = DEFAULT_CAPS.copy()
 
     @classmethod
     def get_local_asset(self, *args):
@@ -43,7 +57,9 @@ class TestNotifySend(dbusmock.DBusTestCase):
 
     def setUp(self):
         (self.p_mock, self.obj_daemon) = self.spawn_server_template(
-            "notification_daemon", {}, stdout=subprocess.PIPE
+            "notification_daemon",
+            {"capabilities": " ".join(self.caps)},
+            stdout=subprocess.PIPE,
         )
         # set log to nonblocking
         flags = fcntl.fcntl(self.p_mock.stdout, fcntl.F_GETFL)
@@ -104,6 +120,9 @@ class TestNotifySend(dbusmock.DBusTestCase):
         self.assertEqual(ns_proc.returncode, 0)
         return ns_proc
 
+class TestNotifySend(TestBaseNotifySend):
+    """Test mocking notification-daemon"""
+
     def test_no_options(self):
         """notify-send with no options"""
 
@@ -161,9 +180,7 @@ class TestNotifySend(dbusmock.DBusTestCase):
     def test_image_only(self):
         """notify-send with image"""
 
-        ns_proc = subprocess.Popen([notify_send, "image-only", "-i", "my-image"])
-        ns_proc.wait()
-        self.assertEqual(ns_proc.returncode, 0)
+        ns_proc = self.notify_send(["image-only", "-i", "my-image"])
 
         notification = self.assertDaemonCall("Notify")
         self.assertNotificationMatches(
@@ -196,9 +213,7 @@ class TestNotifySend(dbusmock.DBusTestCase):
     def test_app_icon_only(self):
         """notify-send with app-icon"""
 
-        ns_proc = subprocess.Popen([notify_send, "app-icon-only", "-n", "my-app-icon"])
-        ns_proc.wait()
-        self.assertEqual(ns_proc.returncode, 0)
+        ns_proc = self.notify_send(["app-icon-only", "-n", "my-app-icon"])
 
         notification = self.assertDaemonCall("Notify")
         self.assertNotificationMatches(
@@ -262,7 +277,7 @@ class TestNotifySend(dbusmock.DBusTestCase):
             "--action=Bar=bar-item",
         ], stderr=subprocess.PIPE)
 
-        [_, stderr] = ns_proc.communicate()
+        [_, stderr] = ns_proc.communicate(timeout=5)
         ns_proc.wait()
 
         self.assertEqual(ns_proc.returncode, 1)
@@ -279,6 +294,59 @@ class TestNotifySend(dbusmock.DBusTestCase):
                 "sender-pid": ns_proc.pid,
             },
         )
+
+
+class TestNotifySendActions(TestBaseNotifySend):
+    """Test mocking notification-daemon with actions"""
+
+    @classmethod
+    def setUpClass(cls):
+        TestBaseNotifySend.setUpClass()
+        cls.caps.append("actions")
+
+    def check_activate_action(self, action_id):
+        ns_proc = self.notify_send_proc([
+            "action!", "Choose it",
+            "--print-id",
+            "--action=Foo",
+            "--action=bar-action=Bar",
+        ], stdout=subprocess.PIPE)
+
+        while True:
+            stdout = ns_proc.stdout.readline()
+            if stdout or ns_proc.poll():
+                break
+
+        action_id = str(action_id)
+        notification = self.assertDaemonCall("Notify")
+        self.assertNotificationMatches(
+            notification,
+            exp_summary="action!",
+            exp_body="Choose it",
+            exp_actions=["0", "Foo", "bar-action", "Bar"],
+            exp_hints={
+                "urgency": 1,
+                "sender-pid": ns_proc.pid,
+            },
+        )
+
+        notification_id = int(stdout.decode('utf-8').strip())
+
+        self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
+                                   (notification_id, action_id))
+
+        [stdout, _] = ns_proc.communicate(timeout=5)
+        self.assertEqual(stdout.decode("utf-8").strip(), action_id)
+        self.assertEqual(ns_proc.returncode, 0)
+
+    def test_activate_numeric_action(self):
+        """notify-send with action"""
+        self.check_activate_action(0)
+
+    def test_activate_named_action(self):
+        """notify-send with action"""
+        self.check_activate_action("bar-action")
+
 
 
 if __name__ == "__main__":
