@@ -932,16 +932,12 @@ get_notification_gicon (NotifyNotification  *notification,
                 return NULL;
         }
 
-        if (strstr (priv->icon_name, "://")) {
+        if (g_uri_is_valid (priv->icon_name, G_URI_FLAGS_PARSE_RELAXED, NULL)) {
                 file = g_file_new_for_uri (priv->icon_name);
         } else if (g_file_test (priv->icon_name, G_FILE_TEST_EXISTS)) {
                 file = g_file_new_for_path (priv->icon_name);
         } else {
-                gicon = g_themed_icon_new (priv->icon_name);
-        }
-
-        if (!file) {
-                return gicon;
+                return g_themed_icon_new (priv->icon_name);
         }
 
         input = g_file_read (file, NULL, error);
