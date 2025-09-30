@@ -11,6 +11,7 @@ __copyright__ = """
 (c) 2025 Marco Trevisan <mail@3v1n0.net>
 """
 
+import dbus
 import dbusmock
 import fcntl
 import os
@@ -48,6 +49,8 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         cls.start_session_bus()
         cls.dbus_con = cls.get_dbus(False)
         cls.caps = DEFAULT_CAPS.copy()
+        cls.template = None
+        cls.env = os.environ.copy()
 
     @classmethod
     def get_local_asset(self, *args):
@@ -57,8 +60,7 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
 
     def setUp(self):
         (self.p_mock, self.obj_daemon) = self.spawn_server_template(
-            "notification_daemon",
-            {"capabilities": " ".join(self.caps)},
+            self.template, {"capabilities": " ".join(self.caps)},
             stdout=subprocess.PIPE,
         )
         # set log to nonblocking
@@ -76,6 +78,45 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         [ret, args] = calls[0]
         print(method, "Called with:", args, "=>", ret)
         return args
+
+    def notify_send_proc(self, args=[], stdout=None, stderr=None):
+        ns_proc = subprocess.Popen([notify_send] + args, env=self.env,
+                                   stdout=stdout, stderr=stderr)
+        return ns_proc
+
+    def notify_send(self, args=[]):
+        ns_proc = self.notify_send_proc(args)
+        ns_proc.wait()
+        self.assertEqual(ns_proc.returncode, 0)
+        return ns_proc
+
+    def notify_send_wait_id(self, args=[]):
+        ns_proc = self.notify_send_proc(["--print-id"] + args,
+                                        stdout=subprocess.PIPE)
+
+        while True:
+            stdout = ns_proc.stdout.readline()
+            if stdout or ns_proc.poll():
+                break
+
+        try:
+            ns_proc.communicate(timeout=0.5)
+        except subprocess.TimeoutExpired:
+            pass
+
+        self.assertIsNone(ns_proc.poll())
+        return [ns_proc, int(stdout.decode("utf-8").strip())]
+
+
+class TestBaseFDONotifySend(TestBaseNotifySend):
+    """Test mocking notification-daemon"""
+
+    @classmethod
+    def setUpClass(cls):
+        TestBaseNotifySend.setUpClass()
+        cls.caps = DEFAULT_CAPS.copy()
+        cls.template = "notification_daemon"
+        cls.env["NOTIFY_IGNORE_PORTAL"] = "1"
 
     def assertNotificationMatches(
         self,
@@ -109,36 +150,8 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         self.assertEqual(hints, exp_hints)
         self.assertEqual(expire_timeout, exp_expire_timeout)
 
-    def notify_send_proc(self, args=[], stdout=None, stderr=None):
-        ns_proc = subprocess.Popen([notify_send] + args,
-                                   stdout=stdout, stderr=stderr)
-        return ns_proc
 
-    def notify_send(self, args=[]):
-        ns_proc = self.notify_send_proc(args)
-        ns_proc.wait()
-        self.assertEqual(ns_proc.returncode, 0)
-        return ns_proc
-
-    def notify_send_wait_id(self, args=[]):
-        ns_proc = self.notify_send_proc(["--print-id"] + args,
-                                        stdout=subprocess.PIPE)
-
-        while True:
-            stdout = ns_proc.stdout.readline()
-            if stdout or ns_proc.poll():
-                break
-
-        try:
-            ns_proc.communicate(timeout=0.5)
-        except subprocess.TimeoutExpired:
-            pass
-
-        self.assertIsNone(ns_proc.poll())
-        return [ns_proc, int(stdout.decode("utf-8").strip())]
-
-
-class TestNotifySend(TestBaseNotifySend):
+class TestNotifySend(TestBaseFDONotifySend):
     """Test mocking notification-daemon"""
 
     def test_no_options(self):
@@ -325,12 +338,12 @@ class TestNotifySend(TestBaseNotifySend):
         self.assertEqual(ns_proc.returncode, 0)
 
 
-class TestNotifySendActions(TestBaseNotifySend):
+class TestNotifySendActions(TestBaseFDONotifySend):
     """Test mocking notification-daemon with actions"""
 
     @classmethod
     def setUpClass(cls):
-        TestBaseNotifySend.setUpClass()
+        TestBaseFDONotifySend.setUpClass()
         cls.caps.append("actions")
 
     def show_actions_notification(self):
@@ -382,6 +395,219 @@ class TestNotifySendActions(TestBaseNotifySend):
         self.assertFalse(stdout.decode("utf-8").strip())
         self.assertEqual(ns_proc.returncode, 0)
 
+
+class TestBasePortalNotifySend(TestBaseNotifySend):
+    """Test notify-send with portal"""
+
+    def assertNotificationMatches(
+        self,
+        args,
+        exp_id=0,
+        exp_notification={},
+    ):
+        [
+            notification_id,
+            notification,
+        ] = args
+
+        self.assertEqual(notification_id, exp_id)
+        self.assertEqual(notification, exp_notification)
+
+    @classmethod
+    def setUpClass(cls):
+        TestBaseNotifySend.setUpClass()
+        cls.caps = DEFAULT_CAPS.copy()
+        cls.template = cls.get_local_asset("portal_template.py")
+        cls.env["NOTIFY_FORCE_PORTAL"] = "1"
+
+
+class TestPortalNotifySend(TestBasePortalNotifySend):
+    """Test notify-send with portal"""
+
+    def test_no_options(self):
+        """notify-send with no options"""
+
+        self.notify_send(["title", "my text"])
+
+        notification = self.assertDaemonCall("AddNotification")
+        self.assertNotificationMatches(
+            notification,
+            exp_id="libnotify-flatpak.(null)-notify-send-1",
+            exp_notification={
+                "title": "title",
+                "body": "my text",
+                "priority": "normal",
+            },
+        )
+
+    def test_options(self):
+        """notify-send with some options"""
+
+        self.notify_send(
+            [
+                "--replace-id", "1234",
+                "--expire-time", "27",
+                "--app-name", "foo.App",
+                "--app-icon", "some-app-icon",
+                "--icon", "some-icon",
+                "--category", "some.category",
+                "--transient",
+                "--hint", "string:desktop-entry:notify-send-app",
+                "--urgency", "critical",
+                "title",
+                "my text",
+            ]
+        )
+
+        notification = self.assertDaemonCall("AddNotification")
+        self.assertNotificationMatches(
+            notification,
+            exp_id="libnotify-flatpak.(null)-notify-send-1234",
+            exp_notification={
+                "title": "title",
+                "body": "my text",
+                "priority": "urgent",
+                "icon": ("themed", (["some-icon", "some-icon-symbolic"])),
+            },
+        )
+
+    def test_image_only(self):
+        """notify-send with image"""
+
+        self.notify_send(["image-only", "-i", "my-image"])
+
+        notification = self.assertDaemonCall("AddNotification")
+        self.assertNotificationMatches(
+            notification,
+            exp_id="libnotify-flatpak.(null)-notify-send-1",
+            exp_notification={
+                "title": "image-only",
+                "body": "",
+                "priority": "normal",
+                "icon": ("themed", (["my-image", "my-image-symbolic"])),
+            },
+        )
+
+    def test_file_image_only(self):
+        """notify-send with local image"""
+
+        image_path = self.get_local_asset("applet-critical.png")
+        self.notify_send(["image-path-only", "-i", image_path])
+
+        with open(image_path, 'rb') as image_file:
+            image_bytes = image_file.read()
+            notification = self.assertDaemonCall("AddNotification")
+            self.assertNotificationMatches(
+                notification,
+                exp_id="libnotify-flatpak.(null)-notify-send-1",
+                exp_notification={
+                    "title": "image-path-only",
+                    "body": "",
+                    "priority": "normal",
+                    "icon": ("bytes", dbus.Array(image_bytes, signature="y")),
+                },
+            )
+
+    def test_app_icon_only(self):
+        """notify-send with app-icon"""
+
+        self.notify_send(["app-icon-only", "-n", "my-app-icon"])
+
+        notification = self.assertDaemonCall("AddNotification")
+        self.assertNotificationMatches(
+            notification,
+            exp_id="libnotify-flatpak.(null)-notify-send-1",
+            exp_notification={
+                "title": "app-icon-only",
+                "body": "",
+                "priority": "normal",
+            },
+        )
+
+    def test_custom_hints(self):
+        """notify-send with some custom hints"""
+
+        self.notify_send(
+            [
+                "-h", "int:int-hint:55",
+                "-h", "double:double-hint:5.5",
+                "-h", "byte:byte-hint:255",
+                "-h", "byte:byte-hex-hint:0x11",
+                "-h", "boolean:boolean-hint-true:true",
+                "-h", "boolean:boolean-hint-TRUE:TRUE",
+                "-h", "boolean:boolean-hint-not-true:not-true",
+                "-h", "boolean:boolean-hint-false:false",
+                "-h", "boolean:boolean-hint-FALSE:FALSE",
+                "-h", "variant:variant-hint-dict:{'a': 1, 'b': 2}",
+                "-h", "string:string-hint:string-hint-value",
+                "hints!"
+            ]
+        )
+
+        notification = self.assertDaemonCall("AddNotification")
+        self.assertNotificationMatches(
+            notification,
+            exp_id="libnotify-flatpak.(null)-notify-send-1",
+            exp_notification={
+                "title": "hints!",
+                "body": "",
+                "priority": "normal",
+            },
+        )
+
+
+class TestPortalNotifySendActions(TestBasePortalNotifySend):
+    """Test notify-send using portal with actions"""
+
+    def show_actions_notification(self):
+        [ns_proc, _] =  self.notify_send_wait_id([
+            "action!", "Choose it",
+            "--action=Foo",
+            "--action=bar-action=Bar",
+        ])
+
+        notification = self.assertDaemonCall("AddNotification")
+
+        self.assertNotificationMatches(
+            notification,
+            exp_id="libnotify-flatpak.(null)-notify-send-1",
+            exp_notification={
+                "title": "action!",
+                "body": "Choose it",
+                "priority": "normal",
+                "buttons": dbus.Array((
+                    {
+                        "label": "Foo",
+                        "action": "0"
+                    },
+                    {
+                        "label": "Bar",
+                        "action": "bar-action"
+                    },
+                ), signature="a{sv}"),
+            },
+        )
+
+        return [ns_proc, notification[0]]
+
+    def check_activate_action(self, action_id):
+        [ns_proc, notification_id] = self.show_actions_notification()
+
+        action_id = str(action_id)
+        self.obj_daemon.EmitActionInvoked(notification_id, action_id,
+                                          dbus.Array((), signature="v"))
+
+        [stdout, _] = ns_proc.communicate(timeout=5)
+        self.assertEqual(stdout.decode("utf-8").strip(), action_id)
+        self.assertEqual(ns_proc.returncode, 0)
+
+    def test_activate_numeric_action(self):
+        """notify-send with action"""
+        self.check_activate_action(0)
+
+    def test_activate_named_action(self):
+        """notify-send with action"""
+        self.check_activate_action("bar-action")
 
 
 if __name__ == "__main__":
