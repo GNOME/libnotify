@@ -1212,6 +1212,8 @@ notify_notification_show (NotifyNotification *notification,
             app_icon = priv->icon_name;
         }
 
+        priv->closed_reason = NOTIFY_CLOSED_REASON_UNSET;
+
         /* TODO: make this nonblocking */
         result = g_dbus_proxy_call_sync (proxy,
                                          "Notify",
