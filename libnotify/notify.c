@@ -136,8 +136,12 @@ _notify_update_spec_version (GError **error)
        char *spec_version;
 
        if (!_notify_get_server_info (NULL, NULL, NULL, &spec_version, error)) {
+                _spec_version_major = 0;
+                _spec_version_minor = 0;
                return FALSE;
        }
+
+       g_debug ("Server spec version is '%s'", spec_version);
 
        sscanf (spec_version,
                "%d.%d",
@@ -577,6 +581,25 @@ _get_portal_proxy (GError **error)
         return proxy;
 }
 
+static void
+on_name_owner_changed (GDBusProxy *proxy)
+{
+        g_autoptr(GError) error = NULL;
+        g_autofree char *name_owner = NULL;
+
+        name_owner = g_dbus_proxy_get_name_owner (_proxy);
+
+        if (!name_owner) {
+                _spec_version_major = 0;
+                _spec_version_minor = 0;
+                return;
+        }
+
+        if (!_notify_update_spec_version (&error)) {
+                g_warning ("Failed to update the spec version: %s", error->message);
+        }
+}
+
 /*
  * _notify_get_proxy:
  * @error: (nullable): a location to store a #GError, or %NULL
@@ -620,6 +643,8 @@ out:
         }
 
         g_object_add_weak_pointer (G_OBJECT (_proxy), (gpointer *) &_proxy);
+        g_signal_connect (_proxy, "notify::name-owner",
+                          G_CALLBACK (on_name_owner_changed), NULL);
 
         return _proxy;
 }
