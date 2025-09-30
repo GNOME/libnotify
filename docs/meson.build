@@ -22,7 +22,7 @@ if not docbook_docs.disabled()
   endif
 endif
 
-if get_option('gtk_doc')
+if get_option('gtk_doc') and g_ir_scanner.found() and introspection.enabled()
   subdir('reference')
 endif
 
