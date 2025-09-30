@@ -50,8 +50,8 @@ typedef struct
         NotifyActionCallback cb;
         GFreeFunc            free_func;
         gpointer             user_data;
-
-} CallbackPair;
+        char                 *label;
+} ActionInfo;
 
 typedef struct _NotifyNotificationPrivate
 {
@@ -74,7 +74,6 @@ typedef struct _NotifyNotificationPrivate
         gint            timeout;
         guint           portal_timeout_id;
 
-        GSList         *actions;
         GHashTable     *action_map;
         GHashTable     *hints;
 
@@ -390,13 +389,14 @@ notify_notification_get_property (GObject    *object,
 }
 
 static void
-destroy_pair (CallbackPair *pair)
+destroy_action_info (ActionInfo *action_info)
 {
-        if (pair->user_data != NULL && pair->free_func != NULL) {
-                pair->free_func (pair->user_data);
+        if (action_info->user_data != NULL && action_info->free_func != NULL) {
+                action_info->free_func (action_info->user_data);
         }
 
-        g_free (pair);
+        g_free (action_info->label);
+        g_free (action_info);
 }
 
 static void
@@ -415,7 +415,7 @@ notify_notification_init (NotifyNotification *notification)
         priv->action_map = g_hash_table_new_full (g_str_hash,
                                                   g_str_equal,
                                                   g_free,
-                                                  (GDestroyNotify) destroy_pair);
+                                                  (GDestroyNotify) destroy_action_info);
 }
 
 static void
@@ -452,9 +452,6 @@ notify_notification_finalize (GObject *object)
         g_free (priv->icon_name);
         g_free (priv->activation_token);
         g_clear_object (&priv->icon_pixbuf);
-
-        if (priv->actions != NULL)
-                g_slist_free_full (priv->actions, g_free);
 
         if (priv->action_map != NULL)
                 g_hash_table_destroy (priv->action_map);
@@ -723,16 +720,16 @@ activate_action (NotifyNotification *notification,
 {
         NotifyNotificationPrivate *priv =
                 notify_notification_get_instance_private (notification);
-        CallbackPair *pair;
+        ActionInfo *action_info;
 
-        pair = g_hash_table_lookup (priv->action_map, action);
+        action_info = g_hash_table_lookup (priv->action_map, action);
 
-        if (!pair) {
+        if (!action_info) {
                 return FALSE;
         }
 
         priv->activating = TRUE;
-        pair->cb (notification, (char *) action, pair->user_data);
+        action_info->cb (notification, (char *) action, action_info->user_data);
         priv->activating = FALSE;
         g_clear_pointer (&priv->activation_token, g_free);
 
@@ -1004,20 +1001,20 @@ add_portal_notification (GDBusProxy         *proxy,
         }
 
         if (priv->has_nondefault_actions) {
+                GHashTableIter iter;
+                gpointer key, value;
                 GVariantBuilder buttons;
-                GSList *l;
 
                 g_variant_builder_init (&buttons, G_VARIANT_TYPE ("aa{sv}"));
 
-                for (l = priv->actions; l && l->next; l = l->next->next) {
+                g_hash_table_iter_init (&iter, priv->action_map);
+                while (g_hash_table_iter_next (&iter, &key, &value)) {
                         GVariantBuilder button;
-                        const char *action;
-                        const char *label;
+                        const char *action = key;
+                        ActionInfo *action_info = value;
+                        const char *label = action_info->label;
 
                         g_variant_builder_init (&button, G_VARIANT_TYPE_VARDICT);
-
-                        action = l->data;
-                        label = l->next->data;
 
                         g_variant_builder_add (&button, "{sv}", "action",
                                                g_variant_new_string (action));
@@ -1123,7 +1120,6 @@ notify_notification_show (NotifyNotification *notification,
         NotifyNotificationPrivate *priv;
         GDBusProxy                *proxy;
         GVariantBuilder            actions_builder, hints_builder;
-        GSList                    *l;
         GHashTableIter             iter;
         gpointer                   key, data;
         GVariant                  *result;
@@ -1157,8 +1153,12 @@ notify_notification_show (NotifyNotification *notification,
         }
 
         g_variant_builder_init (&actions_builder, G_VARIANT_TYPE ("as"));
-        for (l = priv->actions; l != NULL; l = l->next) {
-                g_variant_builder_add (&actions_builder, "s", l->data);
+        g_hash_table_iter_init (&iter, priv->action_map);
+        while (g_hash_table_iter_next (&iter, &key, &data)) {
+                ActionInfo *action_info = data;
+
+                g_variant_builder_add (&actions_builder, "s", key);
+                g_variant_builder_add (&actions_builder, "s", action_info->label);
         }
 
         g_variant_builder_init (&hints_builder, G_VARIANT_TYPE ("a{sv}"));
@@ -1729,9 +1729,6 @@ notify_notification_clear_actions (NotifyNotification *notification)
 
         g_hash_table_remove_all (priv->action_map);
 
-        g_slist_free_full (priv->actions, g_free);
-
-        priv->actions = NULL;
         priv->has_nondefault_actions = FALSE;
 }
 
@@ -1759,7 +1756,7 @@ notify_notification_add_action (NotifyNotification  *notification,
                                 GFreeFunc            free_func)
 {
         NotifyNotificationPrivate *priv;
-        CallbackPair              *pair;
+        ActionInfo              *action_info;
 
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
         g_return_if_fail (action != NULL && *action != '\0');
@@ -1768,14 +1765,12 @@ notify_notification_add_action (NotifyNotification  *notification,
 
         priv = notify_notification_get_instance_private (notification);
 
-        priv->actions = g_slist_append (priv->actions, g_strdup (action));
-        priv->actions = g_slist_append (priv->actions, g_strdup (label));
-
-        pair = g_new0 (CallbackPair, 1);
-        pair->cb = callback;
-        pair->user_data = user_data;
-        pair->free_func = free_func;
-        g_hash_table_insert (priv->action_map, g_strdup (action), pair);
+        action_info = g_new0 (ActionInfo, 1);
+        action_info->cb = callback;
+        action_info->user_data = user_data;
+        action_info->free_func = free_func;
+        action_info->label = g_strdup (label);
+        g_hash_table_insert (priv->action_map, g_strdup (action), action_info);
 
         if (!priv->has_nondefault_actions &&
             g_ascii_strcasecmp (action, "default") != 0) {
