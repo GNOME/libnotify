@@ -346,19 +346,30 @@ class TestNotifySendActions(TestBaseFDONotifySend):
         TestBaseFDONotifySend.setUpClass()
         cls.caps.append("actions")
 
-    def show_actions_notification(self):
-        [ns_proc, notification_id] =  self.notify_send_wait_id([
-            "action!", "Choose it",
-            "--action=Foo",
-            "--action=bar-action=Bar",
-        ])
+    def show_actions_notification(self, actions):
+        args = ["action!", "Choose it"]
+
+        exp_actions = []
+        for action in actions:
+            label = action[0]
+            if len(action) > 1:
+                action_id = action[1]
+                args.append(f"--action={action_id}={label}")
+            else:
+                action_id = str(int(len(exp_actions) / 2))
+                args.append(f"--action={label}")
+
+            exp_actions.append(action_id)
+            exp_actions.append(label)
+
+        [ns_proc, notification_id] = self.notify_send_wait_id(args)
 
         notification = self.assertDaemonCall("Notify")
         self.assertNotificationMatches(
             notification,
             exp_summary="action!",
             exp_body="Choose it",
-            exp_actions=["0", "Foo", "bar-action", "Bar"],
+            exp_actions=exp_actions,
             exp_hints={
                 "urgency": 1,
                 "sender-pid": ns_proc.pid,
@@ -367,8 +378,8 @@ class TestNotifySendActions(TestBaseFDONotifySend):
 
         return [ns_proc, notification_id]
 
-    def check_activate_action(self, action_id):
-        [ns_proc, notification_id] = self.show_actions_notification()
+    def check_activate_action(self, action_id, actions=[("Foo",), ("Bar", "bar-action")]):
+        [ns_proc, notification_id] = self.show_actions_notification(actions)
 
         action_id = str(action_id)
         self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
@@ -386,8 +397,18 @@ class TestNotifySendActions(TestBaseFDONotifySend):
         """notify-send with action"""
         self.check_activate_action("bar-action")
 
+    def test_activate_third_unnamed_action(self):
+        """notify-send with action"""
+        self.check_activate_action(action_id=2, actions=[
+            ("foo",), ("default", "id"), ("baz",)])
+
+    def test_activate_replaced_action(self):
+        """notify-send with action"""
+        self.check_activate_action(action_id="foo-action", actions=[
+            ("Foo", "foo-action"), ("FooBar", "foo-action")])
+
     def test_close_notification(self):
-        [ns_proc, notification_id] = self.show_actions_notification()
+        [ns_proc, notification_id] = self.show_actions_notification([("Foo",)])
 
         self.obj_daemon.EmitSignal(DBUS_IFACE, "NotificationClosed", "uu",
                                    (notification_id, 2))
@@ -559,12 +580,22 @@ class TestPortalNotifySend(TestBasePortalNotifySend):
 class TestPortalNotifySendActions(TestBasePortalNotifySend):
     """Test notify-send using portal with actions"""
 
-    def show_actions_notification(self):
-        [ns_proc, _] =  self.notify_send_wait_id([
-            "action!", "Choose it",
-            "--action=Foo",
-            "--action=bar-action=Bar",
-        ])
+    def show_actions_notification(self, actions):
+        args = ["action!", "Choose it"]
+
+        exp_actions = []
+        for action in actions:
+            label = action[0]
+            if len(action) > 1:
+                action_id = action[1]
+                args.append(f"--action={action_id}={label}")
+            else:
+                action_id = str(int(len(exp_actions)))
+                args.append(f"--action={label}")
+
+            exp_actions.append({"label": label, "action": action_id})
+
+        [ns_proc, _] = self.notify_send_wait_id(args)
 
         notification = self.assertDaemonCall("AddNotification")
 
@@ -575,23 +606,14 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
                 "title": "action!",
                 "body": "Choose it",
                 "priority": "normal",
-                "buttons": dbus.Array((
-                    {
-                        "label": "Foo",
-                        "action": "0"
-                    },
-                    {
-                        "label": "Bar",
-                        "action": "bar-action"
-                    },
-                ), signature="a{sv}"),
+                "buttons": dbus.Array(exp_actions, signature="a{sv}"),
             },
         )
 
         return [ns_proc, notification[0]]
 
-    def check_activate_action(self, action_id):
-        [ns_proc, notification_id] = self.show_actions_notification()
+    def check_activate_action(self, action_id, actions=[("Foo",), ("Bar", "bar-action")]):
+        [ns_proc, notification_id] = self.show_actions_notification(actions)
 
         action_id = str(action_id)
         self.obj_daemon.EmitActionInvoked(notification_id, action_id,
@@ -608,6 +630,16 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
     def test_activate_named_action(self):
         """notify-send with action"""
         self.check_activate_action("bar-action")
+
+    def test_activate_third_unnamed_action(self):
+        """notify-send with action"""
+        self.check_activate_action(action_id=2, actions=[
+            ("foo",), ("default", "id"), ("baz",)])
+
+    def test_activate_replaced_action(self):
+        """notify-send with action"""
+        self.check_activate_action(action_id="foo-action", actions=[
+            ("Foo", "foo-action"), ("FooBar", "foo-action")])
 
 
 if __name__ == "__main__":
