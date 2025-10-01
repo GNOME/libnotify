@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import signal
 import sys
+import tempfile
 import unittest
 
 DBUS_IFACE = "org.freedesktop.Notifications"
@@ -80,9 +81,10 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         print(method, "Called with:", args, "=>", ret)
         return args
 
-    def notify_send_proc(self, args=[], stdout=None, stderr=None):
+    def notify_send_proc(self, args=[], stdout=None, stderr=None, pass_fds=[]):
         ns_proc = subprocess.Popen([notify_send] + args, env=self.env,
-                                   stdout=stdout, stderr=stderr)
+                                   stdout=stdout, stderr=stderr,
+                                   pass_fds=pass_fds)
         return ns_proc
 
     def notify_send(self, args=[]):
@@ -91,15 +93,19 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         self.assertEqual(ns_proc.returncode, 0)
         return ns_proc
 
-    def notify_send_wait_id(self, args=[], stderr=None):
-        ns_proc = self.notify_send_proc(["--print-id"] + args,
-                                        stdout=subprocess.PIPE,
-                                        stderr=stderr)
+    def notify_send_wait_id(self, args=[], stdout=None, stderr=None):
+        with tempfile.NamedTemporaryFile() as tmp:
+            fd = os.open(tmp.name, os.O_RDWR|os.O_CREAT)
+            ns_proc = self.notify_send_proc([f"--id-fd={fd}"] + args,
+                                            stdout=stdout,
+                                            stderr=stderr,
+                                            pass_fds=[fd])
 
-        stdout = self.wait_for_output(ns_proc, ns_proc.stdout)
+            fd_value = self.wait_for_output(ns_proc, tmp)
+            os.close(fd)
 
         self.assertIsNone(ns_proc.poll())
-        return [ns_proc, int(stdout.decode("utf-8").strip())]
+        return [ns_proc, int(fd_value.decode("utf-8").strip())]
 
     def wait_for_output(self, process, io_channel, want_value=None):
         while True:
@@ -342,7 +348,7 @@ class TestNotifySend(TestBaseFDONotifySend):
     def test_close_notification(self):
         [ns_proc, notification_id] =  self.notify_send_wait_id([
             "Wait me", "--wait",
-        ])
+        ], stdout=subprocess.PIPE)
 
         self.obj_daemon.EmitSignal(DBUS_IFACE, "NotificationClosed", "uu",
                                    (notification_id, 3))
@@ -371,7 +377,7 @@ class TestNotifySendActions(TestBaseFDONotifySend):
         TestBaseFDONotifySend.setUpClass()
         cls.caps.append("actions")
 
-    def show_actions_notification(self, actions, stderr=None):
+    def show_actions_notification(self, actions, stdout=subprocess.PIPE, stderr=None):
         args = ["action!", "Choose it"]
 
         exp_actions = []
@@ -393,7 +399,9 @@ class TestNotifySendActions(TestBaseFDONotifySend):
             exp_actions.append(action_id)
             exp_actions.append(label)
 
-        [ns_proc, notification_id] = self.notify_send_wait_id(args, stderr)
+        [ns_proc, notification_id] = self.notify_send_wait_id(args,
+                                                              stdout=stdout,
+                                                              stderr=stderr)
 
         notification = self.assertDaemonCall("Notify")
         self.assertNotificationMatches(
@@ -628,7 +636,7 @@ class TestPortalNotifySend(TestBasePortalNotifySend):
 class TestPortalNotifySendActions(TestBasePortalNotifySend):
     """Test notify-send using portal with actions"""
 
-    def show_actions_notification(self, actions, stderr=None):
+    def show_actions_notification(self, actions, stdout=subprocess.PIPE, stderr=None):
         args = ["action!", "Choose it"]
 
         exp_actions = []
@@ -648,7 +656,7 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
 
             exp_actions.append({"label": label, "action": action_id})
 
-        [ns_proc, _] = self.notify_send_wait_id(args, stderr=stderr)
+        [ns_proc, _] = self.notify_send_wait_id(args, stdout=stdout, stderr=stderr)
 
         notification = self.assertDaemonCall("AddNotification")
 

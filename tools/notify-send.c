@@ -247,6 +247,7 @@ main (int argc, char *argv[])
         static char        *server_vendor = NULL;
         static char        *server_version = NULL;
         static char        *server_spec_version = NULL;
+        static int          id_fd = -1;
         static gboolean     print_id = FALSE;
         static gint         notification_id = 0;
         static gboolean     do_version = FALSE;
@@ -288,6 +289,8 @@ main (int argc, char *argv[])
                  N_("TYPE:NAME:VALUE")},
                 {"print-id", 'p', 0, G_OPTION_ARG_NONE, &print_id,
                  N_ ("Print the notification ID."), NULL},
+                {"id-fd", 0, 0, G_OPTION_ARG_INT, &id_fd,
+                 N_ ("File descriptor where to write the notification ID."), NULL},
                 {"replace-id", 'r', 0, G_OPTION_ARG_INT, &notification_id,
                  N_ ("The ID of the notification to replace."), N_("REPLACE_ID")},
                 {"wait", 'w', 0, G_OPTION_ARG_NONE, &wait,
@@ -508,6 +511,15 @@ main (int argc, char *argv[])
                 g_object_get (notify, "id", &notification_id, NULL);
                 g_printf ("%d\n", notification_id);
                 fflush (stdout);
+        }
+
+        if (id_fd >= 0) {
+                g_autofree char *id_str = NULL;
+
+                g_object_get (notify, "id", &notification_id, NULL);
+                id_str = g_strdup_printf ("%d\n", notification_id);
+                write (id_fd, id_str, strlen (id_str));
+                fsync (id_fd);
         }
 
         if (wait) {

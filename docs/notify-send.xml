@@ -118,6 +118,12 @@
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><option>--id-fd=<replaceable>FILE_DESCRIPTOR</replaceable></option></term>
+        <listitem>
+          <para>File descriptor where to write the notification ID.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term><option>-r</option>, <option>--replace-id</option>=<replaceable>REPLACE_ID</replaceable></term>
         <listitem>
           <para>The ID of the notification to replace.</para>
