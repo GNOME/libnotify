@@ -163,22 +163,27 @@ on_sigint (gpointer data)
         return FALSE;
 }
 
+typedef struct _ActionData {
+        int selected_action_fd;
+        int activation_token_fd;
+} ActionData;
+
 static void
 handle_action (NotifyNotification *notify,
                char               *action,
                gpointer            user_data)
 {
-        int *selected_action_fd = user_data;
+        ActionData *action_data = user_data;
         g_autoptr(GAppLaunchContext) launch_context = NULL;
 
         launch_context = notify_notification_get_activation_app_launch_context (notify);
 
         g_printf ("%s\n", action);
 
-        if (*selected_action_fd >= 0) {
-                write (*selected_action_fd, action, strlen (action));
-                write (*selected_action_fd, "\n", 1);
-                fsync (*selected_action_fd);
+        if (action_data->selected_action_fd >= 0) {
+                write (action_data->selected_action_fd, action, strlen (action));
+                write (action_data->selected_action_fd, "\n", 1);
+                fsync (action_data->selected_action_fd);
         }
 
         if (launch_context) {
@@ -188,6 +193,16 @@ handle_action (NotifyNotification *notify,
                         g_app_launch_context_get_startup_notify_id (launch_context,
                                                                     NULL, NULL);
                 g_debug ("Activation Token: %s", activation_token);
+
+                if (action_data->activation_token_fd) {
+                        write (action_data->activation_token_fd,
+                               activation_token, strlen (activation_token));
+                }
+        }
+
+        if (action_data->activation_token_fd) {
+                write (action_data->activation_token_fd, "\n", 1);
+                fsync (action_data->activation_token_fd);
         }
 
         notify_notification_close (notify, NULL);
@@ -237,13 +252,6 @@ validate_utf8_or_die (const char *str, const char *param)
         }
 }
 
-/* This is only for testing purposes */
-static void
-nothing_to_free (gpointer data)
-{
-        g_assert (data != NULL);
-}
-
 int
 main (int argc, char *argv[])
 {
@@ -262,6 +270,7 @@ main (int argc, char *argv[])
         static char        *server_spec_version = NULL;
         static int          id_fd = -1;
         static int          selected_action_fd = -1;
+        static int          activation_token_fd = -1;
         static gboolean     print_id = FALSE;
         static gint         notification_id = 0;
         static gboolean     do_version = FALSE;
@@ -318,6 +327,8 @@ main (int argc, char *argv[])
                  N_("[NAME=]Text...")},
                 {"selected-action-fd", 0, 0, G_OPTION_ARG_INT, &selected_action_fd,
                  N_ ("File descriptor where to write the action chosen by the user."), NULL},
+                {"activation-token-fd", 0, 0, G_OPTION_ARG_INT, &activation_token_fd    ,
+                 N_ ("File descriptor where to write the action activation token. The daemon must support it."), NULL},
                 {"version", 'v', 0, G_OPTION_ARG_NONE, &do_version,
                  N_("Version of the package."),
                  NULL},
@@ -487,12 +498,18 @@ main (int argc, char *argv[])
                         }
 
                         if (*label != '\0' && *name != '\0') {
+                                g_autofree ActionData *action_data = NULL;
+
+                                action_data = g_new0 (ActionData, 1);
+                                action_data->selected_action_fd = selected_action_fd;
+                                action_data->activation_token_fd = activation_token_fd;
+
                                 notify_notification_add_action (notify,
                                                                 name,
                                                                 label,
                                                                 handle_action,
-                                                                (gpointer) &selected_action_fd,
-                                                                nothing_to_free);
+                                                                g_steal_pointer (&action_data),
+                                                                g_free);
                                 wait = TRUE;
                         }
 

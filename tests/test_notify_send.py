@@ -99,6 +99,7 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         return args
 
     def notify_send_proc(self, args=[], stdout=None, stderr=None, pass_fds=[]):
+        print("Launching", [notify_send] + args, "With FDs", pass_fds)
         ns_proc = subprocess.Popen([notify_send] + args, env=self.env,
                                    stdout=stdout, stderr=stderr,
                                    pass_fds=pass_fds)
@@ -396,7 +397,7 @@ class TestNotifySendActions(TestBaseFDONotifySend):
         cls.caps.append("actions")
 
     def show_actions_notification(self, actions, stdout=subprocess.PIPE, stderr=None,
-                                  selected_action_fd=None):
+                                  selected_action_fd=None, activation_token_fd=None):
         args = ["action!", "Choose it"]
 
         exp_actions = []
@@ -422,6 +423,9 @@ class TestNotifySendActions(TestBaseFDONotifySend):
         if selected_action_fd:
             args.append(f"--selected-action-fd={selected_action_fd}")
             pass_fds.append(selected_action_fd)
+        if activation_token_fd:
+            args.append(f"--activation-token-fd={activation_token_fd}")
+            pass_fds.append(activation_token_fd)
 
         [ns_proc, notification_id] = self.notify_send_wait_id(args,
                                                               stdout=stdout,
@@ -442,21 +446,36 @@ class TestNotifySendActions(TestBaseFDONotifySend):
 
         return [ns_proc, notification_id]
 
-    def check_activate_action(self, action_id, actions=[("Foo",), ("Bar", "bar-action")]):
+    def check_activate_action(self, action_id, actions=[("Foo",), ("Bar", "bar-action")],
+                              activation_token="activation-token"):
         with TemporaryFD("action-id") as tmpfd:
-            [fd, tmp] = tmpfd
-            [ns_proc, notification_id] = self.show_actions_notification(actions,
-                                                                        selected_action_fd=fd)
-            action_id = str(action_id)
-            self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
-                                       (notification_id, action_id))
+            [action_fd, action_tmp] = tmpfd
+            with TemporaryFD("token-id") as tmptokenfd:
+                [token_fd, token_tmp] = tmptokenfd
+                [ns_proc, notification_id] = self.show_actions_notification(actions,
+                                                                            selected_action_fd=action_fd,
+                                                                            activation_token_fd=token_fd)
+                if activation_token:
+                    activation_token += f"-{action_fd}-{token_fd}"
+                    self.obj_daemon.EmitSignal(DBUS_IFACE, "ActivationToken", "us",
+                                               (notification_id, activation_token))
 
-            fd_value = self.wait_for_output(ns_proc, tmp)
+                action_id = str(action_id)
+                self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
+                                           (notification_id, action_id))
+
+                action_value = self.wait_for_output(ns_proc, action_tmp)
+                token_value = self.wait_for_output(ns_proc, token_tmp)
 
         [stdout, _] = ns_proc.communicate(timeout=5)
-        self.assertEqual(fd_value, action_id)
+        self.assertEqual(action_value, action_id)
         self.assertIn(action_id, stdout.decode('utf-8'))
         self.assertEqual(ns_proc.returncode, 0)
+
+        if activation_token:
+            self.assertEqual(token_value, activation_token)
+        else:
+            self.assertFalse(token_value)
 
     def test_activate_numeric_action(self):
         """notify-send with action"""
@@ -672,7 +691,7 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
     """Test notify-send using portal with actions"""
 
     def show_actions_notification(self, actions, stdout=subprocess.PIPE, stderr=None,
-                                  selected_action_fd=[]):
+                                  selected_action_fd=None, activation_token_fd=None):
         args = ["action!", "Choose it"]
 
         exp_actions = []
@@ -696,6 +715,9 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
         if selected_action_fd:
             args.append(f"--selected-action-fd={selected_action_fd}")
             pass_fds.append(selected_action_fd)
+        if activation_token_fd:
+            args.append(f"--activation-token-fd={activation_token_fd}")
+            pass_fds.append(activation_token_fd)
 
         [ns_proc, _] = self.notify_send_wait_id(args, stdout=stdout, stderr=stderr,
                                                 pass_fds=pass_fds)

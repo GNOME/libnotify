@@ -77,6 +77,12 @@
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><option>--activation-token-fd</option>=<replaceable>FILE_DESCRIPTOR</replaceable></term>
+        <listitem>
+          <para>File descriptor where to write the action activation token. The daemon must support it.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term><option>-u</option>, <option>--urgency</option>=<replaceable>LEVEL</replaceable></term>
         <listitem>
           <para>Specifies the urgency level (<literal>low</literal>, <literal>normal</literal>, <literal>critical</literal>).</para>
