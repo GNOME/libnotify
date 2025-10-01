@@ -1793,6 +1793,7 @@ notify_notification_add_action (NotifyNotification  *notification,
 {
         NotifyNotificationPrivate *priv;
         ActionInfo *action_info;
+        guint old_action_idx;
 
         g_return_if_fail (NOTIFY_IS_NOTIFICATION (notification));
         g_return_if_fail (action != NULL && *action != '\0');
@@ -1804,6 +1805,8 @@ notify_notification_add_action (NotifyNotification  *notification,
         if (priv->actions == NULL) {
                 priv->actions = g_ptr_array_new_with_free_func (
                         (GDestroyNotify) destroy_action_info);
+        } else if (find_action_info (notification, action, &old_action_idx)) {
+                g_ptr_array_remove_index (priv->actions, old_action_idx);
         }
 
         action_info = g_new0 (ActionInfo, 1);

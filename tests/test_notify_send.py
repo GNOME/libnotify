@@ -359,6 +359,12 @@ class TestNotifySendActions(TestBaseFDONotifySend):
                 action_id = str(int(len(exp_actions) / 2))
                 args.append(f"--action={label}")
 
+            if action_id in exp_actions:
+                action_idx = exp_actions.index(action_id)
+                del exp_actions[action_idx + 1]
+                exp_actions.insert(action_idx + 1, label)
+                continue
+
             exp_actions.append(action_id)
             exp_actions.append(label)
 
@@ -592,6 +598,11 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
             else:
                 action_id = str(int(len(exp_actions)))
                 args.append(f"--action={label}")
+
+            other = [a for a in exp_actions if a["action"] == action_id]
+            if other:
+                other[0]["label"] = label
+                continue
 
             exp_actions.append({"label": label, "action": action_id})
 
