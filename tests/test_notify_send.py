@@ -17,6 +17,7 @@ import fcntl
 import os
 import shutil
 import subprocess
+import signal
 import sys
 import unittest
 
@@ -90,22 +91,34 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         self.assertEqual(ns_proc.returncode, 0)
         return ns_proc
 
-    def notify_send_wait_id(self, args=[]):
+    def notify_send_wait_id(self, args=[], stderr=None):
         ns_proc = self.notify_send_proc(["--print-id"] + args,
-                                        stdout=subprocess.PIPE)
+                                        stdout=subprocess.PIPE,
+                                        stderr=stderr)
 
-        while True:
-            stdout = ns_proc.stdout.readline()
-            if stdout or ns_proc.poll():
-                break
-
-        try:
-            ns_proc.communicate(timeout=0.5)
-        except subprocess.TimeoutExpired:
-            pass
+        stdout = self.wait_for_output(ns_proc, ns_proc.stdout)
 
         self.assertIsNone(ns_proc.poll())
         return [ns_proc, int(stdout.decode("utf-8").strip())]
+
+    def wait_for_output(self, process, io_channel, want_value=None):
+        while True:
+            line = io_channel.readline()
+            if (not want_value and line) or (
+                want_value and want_value.encode() in line) or process.poll():
+                break
+
+        try:
+            process.communicate(timeout=0.5)
+        except subprocess.TimeoutExpired:
+            pass
+
+        if want_value:
+            self.assertIn(want_value, line.decode('utf-8'))
+        else:
+            self.assertTrue(line)
+
+        return line
 
 
 class TestBaseFDONotifySend(TestBaseNotifySend):
@@ -358,7 +371,7 @@ class TestNotifySendActions(TestBaseFDONotifySend):
         TestBaseFDONotifySend.setUpClass()
         cls.caps.append("actions")
 
-    def show_actions_notification(self, actions):
+    def show_actions_notification(self, actions, stderr=None):
         args = ["action!", "Choose it"]
 
         exp_actions = []
@@ -380,7 +393,7 @@ class TestNotifySendActions(TestBaseFDONotifySend):
             exp_actions.append(action_id)
             exp_actions.append(label)
 
-        [ns_proc, notification_id] = self.notify_send_wait_id(args)
+        [ns_proc, notification_id] = self.notify_send_wait_id(args, stderr)
 
         notification = self.assertDaemonCall("Notify")
         self.assertNotificationMatches(
@@ -424,6 +437,23 @@ class TestNotifySendActions(TestBaseFDONotifySend):
         """notify-send with action"""
         self.check_activate_action(action_id="foo-action", actions=[
             ("Foo", "foo-action"), ("FooBar", "foo-action")])
+
+    def test_activate_invalid_action(self):
+        [ns_proc, notification_id] = self.show_actions_notification([("Foo", "foo")],
+                                                                    stderr=subprocess.PIPE)
+
+        self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
+                                   (notification_id, "bar"))
+
+        self.wait_for_output(ns_proc, ns_proc.stderr,
+                             "Received unknown action bar")
+
+        ns_proc.send_signal(signal.SIGINT)
+        [stdout, stderr] = ns_proc.communicate(timeout=5)
+        self.assertFalse(stdout.decode("utf-8").strip())
+        self.assertIn("Wait cancelled, closing notification",
+                      stderr.decode("utf-8").strip())
+        self.assertEqual(ns_proc.returncode, 0)
 
     def test_close_notification(self):
         [ns_proc, notification_id] = self.show_actions_notification([("Foo",)])
@@ -598,7 +628,7 @@ class TestPortalNotifySend(TestBasePortalNotifySend):
 class TestPortalNotifySendActions(TestBasePortalNotifySend):
     """Test notify-send using portal with actions"""
 
-    def show_actions_notification(self, actions):
+    def show_actions_notification(self, actions, stderr=None):
         args = ["action!", "Choose it"]
 
         exp_actions = []
@@ -618,7 +648,7 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
 
             exp_actions.append({"label": label, "action": action_id})
 
-        [ns_proc, _] = self.notify_send_wait_id(args)
+        [ns_proc, _] = self.notify_send_wait_id(args, stderr=stderr)
 
         notification = self.assertDaemonCall("AddNotification")
 
@@ -663,6 +693,21 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
         """notify-send with action"""
         self.check_activate_action(action_id="foo-action", actions=[
             ("Foo", "foo-action"), ("FooBar", "foo-action")])
+
+    def test_activate_invalid_action(self):
+        [ns_proc, notification_id] = self.show_actions_notification([("Foo", "foo")],
+                                                                    stderr=subprocess.PIPE)
+
+        self.obj_daemon.EmitActionInvoked(notification_id, "bar",
+                                          dbus.Array((), signature="v"))
+
+        self.wait_for_output(ns_proc, ns_proc.stderr,
+                             "Received unknown action bar")
+
+        ns_proc.send_signal(signal.SIGINT)
+        [stdout, _] = ns_proc.communicate(timeout=5)
+        self.assertFalse(stdout.decode("utf-8").strip())
+        self.assertEqual(ns_proc.returncode, 0)
 
 
 if __name__ == "__main__":

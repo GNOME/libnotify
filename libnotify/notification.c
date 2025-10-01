@@ -840,8 +840,7 @@ proxy_g_signal_cb (GDBusProxy *proxy,
                 }
 
                 if (!activate_action (notification, action) &&
-                    g_str_equal (action, "default-action") &&
-                    !_notify_get_snap_app ()) {
+                    !g_str_equal (action, "default-action")) {
                         g_warning ("Received unknown action %s", action);
                 }
 
