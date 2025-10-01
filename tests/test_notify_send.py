@@ -42,6 +42,23 @@ if not notify_send:
 
 subprocess.check_output([notify_send, "--version"], text=True)
 
+class TemporaryFD:
+    """ Create a temporary FD, do not use memfd as it may be less portable """
+    def __init__(self, prefix="temporary-fd"):
+        self.prefix = prefix
+        self.fd = -1
+        self.temporary = None
+
+    def __enter__(self):
+        self.temporary = tempfile.NamedTemporaryFile(prefix=self.prefix)
+        self.fd = os.open(self.temporary.name, os.O_RDWR|os.O_CREAT)
+        return [self.fd, self.temporary]
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        os.close(self.fd)
+        self.temporary.close()
+
+
 
 class TestBaseNotifySend(dbusmock.DBusTestCase):
     """Test mocking notification-daemon"""
@@ -93,19 +110,18 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         self.assertEqual(ns_proc.returncode, 0)
         return ns_proc
 
-    def notify_send_wait_id(self, args=[], stdout=None, stderr=None):
-        with tempfile.NamedTemporaryFile() as tmp:
-            fd = os.open(tmp.name, os.O_RDWR|os.O_CREAT)
+    def notify_send_wait_id(self, args=[], stdout=None, stderr=None, pass_fds=[]):
+        with TemporaryFD("notification-id") as tmpfd:
+            [fd, tmp] = tmpfd
             ns_proc = self.notify_send_proc([f"--id-fd={fd}"] + args,
                                             stdout=stdout,
                                             stderr=stderr,
-                                            pass_fds=[fd])
+                                            pass_fds=pass_fds + [fd])
 
             fd_value = self.wait_for_output(ns_proc, tmp)
-            os.close(fd)
 
         self.assertIsNone(ns_proc.poll())
-        return [ns_proc, int(fd_value.decode("utf-8").strip())]
+        return [ns_proc, int(fd_value.strip())]
 
     def wait_for_output(self, process, io_channel, want_value=None):
         while True:
@@ -119,12 +135,14 @@ class TestBaseNotifySend(dbusmock.DBusTestCase):
         except subprocess.TimeoutExpired:
             pass
 
+        line = line.decode('utf-8')
+
         if want_value:
-            self.assertIn(want_value, line.decode('utf-8'))
+            self.assertIn(want_value, line)
         else:
             self.assertTrue(line)
 
-        return line
+        return line.strip()
 
 
 class TestBaseFDONotifySend(TestBaseNotifySend):
@@ -377,7 +395,8 @@ class TestNotifySendActions(TestBaseFDONotifySend):
         TestBaseFDONotifySend.setUpClass()
         cls.caps.append("actions")
 
-    def show_actions_notification(self, actions, stdout=subprocess.PIPE, stderr=None):
+    def show_actions_notification(self, actions, stdout=subprocess.PIPE, stderr=None,
+                                  selected_action_fd=None):
         args = ["action!", "Choose it"]
 
         exp_actions = []
@@ -399,9 +418,15 @@ class TestNotifySendActions(TestBaseFDONotifySend):
             exp_actions.append(action_id)
             exp_actions.append(label)
 
+        pass_fds=[]
+        if selected_action_fd:
+            args.append(f"--selected-action-fd={selected_action_fd}")
+            pass_fds.append(selected_action_fd)
+
         [ns_proc, notification_id] = self.notify_send_wait_id(args,
                                                               stdout=stdout,
-                                                              stderr=stderr)
+                                                              stderr=stderr,
+                                                              pass_fds=pass_fds)
 
         notification = self.assertDaemonCall("Notify")
         self.assertNotificationMatches(
@@ -418,14 +443,19 @@ class TestNotifySendActions(TestBaseFDONotifySend):
         return [ns_proc, notification_id]
 
     def check_activate_action(self, action_id, actions=[("Foo",), ("Bar", "bar-action")]):
-        [ns_proc, notification_id] = self.show_actions_notification(actions)
+        with TemporaryFD("action-id") as tmpfd:
+            [fd, tmp] = tmpfd
+            [ns_proc, notification_id] = self.show_actions_notification(actions,
+                                                                        selected_action_fd=fd)
+            action_id = str(action_id)
+            self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
+                                       (notification_id, action_id))
 
-        action_id = str(action_id)
-        self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
-                                   (notification_id, action_id))
+            fd_value = self.wait_for_output(ns_proc, tmp)
 
         [stdout, _] = ns_proc.communicate(timeout=5)
-        self.assertEqual(stdout.decode("utf-8").strip(), action_id)
+        self.assertEqual(fd_value, action_id)
+        self.assertIn(action_id, stdout.decode('utf-8'))
         self.assertEqual(ns_proc.returncode, 0)
 
     def test_activate_numeric_action(self):
@@ -447,21 +477,26 @@ class TestNotifySendActions(TestBaseFDONotifySend):
             ("Foo", "foo-action"), ("FooBar", "foo-action")])
 
     def test_activate_invalid_action(self):
-        [ns_proc, notification_id] = self.show_actions_notification([("Foo", "foo")],
-                                                                    stderr=subprocess.PIPE)
+        with TemporaryFD("action-id") as tmpfd:
+            [fd, tmp] = tmpfd
+            [ns_proc, notification_id] = self.show_actions_notification([("Foo", "foo")],
+                                                                        stderr=subprocess.PIPE,
+                                                                        selected_action_fd=fd)
+            action_id = "bar"
+            self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
+                                       (notification_id, action_id))
 
-        self.obj_daemon.EmitSignal(DBUS_IFACE, "ActionInvoked", "us",
-                                   (notification_id, "bar"))
+            self.wait_for_output(ns_proc, ns_proc.stderr,
+                                 f"Received unknown action {action_id}")
 
-        self.wait_for_output(ns_proc, ns_proc.stderr,
-                             "Received unknown action bar")
+            ns_proc.send_signal(signal.SIGINT)
+            [stdout, stderr] = ns_proc.communicate(timeout=5)
+            self.assertNotIn(action_id, stdout.decode("utf-8").strip())
+            self.assertIn("Wait cancelled, closing notification",
+                          stderr.decode("utf-8").strip())
+            self.assertEqual(ns_proc.returncode, 0)
 
-        ns_proc.send_signal(signal.SIGINT)
-        [stdout, stderr] = ns_proc.communicate(timeout=5)
-        self.assertFalse(stdout.decode("utf-8").strip())
-        self.assertIn("Wait cancelled, closing notification",
-                      stderr.decode("utf-8").strip())
-        self.assertEqual(ns_proc.returncode, 0)
+            self.assertFalse(tmp.readlines())
 
     def test_close_notification(self):
         [ns_proc, notification_id] = self.show_actions_notification([("Foo",)])
@@ -636,7 +671,8 @@ class TestPortalNotifySend(TestBasePortalNotifySend):
 class TestPortalNotifySendActions(TestBasePortalNotifySend):
     """Test notify-send using portal with actions"""
 
-    def show_actions_notification(self, actions, stdout=subprocess.PIPE, stderr=None):
+    def show_actions_notification(self, actions, stdout=subprocess.PIPE, stderr=None,
+                                  selected_action_fd=[]):
         args = ["action!", "Choose it"]
 
         exp_actions = []
@@ -656,7 +692,13 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
 
             exp_actions.append({"label": label, "action": action_id})
 
-        [ns_proc, _] = self.notify_send_wait_id(args, stdout=stdout, stderr=stderr)
+        pass_fds=[]
+        if selected_action_fd:
+            args.append(f"--selected-action-fd={selected_action_fd}")
+            pass_fds.append(selected_action_fd)
+
+        [ns_proc, _] = self.notify_send_wait_id(args, stdout=stdout, stderr=stderr,
+                                                pass_fds=pass_fds)
 
         notification = self.assertDaemonCall("AddNotification")
 
@@ -674,14 +716,19 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
         return [ns_proc, notification[0]]
 
     def check_activate_action(self, action_id, actions=[("Foo",), ("Bar", "bar-action")]):
-        [ns_proc, notification_id] = self.show_actions_notification(actions)
+        with TemporaryFD("action-id") as tmpfd:
+            [fd, tmp] = tmpfd
+            [ns_proc, notification_id] = self.show_actions_notification(actions,
+                                                                        selected_action_fd=fd)
+            action_id = str(action_id)
+            self.obj_daemon.EmitActionInvoked(notification_id, action_id,
+                                              dbus.Array((), signature="v"))
 
-        action_id = str(action_id)
-        self.obj_daemon.EmitActionInvoked(notification_id, action_id,
-                                          dbus.Array((), signature="v"))
+            fd_value = self.wait_for_output(ns_proc, tmp)
 
         [stdout, _] = ns_proc.communicate(timeout=5)
-        self.assertEqual(stdout.decode("utf-8").strip(), action_id)
+        self.assertEqual(fd_value, action_id)
+        self.assertIn(action_id, stdout.decode('utf-8'))
         self.assertEqual(ns_proc.returncode, 0)
 
     def test_activate_numeric_action(self):
@@ -703,19 +750,26 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
             ("Foo", "foo-action"), ("FooBar", "foo-action")])
 
     def test_activate_invalid_action(self):
-        [ns_proc, notification_id] = self.show_actions_notification([("Foo", "foo")],
-                                                                    stderr=subprocess.PIPE)
+        with TemporaryFD("action-id") as tmpfd:
+            [fd, tmp] = tmpfd
 
-        self.obj_daemon.EmitActionInvoked(notification_id, "bar",
-                                          dbus.Array((), signature="v"))
+            [ns_proc, notification_id] = self.show_actions_notification([("Foo", "foo")],
+                                                                        stderr=subprocess.PIPE,
+                                                                        selected_action_fd=fd)
 
-        self.wait_for_output(ns_proc, ns_proc.stderr,
-                             "Received unknown action bar")
+            action_id = "bar"
+            self.obj_daemon.EmitActionInvoked(notification_id, action_id,
+                                            dbus.Array((), signature="v"))
 
-        ns_proc.send_signal(signal.SIGINT)
-        [stdout, _] = ns_proc.communicate(timeout=5)
-        self.assertFalse(stdout.decode("utf-8").strip())
-        self.assertEqual(ns_proc.returncode, 0)
+            self.wait_for_output(ns_proc, ns_proc.stderr,
+                                 f"Received unknown action {action_id}")
+
+            ns_proc.send_signal(signal.SIGINT)
+            [stdout, _] = ns_proc.communicate(timeout=5)
+            self.assertNotIn(action_id, stdout.decode("utf-8").strip())
+            self.assertEqual(ns_proc.returncode, 0)
+
+            self.assertFalse(tmp.readlines())
 
 
 if __name__ == "__main__":

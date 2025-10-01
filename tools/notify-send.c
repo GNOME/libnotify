@@ -168,12 +168,18 @@ handle_action (NotifyNotification *notify,
                char               *action,
                gpointer            user_data)
 {
-        const char *action_name = user_data;
+        int *selected_action_fd = user_data;
         g_autoptr(GAppLaunchContext) launch_context = NULL;
 
         launch_context = notify_notification_get_activation_app_launch_context (notify);
 
-        g_printf ("%s\n", action_name);
+        g_printf ("%s\n", action);
+
+        if (*selected_action_fd >= 0) {
+                write (*selected_action_fd, action, strlen (action));
+                write (*selected_action_fd, "\n", 1);
+                fsync (*selected_action_fd);
+        }
 
         if (launch_context) {
                 g_autofree char *activation_token = NULL;
@@ -231,6 +237,13 @@ validate_utf8_or_die (const char *str, const char *param)
         }
 }
 
+/* This is only for testing purposes */
+static void
+nothing_to_free (gpointer data)
+{
+        g_assert (data != NULL);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -248,6 +261,7 @@ main (int argc, char *argv[])
         static char        *server_version = NULL;
         static char        *server_spec_version = NULL;
         static int          id_fd = -1;
+        static int          selected_action_fd = -1;
         static gboolean     print_id = FALSE;
         static gint         notification_id = 0;
         static gboolean     do_version = FALSE;
@@ -302,6 +316,8 @@ main (int argc, char *argv[])
                  " May be set multiple times. The name of the action is output to stdout. If NAME is "
                  "not specified, the numerical index of the option is used (starting with 0)."),
                  N_("[NAME=]Text...")},
+                {"selected-action-fd", 0, 0, G_OPTION_ARG_INT, &selected_action_fd,
+                 N_ ("File descriptor where to write the action chosen by the user."), NULL},
                 {"version", 'v', 0, G_OPTION_ARG_NONE, &do_version,
                  N_("Version of the package."),
                  NULL},
@@ -457,7 +473,7 @@ main (int argc, char *argv[])
                 }
 
                 while (have_actions && (action = actions[i++])) {
-                        gchar *name;
+                        g_autofree char *name = NULL;
                         const gchar *label;
 
                         spl = g_strsplit (action, "=", 2);
@@ -475,8 +491,8 @@ main (int argc, char *argv[])
                                                                 name,
                                                                 label,
                                                                 handle_action,
-                                                                name,
-                                                                g_free);
+                                                                (gpointer) &selected_action_fd,
+                                                                nothing_to_free);
                                 wait = TRUE;
                         }
 
