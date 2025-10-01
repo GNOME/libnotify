@@ -337,6 +337,18 @@ class TestNotifySend(TestBaseFDONotifySend):
         self.assertFalse(stdout.decode("utf-8").strip())
         self.assertEqual(ns_proc.returncode, 0)
 
+    def test_sigint_while_notifying(self):
+        [ns_proc, _] =  self.notify_send_wait_id([
+            "Wait and cancel me", "--wait",
+        ], stderr=subprocess.PIPE)
+
+        ns_proc.send_signal(signal.SIGINT)
+        [_, stderr] = ns_proc.communicate()
+
+        self.assertEqual(ns_proc.returncode, 0)
+        self.assertIn("Wait cancelled, closing notification",
+                      stderr.decode("utf-8"))
+
 
 class TestNotifySendActions(TestBaseFDONotifySend):
     """Test mocking notification-daemon with actions"""
