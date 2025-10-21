@@ -33,7 +33,6 @@
 
 #include "notify.h"
 #include "internal.h"
-#include "notify-marshal.h"
 
 static gboolean         _initted = FALSE;
 static char            *_app_name = NULL;

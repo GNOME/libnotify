@@ -34,11 +34,6 @@ enum_types = gnome.mkenums_simple('@0@-enum-types'.format(LIBNAME),
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS''',
 )
 
-marshal = gnome.genmarshal('@0@-marshal'.format(LIBNAME),
-  prefix: '@0@_marshal'.format(LIBNAME),
-  sources: '@0@-marshal.list'.format(LIBNAME),
-)
-
 libnotify_cflags = [
   '-DG_LOG_DOMAIN="libnotify"',
 ]
@@ -57,7 +52,7 @@ notify_dep = declare_dependency(
   include_directories: default_includes,
   dependencies: libnotify_deps,
   compile_args: libnotify_cflags,
-  sources: headers + [enum_types[1]] + [marshal[1]],
+  sources: headers + [enum_types[1]],
 )
 
 libnotify_lib = shared_library(LIBNAME,
@@ -65,7 +60,6 @@ libnotify_lib = shared_library(LIBNAME,
   sources: [
     sources,
     enum_types,
-    marshal,
     private_sources,
   ],
   version: '@0@.@1@.@2@'.format(LT_CURRENT, LT_REVISION, LT_AGE),
