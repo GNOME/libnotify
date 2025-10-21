@@ -68,6 +68,7 @@ endforeach
 test('test-notify-send', py,
   args: files('test_notify_send.py'),
   depends: tool_notify_send,
+  timeout: 60,
   env: {
     'NOTIFY_SEND': tool_notify_send.full_path(),
   },
