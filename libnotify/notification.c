@@ -40,6 +40,22 @@
 # define G_PARAM_STATIC_BLURB 0
 #endif
 
+/**
+ * NOTIFY_CLOSED_REASON_UNDEFIEND:
+ *
+ * Closed by undefined/reserved reasons.
+ *
+ * Since: 0.8.0
+ * Deprecated: 0.8.8: Use [flags@Notify.ClosedReason.UNDEFINED].
+ **/
+/**
+ * NOTIFY_CLOSED_REASON_UNDEFINED:
+ *
+ * Closed by undefined/reserved reasons.
+ *
+ * Since: 0.8.8
+ **/
+
 static void     notify_notification_class_init (NotifyNotificationClass *klass);
 static void     notify_notification_init       (NotifyNotification *sp);
 static void     notify_notification_finalize   (GObject            *object);

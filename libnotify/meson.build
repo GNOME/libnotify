@@ -29,7 +29,9 @@ headers += configure_file(
 enum_types = gnome.mkenums_simple('@0@-enum-types'.format(LIBNAME),
   sources : headers,
   install_header: true,
-  install_dir: libnotify_includedir
+  install_dir: libnotify_includedir,
+  body_prefix: '''#include <glib.h>
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS''',
 )
 
 marshal = gnome.genmarshal('@0@-marshal'.format(LIBNAME),
