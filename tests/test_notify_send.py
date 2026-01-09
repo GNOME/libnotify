@@ -410,7 +410,7 @@ class TestNotifySendActions(TestBaseFDONotifySend):
                 action_id = action[1]
                 args.append(f"--action={action_id}={label}")
             else:
-                action_id = str(int(len(exp_actions) / 2))
+                action_id = str(int(len(exp_actions) / 2) + 1)
                 args.append(f"--action={label}")
 
             if action_id in exp_actions:
@@ -482,7 +482,7 @@ class TestNotifySendActions(TestBaseFDONotifySend):
 
     def test_activate_numeric_action(self):
         """notify-send with action"""
-        self.check_activate_action(0)
+        self.check_activate_action(1)
 
     def test_activate_named_action(self):
         """notify-send with action"""
@@ -490,7 +490,7 @@ class TestNotifySendActions(TestBaseFDONotifySend):
 
     def test_activate_third_unnamed_action(self):
         """notify-send with action"""
-        self.check_activate_action(action_id=2, actions=[
+        self.check_activate_action(action_id=3, actions=[
             ("foo",), ("default", "id"), ("baz",)])
 
     def test_activate_replaced_action(self):
@@ -713,7 +713,7 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
                 action_id = action[1]
                 args.append(f"--action={action_id}={label}")
             else:
-                action_id = str(int(len(exp_actions)))
+                action_id = str(int(len(exp_actions)) + 1)
                 args.append(f"--action={label}")
 
             other = [a for a in exp_actions if a["action"] == action_id]
@@ -767,7 +767,7 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
 
     def test_activate_numeric_action(self):
         """notify-send with action"""
-        self.check_activate_action(0)
+        self.check_activate_action(1)
 
     def test_activate_named_action(self):
         """notify-send with action"""
@@ -775,7 +775,7 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
 
     def test_activate_third_unnamed_action(self):
         """notify-send with action"""
-        self.check_activate_action(action_id=2, actions=[
+        self.check_activate_action(action_id=3, actions=[
             ("foo",), ("default", "id"), ("baz",)])
 
     def test_activate_replaced_action(self):

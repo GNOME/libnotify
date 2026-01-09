@@ -489,7 +489,7 @@ main (int argc, char *argv[])
                         spl = g_strsplit (action, "=", 2);
 
                         if (g_strv_length (spl) == 1) {
-                                name = g_strdup_printf ("%d", i - 1);
+                                name = g_strdup_printf ("%d", i);
                                 label = g_strstrip (spl[0]);
                         } else {
                                 name = g_strdup (g_strstrip (spl[0]));
