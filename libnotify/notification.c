@@ -1034,6 +1034,10 @@ add_portal_notification (GDBusProxy         *proxy,
                         GVariantBuilder button;
                         ActionInfo *ai = g_ptr_array_index (priv->actions, i);
 
+                        if (g_ascii_strcasecmp (ai->id, "default") == 0) {
+                            continue;
+                        }
+
                         g_variant_builder_init (&button, G_VARIANT_TYPE_VARDICT);
 
                         g_variant_builder_add (&button, "{sv}", "action",
