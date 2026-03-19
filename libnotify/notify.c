@@ -497,8 +497,6 @@ notify_uninit (void)
                 return;
         }
 
-        g_clear_pointer (&_app_name, g_free);
-
         for (l = _active_notifications; l != NULL; l = l->next) {
                 NotifyNotification *n = NOTIFY_NOTIFICATION (l->data);
 
@@ -509,6 +507,9 @@ notify_uninit (void)
 
                 g_object_run_dispose (G_OBJECT (n));
         }
+
+        g_clear_pointer (&_app_name, g_free);
+        g_clear_pointer (&_app_icon, g_free);
 
         g_clear_object (&_proxy);
         g_clear_pointer (&_snap_name, g_free);
