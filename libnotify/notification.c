@@ -879,10 +879,7 @@ remove_portal_notification (GDBusProxy         *proxy,
         GVariant *ret;
         gchar *notification_id;
 
-        if (priv->portal_timeout_id) {
-                g_source_remove (priv->portal_timeout_id);
-                priv->portal_timeout_id = 0;
-        }
+        g_clear_handle_id (&priv->portal_timeout_id, g_source_remove);
 
         notification_id = get_portal_notification_id (notification);
 
@@ -1082,11 +1079,7 @@ add_portal_notification (GDBusProxy         *proxy,
                                       NULL,
                                       error);
 
-        if (priv->portal_timeout_id) {
-                g_source_remove (priv->portal_timeout_id);
-                priv->portal_timeout_id = 0;
-        }
-
+        g_clear_handle_id (&priv->portal_timeout_id, g_source_remove);
         g_free (notification_id);
 
         if (!ret) {
