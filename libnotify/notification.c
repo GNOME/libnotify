@@ -933,8 +933,10 @@ get_notification_gicon (NotifyNotification  *notification,
 {
         NotifyNotificationPrivate *priv =
                 notify_notification_get_instance_private (notification);
-        GFileInputStream *input;
         g_autoptr(GFile) file = NULL;
+        g_autofree gchar *contents = NULL;
+        g_autoptr(GByteArray) bytes_array = NULL;
+        gsize length;
 
         if (priv->icon_pixbuf) {
                 return G_ICON (g_object_ref (priv->icon_pixbuf));
@@ -952,37 +954,12 @@ get_notification_gicon (NotifyNotification  *notification,
                 return g_themed_icon_new (priv->icon_name);
         }
 
-        if (!(input = g_file_read (file, NULL, error))) {
+        if (!g_file_load_contents (file, NULL, &contents, &length, NULL, error)) {
                 return NULL;
         }
 
-        g_autoptr(GByteArray) bytes_array = g_byte_array_new ();
-        g_autoptr(GInputStream) buffered_stream = NULL;
-
-        buffered_stream = g_buffered_input_stream_new (G_INPUT_STREAM (input));
-
-        while (TRUE) {
-                gssize read;
-
-                read = g_buffered_input_stream_fill (G_BUFFERED_INPUT_STREAM (buffered_stream),
-                                                     -1, NULL, error);
-
-                if (read < 0) {
-                        return NULL;
-                }
-
-                if (read > 0) {
-                        gconstpointer buffer;
-                        gsize buffer_size;
-
-                        buffer = g_buffered_input_stream_peek_buffer (G_BUFFERED_INPUT_STREAM (buffered_stream),
-                                                                      &buffer_size);
-                        g_byte_array_append (bytes_array, buffer, buffer_size);
-                        continue;
-                }
-
-                break;
-        }
+        bytes_array = g_byte_array_new_take ((guint8 *) g_steal_pointer (&contents),
+                                             length);
 
         if (bytes_array->len) {
                 g_autoptr(GBytes) bytes = NULL;
