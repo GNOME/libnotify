@@ -69,7 +69,7 @@ notify_notification_set_hint_variant (NotifyNotification *notification,
                                       const char         *value,
                                       GError            **error)
 {
-        static gboolean conv_error = FALSE;
+        gboolean conv_error = FALSE;
         if (!strcasecmp (type, "string")) {
                 notify_notification_set_hint_string (notification,
                                                      key,
