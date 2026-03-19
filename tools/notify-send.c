@@ -194,13 +194,13 @@ handle_action (NotifyNotification *notify,
                                                                     NULL, NULL);
                 g_debug ("Activation Token: %s", activation_token);
 
-                if (action_data->activation_token_fd) {
+                if (action_data->activation_token_fd > 0) {
                         write (action_data->activation_token_fd,
                                activation_token, strlen (activation_token));
                 }
         }
 
-        if (action_data->activation_token_fd) {
+        if (action_data->activation_token_fd > 0) {
                 write (action_data->activation_token_fd, "\n", 1);
                 fsync (action_data->activation_token_fd);
         }
