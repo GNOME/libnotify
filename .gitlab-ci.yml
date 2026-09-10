@@ -92,7 +92,7 @@ build:coverage:ubuntu:
     - apt-get install -q -y gcovr
   script:
     - meson setup ${BUILD_DIR} -Db_coverage=true
-    - meson test -C ${BUILD_DIR} --print-errorlogs
+    - meson test -C ${BUILD_DIR} --print-errorlogs -t ${TEST_TIMEOUT_MULTIPLIER}
     - ninja -C ${BUILD_DIR} coverage || true
     - cat ${BUILD_DIR}/meson-logs/coverage.txt || true
   artifacts:
