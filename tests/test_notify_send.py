@@ -520,6 +520,31 @@ class TestNotifySendActions(TestBaseFDONotifySend):
 
             self.assertFalse(tmp.readlines())
 
+    def test_default_action_is_kept(self):
+        """The default action is only filtered out in the portal path, standard
+        FDO action list must keep it"""
+        [ns_proc, _] = self.notify_send_wait_id([
+            "action!", "Body",
+            "--action=default=Default label",
+            "--action=foo=Foo label",
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        notification = self.assertDaemonCall("Notify")
+        self.assertNotificationMatches(
+            notification,
+            exp_summary="action!",
+            exp_body="Body",
+            exp_actions=["default", "Default label", "foo", "Foo label"],
+            exp_hints={
+                "urgency": 1,
+                "sender-pid": ns_proc.pid,
+            },
+        )
+
+        ns_proc.send_signal(signal.SIGINT)
+        ns_proc.communicate(timeout=5)
+        self.assertEqual(ns_proc.returncode, 0)
+
     def test_close_notification(self):
         [ns_proc, notification_id] = self.show_actions_notification([("Foo",)])
 
@@ -765,6 +790,24 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
         self.assertIn(action_id, stdout.decode('utf-8'))
         self.assertEqual(ns_proc.returncode, 0)
 
+    def notification_options_for_actions(self, actions):
+        """Shows a notification with the given action/label pairs and returns
+        the options received by the portal"""
+
+        args = ["action!", "Body"]
+        args += [f"--action={action_id}={label}" for label, action_id in actions]
+
+        [ns_proc, _] = self.notify_send_wait_id(args, stdout=subprocess.PIPE,
+                                                stderr=subprocess.PIPE)
+
+        [_, notification] = self.assertDaemonCall("AddNotification")
+
+        ns_proc.send_signal(signal.SIGINT)
+        ns_proc.communicate(timeout=5)
+        self.assertEqual(ns_proc.returncode, 0)
+
+        return notification
+
     def test_activate_numeric_action(self):
         """notify-send with action"""
         self.check_activate_action(1)
@@ -782,6 +825,45 @@ class TestPortalNotifySendActions(TestBasePortalNotifySend):
         """notify-send with action"""
         self.check_activate_action(action_id="foo-action", actions=[
             ("Foo", "foo-action"), ("FooBar", "foo-action")])
+
+    def test_default_action_alone_has_no_buttons(self):
+        """notify-send just with default action must not show a button"""
+
+        notification = self.notification_options_for_actions([
+            ("Default label", "default"),
+        ])
+
+        self.assertEqual(notification["default-action"], "default")
+        self.assertNotIn("buttons", notification)
+
+    def test_default_action_is_not_a_button(self):
+        """notify-send with default action must not show a button for the
+        default action"""
+
+        notification = self.notification_options_for_actions([
+            ("Default label", "default"),
+            ("Foo label", "foo"),
+        ])
+
+        self.assertEqual(notification["default-action"], "default")
+        self.assertEqual(notification["buttons"], dbus.Array([
+            {"label": "Foo label", "action": "foo"},
+        ], signature="a{sv}"))
+
+    def test_default_action_is_not_a_button_ignore_case(self):
+        """notify-send default action is recognized with mixed case"""
+
+        notification = self.notification_options_for_actions([
+            ("Foo label", "foo"),
+            ("Default label", "DefAulT"),
+            ("Bar label", "bar"),
+        ])
+
+        self.assertEqual(notification["default-action"], "default")
+        self.assertEqual(notification["buttons"], dbus.Array([
+            {"label": "Foo label", "action": "foo"},
+            {"label": "Bar label", "action": "bar"},
+        ], signature="a{sv}"))
 
     def test_activate_invalid_action(self):
         with TemporaryFD("action-id") as tmpfd:
