@@ -180,7 +180,7 @@ handle_action (NotifyNotification *notify,
 
         g_printf ("%s\n", action);
 
-        if (action_data->selected_action_fd >= 0) {
+        if (action_data->selected_action_fd > 0) {
                 write (action_data->selected_action_fd, action, strlen (action));
                 write (action_data->selected_action_fd, "\n", 1);
                 fsync (action_data->selected_action_fd);
@@ -549,7 +549,7 @@ main (int argc, char *argv[])
                 fflush (stdout);
         }
 
-        if (id_fd >= 0) {
+        if (id_fd > 0) {
                 g_autofree char *id_str = NULL;
 
                 g_object_get (notify, "id", &notification_id, NULL);
