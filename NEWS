@@ -1,3 +1,32 @@
+New in 0.8.9
+============
+
+This is a maintenance release, mostly with bug fixes around notify-send
+behaviors and portal notifications, together with more tests coverage for
+hints edge cases, and some library cleanups.
+
+* notify-send: Start action ID from 1 as docs states [Marco]
+* notification: Do not send the default action as a button in portal
+  notifications [Cajus]
+* notify-send: Fix the activation token FD validity check [Marco]
+* notify-send: Don't write the notification ID and action to stdin [Marco]
+* notify: Free the application name and icon on uninit [Cajus]
+* notification: Read the icon contents using g_file_load_contents() [Cajus]
+* notification: Use g_clear_handle_id() for the portal timeout [Cajus]
+* notify-send: Don't cache the hint conversion error [Cajus]
+* tests/notify-send: Add tests for the default action button [Cajus]
+* tests/notify-send: Verify behavior on invalid hints [Marco]
+* launch-context: Don't omit parameter names in vfunc implementation [Logan]
+* ci: Do not involve MESON into non-meson env variables [Marco]
+* ci: Actually use the meson test multiplier value [Marco]
+
+* Bugs fixed:
+  - #66 portal: "default" action adds additional button [Cajus]
+  - #67 Omitted parameter names in a vfunc implementation [Logan]
+
+Contributors:
+  Cajus Pollmeier, Logan Rathbone, Marco Trevisan
+
 New in 0.8.8
 ============
 
