@@ -339,6 +339,46 @@ class TestNotifySend(TestBaseFDONotifySend):
             },
         )
 
+    def test_invalid_hint(self):
+        """notify-send with an invalid hint is not shown"""
+
+        # Any hint error stops the parsing, so nothing is ever shown
+        invalid_hints = {
+            "unknown-type:hint:value":
+                'Invalid hint type "unknown-type"',
+            "string:just-a-name":
+                "Invalid hint syntax specified. Use TYPE:NAME:VALUE.",
+            "int:int-hint:not-a-number":
+                'Value "not-a-number" of hint "int-hint" could not be parsed '
+                'as type "int".',
+            "double:double-hint:not-a-number":
+                'Value "not-a-number" of hint "double-hint" could not be '
+                'parsed as type "double".',
+            "byte:byte-hint:300":
+                'Value "300" of hint "byte-hint" could not be parsed as '
+                'type "byte".',
+            "byte:byte-hint:0x100":
+                'Value "0x100" of hint "byte-hint" could not be parsed as '
+                'type "byte".',
+            "variant:variant-hint:not-a-variant":
+                'Value "not-a-variant" of hint "variant-hint" could not be '
+                'parsed as type "variant".',
+        }
+
+        for hint, expected_error in invalid_hints.items():
+            with self.subTest(hint=hint):
+                ns_proc = self.notify_send_proc(
+                    ["-h", hint, "hints!"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+
+                [stdout, stderr] = ns_proc.communicate(timeout=5)
+
+                self.assertEqual(ns_proc.returncode, 1)
+                self.assertIn(expected_error, stderr.decode("utf-8"))
+                self.assertNoDaemonCall("Notify")
+
     def test_actions_not_supported(self):
         """notify-send with action not supported"""
 
